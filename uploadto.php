@@ -1,4 +1,11 @@
 <?php
+// prevent script injection
+if (!isset($_GET['dir'])) {
+    header('Location: index.php');
+    exit();
+}
+$_GET['dir'] = htmlspecialchars($_GET['dir']);
+
 // recieves dir
 $folder = $_GET['dir'];
 $file = "TOs/" . $folder . "/Plenum_to.json";

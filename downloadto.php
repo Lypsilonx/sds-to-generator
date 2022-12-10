@@ -1,4 +1,11 @@
 <?php
+// prevent script injection
+if (!isset($_GET['dir'])) {
+    header('Location: index.php');
+    exit();
+}
+$_GET['dir'] = htmlspecialchars($_GET['dir']);
+
 // recieves dir
 $folder = $_GET['dir'];
 $file = "TOs/" . $folder . "/Plenum_to.json";
@@ -19,7 +26,7 @@ $json_data = json_decode($json, true);
     <script src="sds-to-functions.js"></script>
     <script style="display: none;">
         var dir = window.location.href.split('?')[1].split('=')[1];
-        renderMarkDown(dir + '/Plenum');
+        renderMarkDown(dir + '/Plenum', download);
 
         // go to index.php after 1 second
         setTimeout(function () {

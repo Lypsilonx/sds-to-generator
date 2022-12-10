@@ -152,6 +152,6 @@ document.querySelector('#menubutton').addEventListener('click', function () {
 document.querySelectorAll('.downloadb').forEach(function (button) {
     button.addEventListener('click', function () {
         var dir = window.location.href.split('?')[1].split('=')[1];
-        renderMarkDown(dir);
+        renderMarkDown(dir, download);
     });
 });

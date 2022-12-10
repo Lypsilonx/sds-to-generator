@@ -1,1 +1,12 @@
-{"-1001179397656":{"name":"Aachen","weekday":"wednesday"}}
+{
+    "groups": [
+        {
+            "name": "Aachen",
+            "weekday": "wednesday",
+            "members": [
+                -1001179397656,
+                574628761
+            ]
+        }
+    ]
+}

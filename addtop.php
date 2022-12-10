@@ -1,4 +1,13 @@
 <?php
+// prevent script injection
+if (!isset($_POST['title']) || !isset($_POST['content']) || !isset($_POST['dir'])) {
+    header('Location: index.php');
+    exit();
+}
+$_POST['title'] = htmlspecialchars($_POST['title']);
+$_POST['content'] = htmlspecialchars($_POST['content']);
+$_POST['dir'] = htmlspecialchars($_POST['dir']);
+
 // recieves form data from sds-to-generator/index.php
 // load the json from dir (in form data)
 $dir = $_POST['dir'];
@@ -47,7 +56,7 @@ if ($_POST["edit"] == "") {
 }
 
 // encode array to json and save to file
-file_put_contents($file, json_encode($json_data));
+file_put_contents($file, json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
 header('Location: index.php?dir=' . $dir);

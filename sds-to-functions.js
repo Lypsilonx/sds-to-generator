@@ -6,7 +6,7 @@ function resize() {
     }
 }
 
-function renderMarkDown(dir, dlul = false) {
+function renderMarkDown(dir, process = () => { }) {
     // get the JSON from the directory and render it as markdown
     fetch('TOs/' + dir + '_to.json').then(
         function (response) {
@@ -126,7 +126,7 @@ function renderMarkDown(dir, dlul = false) {
                                                                             wrb.push(events["events"][key2]);
                                                                         }
                                                                         // is the day within the next 7 days of data["date"] or on the same day?
-                                                                        if (date2.getTime() - date.getTime() < 604800000) {
+                                                                        if (date2.getTime() - date.getTime() < 604800000 && date2.getTime() - date.getTime() >= 0) {
                                                                             wvs.push(events["events"][key2]);
                                                                         }
                                                                     }
@@ -218,40 +218,7 @@ function renderMarkDown(dir, dlul = false) {
                                                                 }
                                                             ).then(
                                                                 function (mask) {
-                                                                    if (dlul == "false") {
-                                                                        // download the rendered markdown as a .md file
-                                                                        var element = document.createElement('a');
-                                                                        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(mask));
-                                                                        element.setAttribute('download', dir.replace("_to", "").replace("/"," ") + " " + data["date"] + ".md");
-
-                                                                        element.style.display = 'none';
-                                                                        document.body.appendChild(element);
-
-                                                                        element.click();
-
-                                                                        document.body.removeChild(element);
-                                                                    } else {
-                                                                        // load webdavuser.config from the same directory as this script
-                                                                        fetch('webdavuser.config').then(
-                                                                            function (response) {
-                                                                                return response.json();
-                                                                            }
-                                                                        ).then(
-                                                                            function (webdavuser) {
-                                                                                // upload the rendered markdown as a .md file
-                                                                                // using webDAV endpoint "https://cloud.linke-sds.org/remote.php/dav/files/Lyx/"
-        
-                                                                                var request = new XMLHttpRequest();
-                                                                                var url = 'https://cloud.linke-sds.org/remote.php/dav/files/' + webdavuser["user"] + '/Ortsgruppe ' + dir2 + '/' + data["date"] + ".md";
-
-                                                                                request.open('PUT', url, false, webdavuser["user"], webdavuser["password"]);
-                                                                                request.setRequestHeader('Content-Type', 'text/plain', 'charset=utf-8');
-                                                                                // ! NOT WORKING ! 
-                                                                                request.setRequestHeader('Access-Control-Allow-Origin', '*');
-                                                                                request.send(mask);
-                                                                            }
-                                                                        );
-                                                                    }
+                                                                    process(mask, dir.replace("_to", "").replace("/"," ") + " " + data["date"] + ".md");
                                                                 }
                                                             );
                                                         }
@@ -266,6 +233,43 @@ function renderMarkDown(dir, dlul = false) {
                     );
                 }
             );
+        }
+    );
+}
+
+function download(mask, filename) {
+    // download the rendered markdown as a .md file
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(mask));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+function upload(mask, filename) {
+    // load webdavuser.config from the same directory as this script
+    fetch('webdavuser.config').then(
+        function (response) {
+            return response.json();
+        }
+    ).then(
+        function (webdavuser) {
+            // upload the rendered markdown as a .md file
+            // using webDAV endpoint "https://cloud.linke-sds.org/remote.php/dav/files/Lyx/"
+
+            var request = new XMLHttpRequest();
+            var url = 'https://cloud.linke-sds.org/remote.php/dav/files/' + webdavuser["user"] + '/Ortsgruppe ' + dir2 + '/' + filename;
+
+            request.open('PUT', url, false, webdavuser["user"], webdavuser["password"]);
+            request.setRequestHeader('Content-Type', 'text/plain', 'charset=utf-8');
+            // ! NOT WORKING ! 
+            request.setRequestHeader('Access-Control-Allow-Origin', '*');
+            request.send(mask);
         }
     );
 }
