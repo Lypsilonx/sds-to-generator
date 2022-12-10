@@ -6,6 +6,7 @@ $input = file_get_contents('php://input');
 $update = json_decode($input, true);
 if (isset($update['message'])) {
     $message = $update['message'];
+    $message_id = $message['message_id'];
     if (isset($message['text'])) {
         $text = $message['text'];
         if (strpos($text, "/start") === 0) {
@@ -22,6 +23,14 @@ if (isset($update['message'])) {
             // get rest of message
             // split rest of message
             $rest = explode(" ", $text);
+
+            // check if rest of message is valid
+            if (count($rest) < 3) {
+                $response = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
+                send_message($token, $chat_id, $response, $message_id);
+                return;
+            }
+
             // get name
             $name = $rest[1];
             // get weekday
@@ -55,7 +64,7 @@ if (isset($update['message'])) {
 
             // send response
             $response = "Ortsgruppe " . $name . " wurde erfolgreich hinzugefügt.";
-            send_message($token, $chat_id, $response);
+            send_message($token, $chat_id, $response, $message_id);
         }
         // Get TO
         else if (strpos(strtolower($text), "/getto") === 0) {
@@ -68,10 +77,10 @@ if (isset($update['message'])) {
             if (array_key_exists($chat_id, $chats)) {
                 $response = "Hier ist der Link zum Download der TO: "
                     . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/downloadto.php?dir=" . $chats[$chat_id]["name"];
-                send_message($token, $chat_id, $response);
+                send_message($token, $chat_id, $response, $message_id, 10);
             } else {
                 $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
-                send_message($token, $chat_id, $response);
+                send_message($token, $chat_id, $response, $message_id);
             }
         }
         // Upload TO
@@ -85,10 +94,27 @@ if (isset($update['message'])) {
             if (array_key_exists($chat_id, $chats)) {
                 $response = "Clicke hier um die TO Hochzuladen: "
                     . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/uploadto.php?dir=" . $chats[$chat_id]["name"];
-                send_message($token, $chat_id, $response);
+                send_message($token, $chat_id, $response, $message_id, 10);
             } else {
                 $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
-                send_message($token, $chat_id, $response);
+                send_message($token, $chat_id, $response, $message_id);
+            }
+        }
+        // Look at TO
+        else if (strpos(strtolower($text), "/seeto") === 0) {
+            // check if chat is initialized
+            // load chats.json
+            $chats = json_decode(file_get_contents("chats.json"), true);
+            // get chat id
+            $chat_id = $message['chat']['id'];
+            // check if chat id is in chats.json
+            if (array_key_exists($chat_id, $chats)) {
+                $response = "Hier ist der Link zum Download der TO: "
+                    . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $chats[$chat_id]["name"] . "/Plenum";
+                send_message($token, $chat_id, $response, $message_id, 10);
+            } else {
+                $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
+                send_message($token, $chat_id, $response, $message_id);
             }
         }
         // /top or #top (not regarding capitalization)
@@ -215,30 +241,30 @@ if (isset($update['message'])) {
                 if (deleteTOP($chats[$chat_id]["name"], $title)) {
                     // send response
                     $response = "TOP \"" . $title . "\" wurde erfolgreich gelöscht.";
-                    send_message($token, $chat_id, $response);
+                    send_message($token, $chat_id, $response, $message_id);
                 } else {
                     $response = "TOP \"" . $title . "\" konnte nicht gefunden werden.";
-                    send_message($token, $chat_id, $response);
+                    send_message($token, $chat_id, $response, $message_id);
                 }
 
                 // delete event
                 if (deleteEvent($chats[$chat_id]["name"], $title)) {
                     // send response
                     $response = "Termin \"" . $title . "\" wurde erfolgreich gelöscht.";
-                    send_message($token, $chat_id, $response);
+                    send_message($token, $chat_id, $response, $message_id);
                 } else {
                     $response = "Termin \"" . $title . "\" konnte nicht gefunden werden.";
-                    send_message($token, $chat_id, $response);
+                    send_message($token, $chat_id, $response, $message_id);
                 }
             } else {
                 $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
-                send_message($token, $chat_id, $response);
+                send_message($token, $chat_id, $response, $message_id);
             }
         }
         // Help
         else if (strpos(strtolower($text), "/help") === 0) {
             $chat_id = $message['chat']['id'];
-            $response = "Ich habe dich leider nicht verstanden. Bitte benutze einen der folgenden Befehle: "
+            $response = "Hier ist eine Liste aller Befehle:"
                 . PHP_EOL
                 . PHP_EOL . "/init <Ortsgruppe> <Wochentag>"
                 . PHP_EOL . "Initialisiert eine neue Ortsgruppe"
@@ -248,6 +274,9 @@ if (isset($update['message'])) {
                 . PHP_EOL
                 . PHP_EOL . "/upto"
                 . PHP_EOL . "Lädt die TO auf den SDS Server hoch"
+                . PHP_EOL
+                . PHP_EOL . "/seeto"
+                . PHP_EOL . "Liefert einen Link zum Ansehen der TO"
                 . PHP_EOL
                 . PHP_EOL . "/top <Titel>"
                 . PHP_EOL . "<Text>"
@@ -259,7 +288,7 @@ if (isset($update['message'])) {
                 . PHP_EOL
                 . PHP_EOL . "/del <Titel>"
                 . PHP_EOL . "Löscht einen TOP";
-            send_message($token, $chat_id, $response);
+            send_message($token, $chat_id, $response, $message_id, 20);
         }
     }
 }
@@ -320,9 +349,28 @@ function deleteEvent($og, $title)
     return false;
 }
 
-function send_message($token, $chat_id, $response)
+function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5)
 {
     $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response);
+    // send message and get message id
+    $message = json_decode(file_get_contents($url), true);
+    $message_id = $message["result"]["message_id"];
+
+    // delete message after 5 seconds
+    $url = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $message_id;
+    sleep($delTime);
+    // if deleteCmd is true, delete command message
+    if ($deleteCmd) {
+        $url2 = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $deleteCmd;
+        file_get_contents($url2);
+    }
     file_get_contents($url);
+}
+
+function logToFile($message)
+{
+    $log = fopen("log.txt", "a");
+    fwrite($log, $message . PHP_EOL);
+    fclose($log);
 }
 ?>
