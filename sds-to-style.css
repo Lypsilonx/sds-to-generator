@@ -99,6 +99,7 @@ input[type="submit"]:hover {
 
 hr {
   margin-bottom: 0.5em;
+  margin-top: 0.5em;
 }
 
 .hidden {
@@ -196,13 +197,23 @@ header {
 }
 
 #sidebar ul {
-  display: table;
   height: 96%;
   width: 100%;
 }
 
 #sidebar li {
   width: unset;
+}
+
+#sidebar li a {
+  display: inline-block;
+  text-align: left;
+  justify-content: left;
+  align-items: flex-start;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 
 .downloadb {
@@ -430,10 +441,11 @@ body.hidemenu #mainbottomgradient {
 
 #main .toprow {
   margin-top: 2em;
+  margin-left: 2em;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: calc(100% - 2em);
   padding: 0;
 }
 

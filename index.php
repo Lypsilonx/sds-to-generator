@@ -123,7 +123,6 @@
                     }
 
                     if ($topsP != null) {
-                        echo '</br>';
                         echo '<hr>';
                         echo '<li><a href="#permanent">Laufende Arbeitsaufträge</a></li>';
                     }

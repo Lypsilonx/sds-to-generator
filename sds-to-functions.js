@@ -62,6 +62,18 @@ function renderMarkDown(dir, process = () => { }) {
                                                     ).then(
                                                         function (permFormat) {
                                                             var permFormatOriginal = permFormat;
+                                                            // Format the date as DD.MM.YYYY
+                                                            var fdate = new Date(data["date"]);
+                                                            var day = fdate.getDate();
+                                                            var month = fdate.getMonth() + 1;
+                                                            var year = fdate.getFullYear();
+                                                            if (day < 10) {
+                                                                day = '0' + day;
+                                                            }
+                                                            if (month < 10) {
+                                                                month = '0' + month;
+                                                            }
+                                                            fdate = day + '.' + month + '.' + year;
                                                             // load Markdown/mask.md
                                                             fetch('Markdown/mask.md').then(
                                                                 function (response) {
@@ -86,6 +98,8 @@ function renderMarkDown(dir, process = () => { }) {
                                                                             }
                                                                             // replace the %tops% in mask.md with the value of topFormat
                                                                             mask = mask.replace(new RegExp('%tops%', 'g'), "\n\n\n" + allTops.join('\n\n\n'));
+                                                                        } else if (key == "date") {
+                                                                            mask = mask.replace(new RegExp('%date%', 'g'), fdate);
                                                                         } else {
                                                                             // replace the %key% in mask.md with the value of the key
                                                                             mask = mask.replace(new RegExp('%' + key + '%', 'g'), data[key]);
@@ -218,7 +232,7 @@ function renderMarkDown(dir, process = () => { }) {
                                                                 }
                                                             ).then(
                                                                 function (mask) {
-                                                                    process(mask, dir.replace("_to", "").replace("/"," ") + " " + data["date"] + ".md");
+                                                                    process(mask, dir.replace("_to", "").replace("/"," ") + " " + fdate + ".md");
                                                                 }
                                                             );
                                                         }
