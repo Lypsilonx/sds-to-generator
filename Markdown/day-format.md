@@ -1,0 +1,3 @@
+#### %day%, der %date%
+
+%events%

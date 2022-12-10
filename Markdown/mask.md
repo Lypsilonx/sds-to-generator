@@ -2,23 +2,25 @@
 
 ### %nn%. Beginn
 
-* Wer möchte die Moderation übernehmen? 
-* Wer übernimmt die Awareness Aufgaben? 
+* Wer Moderiert? 
+* Wer ist Awareness Person? 
 * Wer schreibt das Protokoll? 
+
 
 ### %nn%. Awarenessrunde
 
 Awarenessfrage: %awarenessfrage%
 
+
 ### %nn%. Wochenrückblick
 
 %wochenrueckblick%
 
+
 ### %nn%. Wochenvorschau
 
-%wochenvorschau%
+%wochenvorschau%%tops%%permanent%
 
-%tops%%permanent%
 
 ### %nn%. Sonstiges
 
@@ -27,6 +29,7 @@ Awarenessfrage: %awarenessfrage%
 ### %nn%. Abschlussrunde
 
 Zusatzfrage: %zusatzfrage%
+
 
 ### %nn%. Arbeitsphase
 

@@ -41,6 +41,7 @@
     $date = $json_data['date'];
     $tops;
     $topsP = array();
+    $topsE = array();
     if ($dir != "fallback") {
         // try getting json file (permanent)
         $jsonP;
@@ -56,21 +57,30 @@
         }
 
         $json_dataP = json_decode($jsonP, true);
+
+        // try getting json file (events)
+        $jsonE;
+        if (file_exists("TOs/" . $folder . "/events.json")) {
+            $jsonE = file_get_contents("TOs/" . $folder . "/events.json");
+        } else {
+            // create new json file
+            $jsonE = array(
+                'events' => array()
+            );
+            file_put_contents("TOs/" . $folder . "/events.json", json_encode($jsonE));
+        }
+
+        $json_dataE = json_decode($jsonE, true);
+
         $tops = $json_data['tops'];
         $topsP = $json_dataP['tops'];
+        $events = $json_dataE['events'];
     } else {
         $tops = $json_data['tops'];
     }
     ?>
     <header>
         <h1>SDS TO Generator</h1>
-        <?php
-        if ($dir != "fallback") {
-            echo '<a id="downloadbutton">';
-            echo '<i class="material-icons">file_download</i>';
-            echo '</a>';
-        }
-        ?>
         <div id="headerbuttons">
             <input type="text" name="dir" placeholder="Directory" value="<?php
             if ($dir != "fallback") {
@@ -95,6 +105,10 @@
             <ul>
                 <div class="placeholder"></div>
                 <?php
+                echo '<li><a href="#wrb">Wochenrückblick</a></li>';
+                echo '<li><a href="#wfs">Wochenvorschau</a></li>';
+                echo '<hr>';
+
                 $i = 1;
                 foreach ($tops as $top) {
                     echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
@@ -116,8 +130,8 @@
                 <div id=sidebarbottomgradient>
                     <?php
                     if ($dir != "fallback" && $addto == false) {
-                        echo '<a class="addtopbutton">';
-                        echo '<i class="material-icons">add</i>';
+                        echo '<a class="downloadb button">';
+                        echo '<i class="material-icons">file_download</i>';
                         echo '</a>';
                     }
                     ?>
@@ -133,8 +147,8 @@
                     <?php
                     if ($dir != "fallback") {
                         // datum formatieren nach dd.mm.yyyy
-                        $date = date_create($date);
-                        $day = date_format($date, 'l');
+                        $datec = date_create($date);
+                        $day = date_format($datec, 'l');
                         // auf deutsch uübersetzen
                         switch ($day) {
                             case 'Monday':
@@ -159,12 +173,66 @@
                                 $day = 'Sonntag';
                                 break;
                         }
-                        echo $day . ', den ' . date_format($date, 'd.m.Y');
+                        echo $day . ', den ' . date_format($datec, 'd.m.Y');
                     }
                     ?>
                 </h3>
             </div>
             <?php
+            echo '<div class="catrow" id="wrb">';
+            echo '<hr>';
+            echo '<h3>Wochenrückblick</h3>';
+
+            foreach ($events as $event) {
+                // if event was within the last 7 days of $date
+                if (strtotime($event['date']) >= strtotime('-7 days', strtotime($date)) && strtotime($event['date']) <= strtotime($date)) {
+                    echo '<div class="toprow">';
+                    echo '<div class="top">';
+                    echo '<h4>' . $event['title'] . '</h4>';
+                    echo '<h5>' . $event['date'] . '</h5>';
+                    echo '<p>' . $event['content'] . '</p>';
+                    echo '</div>';
+                    echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+                    echo '<i class="material-icons">edit</i>';
+                    echo '</a>';
+                    echo '</div>';
+                }
+            }
+
+            echo '</div>';
+
+            echo '<div class="catrow" id="wfs">';
+            echo '<hr>';
+            echo '<h3>Wochenvorschau</h3>';
+
+            foreach ($events as $event) {
+                // if event is within the next 7 days of $date
+                if (strtotime($event['date']) >= strtotime($date) && strtotime($event['date']) <= strtotime('+7 days', strtotime($date))) {
+                    echo '<div class="toprow">';
+                    echo '<div class="top">';
+                    echo '<h4>' . $event['title'] . '</h4>';
+                    echo '<h5>' . $event['date'] . '</h5>';
+                    echo '<p>' . $event['content'] . '</p>';
+                    echo '</div>';
+                    echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+                    echo '<i class="material-icons">edit</i>';
+                    echo '</a>';
+                    echo '</div>';
+                }
+            }
+
+            if ($dir != "fallback" && $addto == false) {
+                echo '<a class="addeventb button">';
+                echo '<i class="material-icons">add</i>';
+                echo '</a>';
+            }
+            echo '</div>';
+
+            echo '<div class="catrow" id="wfs">';
+            echo '<hr>';
+            echo '<h3>TOPS</h3>';
+            echo '</div>';
+
             $i = 1;
             foreach ($tops as $top) {
                 echo '<div class="toprow">';
@@ -199,21 +267,22 @@
                 echo '</div>';
             }
 
-            echo '<div class="placeholder"></div>';
-
             if ($dir != "fallback" && $addto == false) {
-                echo '<div id="mainbottomgradient">';
-                echo '<a class="addtopbutton">';
+                echo '<a class="addtopb button">';
                 echo '<i class="material-icons">add</i>';
                 echo '</a>';
-                echo '</div>';
             }
+
+            echo '<div class="placeholder"></div>';
+
+            echo '<div id="mainbottomgradient">';
+            echo '</div>';
             ?>
 
         </div>
     </div>
 
-    <div class="addtopmenu hidden">
+    <div class="addtop menu hidden">
         <form action="addtop.php" method="post" id="addtopform">
             <h2>TOP hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php echo $dir; ?>">
@@ -237,7 +306,7 @@
         </form>
     </div>
 
-    <div class="addtomenu<?php if (!$addto) {
+    <div class="addto menu<?php if (!$addto) {
         echo ' hidden';
     } ?>">
         <form action="addto.php" method="post" id="addtoform">
@@ -247,6 +316,23 @@
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="TO Title" id="titlefield" value="" required>
             <input type="date" name="date" placeholder="TO Date" id="datefield" value="" required>
+            <div id="atmbuttons">
+                <a class="cancelbutton">Cancel</a>
+                <a class="deletebutton hidden">Delete</a>
+                <input type="submit" value="Add" class="submitbutton">
+            </div>
+        </form>
+    </div>
+
+    <div class="addevent menu hidden">
+        <form action="addevent.php" method="post" id="addeventform">
+            <h2>Event hinzufügen</h2>
+            <input type="hidden" name="dir" value="<?php echo $dir; ?>">
+            <input type="hidden" name="edit" value="" id="editfield">
+            <input type="hidden" name="delete" value="false" id="deletefield">
+            <input type="text" name="title" placeholder="Event Title" id="titlefield" value="" required>
+            <input type="date" name="date" placeholder="Event Date" id="datefield" value="" required>
+            <textarea name="content" placeholder="Event Description" id="contentfield" required></textarea>
             <div id="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>

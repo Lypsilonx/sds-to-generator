@@ -205,13 +205,13 @@ header {
   width: unset;
 }
 
-.addtopbutton {
+.downloadb {
   align-items: center;
   height: 2.3em;
   min-width: 1.5em;
 }
 
-#sidebar .addtopbutton {
+#sidebar .downloadb {
   margin-bottom: 0;
   padding: 0.1em;
   padding-left: 0.5em;
@@ -222,7 +222,7 @@ header {
   width: unset;
 }
 
-#sidebar a.addtopbutton:hover {
+#sidebar a.downloadb:hover {
   background-color: var(--sds-accent-2);
 }
 
@@ -366,18 +366,21 @@ body.hidemenu #menubutton {
   );
 }
 
-#main .addtopbutton {
-  position: absolute;
-  bottom: 1em;
+#main .button {
+  position: relative;
   width: 8vw;
-  left: calc(50% - 4vw);
+  justify-self: center;
   z-index: 1;
   justify-content: space-between;
   text-align: center;
 }
 
-#main .addtopbutton::after {
+#main .addtopb::after {
   content: "Neuer TOP";
+}
+
+#main .addeventb {
+  content: "Neues Event";
 }
 
 body.hidemenu #main {
@@ -385,12 +388,12 @@ body.hidemenu #main {
   margin-left: calc(-1 * max(20%, 200px));
 }
 
-body.hidemenu #main .addtopbutton {
+body.hidemenu #main .button {
   width: 1.5em;
   left: calc(50% - 1.75em);
 }
 
-body.hidemenu #main .addtopbutton::after {
+body.hidemenu #main .button::after {
   content: "";
 }
 
@@ -405,13 +408,22 @@ body.hidemenu #mainbottomgradient {
     margin-left: 2%;
   }
 
-  #main .addtopbutton {
+  #main .addtopb {
     width: 8vw;
     left: calc(50% - 4vw);
   }
 
-  #main .addtopbutton::after {
+  #main .addeventb {
+    width: 10vw;
+    left: calc(50% - 5vw);
+  }
+
+  #main .addtopb::after {
     content: "Neuer TOP";
+  }
+
+  #main .addeventb::after {
+    content: "Neuers Event";
   }
 
   #mainbottomgradient {
@@ -450,8 +462,7 @@ body.hidemenu #mainbottomgradient {
 /* #endregion */
 /* -------------------------- Menus -------------------------- */
 /* #region Menus */
-.addtopmenu,
-.addtomenu {
+.menu {
   position: absolute;
   top: 0;
   left: 0;
@@ -463,8 +474,7 @@ body.hidemenu #mainbottomgradient {
   align-items: center;
 }
 
-.addtopmenu form,
-.addtomenu form {
+.menu form {
   background-color: var(--main-bg-color);
   width: 50%;
   padding: 2em;
@@ -474,22 +484,21 @@ body.hidemenu #mainbottomgradient {
   gap: 1em;
 }
 
-.addtopmenu form {
+.addtop form,
+.addevent form {
   height: 80%;
 }
 
-.addtopmenu form {
+.addto form {
   height: 50%;
 }
 
-.addtopmenu form *,
-.addtomenu form * {
+.menu form * {
   text-align: left;
   border: none;
 }
 
-.addtopmenu h2,
-.addtomenu h2 {
+.menu h2 {
   text-align: left;
   border: none;
   background-color: var(--sds-color-font);
@@ -502,7 +511,7 @@ body.hidemenu #mainbottomgradient {
   margin-bottom: 1em;
 }
 
-.addtopmenu #pfield {
+.menu #pfield {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
@@ -539,9 +548,8 @@ body.hidemenu #mainbottomgradient {
   justify-content: center;
 }
 
-.addtopmenu form input[type="text"],
-.addtomenu form input[type="text"],
-.addtomenu form input[type="date"] {
+.menu form input[type="text"],
+.menu form input[type="date"] {
   width: 100%;
   height: 2em;
   padding: 0.5em;
@@ -552,7 +560,7 @@ body.hidemenu #mainbottomgradient {
   font-size: 1.2em;
 }
 
-.addtopmenu form #contentfield {
+.menu form #contentfield {
   width: 100%;
   padding: 0.5em;
   height: 70%;
