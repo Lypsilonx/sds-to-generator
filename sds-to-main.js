@@ -105,22 +105,23 @@ document.querySelectorAll('.editbutton').forEach(function (button) {
   });
 });
 
-// when .deletebutton is clicked set the delete fields of the forms to true and simulate a submit
+// when .deletebutton is clicked set the delete fields of the forms to true and submit the form
 document.querySelectorAll('.deletebutton').forEach(function (button) {
     button.addEventListener('click', function () {
-        if (button.parentElement.parentElement.id == "addtoform") {
+        if (button.parentElement.parentElement.parentElement.classList.contains('addto')) {
             var form = document.querySelector('.addto');
             form.querySelector('#deletefield').value = "true";
-            form.querySelector('.submitbutton').click();
-        } else if (button.parentElement.parentElement.id == "addeventform") {
+            form.children[0].submit();
+            
+        } else if (button.parentElement.parentElement.parentElement.classList.contains('addevent')) {
             var form = document.querySelector('.addevent');
             form.querySelector('#deletefield').value = "true";
-            form.querySelector('.submitbutton').click();
+            form.children[0].submit();
         }
         else {
             var form = document.querySelector('.addtop');
             form.querySelector('#deletefield').value = "true";
-            form.querySelector('.submitbutton').click();
+            form.children[0].submit();
         }
     });
 });

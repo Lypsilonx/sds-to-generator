@@ -328,6 +328,10 @@
         <form action="addevent.php" method="post" id="addeventform">
             <h2>Event hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php echo $dir; ?>">
+            <input type="hidden" name="id" value="<?php
+            // generate random id
+            echo uniqid();
+            ?>">
             <input type="hidden" name="edit" value="" id="editfield">
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="Event Title" id="titlefield" value="" required>
