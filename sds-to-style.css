@@ -339,7 +339,7 @@ body.hidemenu #menubutton {
   font-family: "Bitter";
   margin-block-start: 0;
   margin-block-end: 0;
-  background-color: var(--sds-color-2);
+  background-color: var(--sds-accent-1);
   padding: 0.1em;
   padding-left: 0.5em;
   padding-right: 0.5em;
@@ -370,8 +370,9 @@ body.hidemenu #menubutton {
   position: relative;
   width: 8vw;
   justify-self: center;
+  margin-top: 5%;
   z-index: 1;
-  justify-content: space-between;
+  justify-content: space-evenly;
   text-align: center;
 }
 
@@ -408,12 +409,7 @@ body.hidemenu #mainbottomgradient {
     margin-left: 2%;
   }
 
-  #main .addtopb {
-    width: 8vw;
-    left: calc(50% - 4vw);
-  }
-
-  #main .addeventb {
+  #main .button {
     width: 10vw;
     left: calc(50% - 5vw);
   }

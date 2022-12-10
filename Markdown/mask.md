@@ -24,7 +24,7 @@ Awarenessfrage: %awarenessfrage%
 
 ### %nn%. Sonstiges
 
-1. Wer macht die nächste TO?
+
 
 ### %nn%. Abschlussrunde
 

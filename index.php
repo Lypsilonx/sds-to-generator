@@ -345,6 +345,7 @@
         </form>
     </div>
 
+    <script src="sds-to-functions.js"></script>
     <script src="sds-to-main.js"></script>
 </body>
 
