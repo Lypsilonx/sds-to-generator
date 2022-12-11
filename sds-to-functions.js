@@ -224,6 +224,9 @@ function renderMarkDown(dir, process = () => { }) {
                                                                         j++;
                                                                     }
 
+                                                                    // seed the random number generator with the date
+                                                                    Math.seedrandom(data["date"]);
+
                                                                     // replace %awarenessfrage% and %zusatzfrage% with a random question
                                                                     mask = mask.replace(new RegExp('%awarenessfrage%', 'g'), generateQuestion());
                                                                     mask = mask.replace(new RegExp('%zusatzfrage%', 'g'), generateQuestion());

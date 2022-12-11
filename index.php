@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <?php
     // load json file from directory in url
     $addto = false;
