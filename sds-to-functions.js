@@ -124,7 +124,7 @@ function renderMarkDown(dir, process = () => { }) {
                                                                     }
                                                                     if (perm) {
                                                                         // replace the %permanent% in mask.md with the value of topFormat
-                                                                        mask = mask.replace(new RegExp('%permanent%', 'g'), allPermTops.join('\n\n\n'));
+                                                                        mask = mask.replace(new RegExp('%permanent%', 'g'), allPermTops.join('\n'));
                                                                     } else {
                                                                         mask = mask.replace(new RegExp('%permanent%', 'g'), "");
                                                                     }
@@ -305,7 +305,7 @@ function getDate(date) {
 }
 
 function generateQuestion() {
-    switch (Math.floor(Math.random() * 3)) {
+    switch (Math.floor(Math.random() * 4)) {
         case 0:
             var question = "Was ist dein(e)";
             question += Math.floor(Math.random() * 2) == 0 ? " lieblings" : " hass";
@@ -351,6 +351,46 @@ function generateQuestion() {
                 "Spruch"
             ];
             question += things[Math.floor(Math.random() * things.length)] + " kommt dir gerade in den Sinn, und warum?";
+            break;
+        case 3:
+            var comparables = [
+                "Bier",
+                "Kaffee",
+                "Kuchen",
+                "Brot",
+                "Käse",
+                "Wurst",
+                "Schokolade",
+                "Tische",
+                "Stühle",
+                "Bücher",
+                "Filme",
+                "Spielzeug",
+                "Kinder",
+                "Erwachsene",
+                "Tiere",
+                "Pflanzen",
+                "Menschen",
+                "Marmelade",
+                "Ketchup",
+                "Senf",
+                "Mayonnaise",
+                "Hunde",
+                "Katzen",
+                "Mäuse",
+                "Fische",
+                "Vögel",
+                "Schafe",
+                "Ziegen",
+                "Kühe",
+                "Pferde",
+                "Elefanten",
+                "Löwen",
+                "Tiger",
+                "Bären",
+                "Krokodile"
+            ];
+            var question = "Was ist besser: " + comparables[Math.floor(Math.random() * comparables.length)] + " oder " + comparables[Math.floor(Math.random() * comparables.length)] + "?";
             break;
     }
     return question;

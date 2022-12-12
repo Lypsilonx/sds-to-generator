@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,8 +15,6 @@
 <body>
     <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <?php
-    // start session
-    session_start();
     // load json file from directory in url
     $addto = false;
     $dir;
@@ -123,7 +124,7 @@
             if (!$signedin) {
                 echo '<form action="signin.php" method="post">';
                 echo '<input type="hidden" name="dir" value="' . $dir . '">';
-                echo '<input type="password" name="password" placeholder="Password" id="passwordfield" required>';
+                echo '<input type="password" name="password" placeholder="Passwort" id="passwordfield" title="Das Passwort, dass deine Gruppe festgelegt hat." required>';
                 echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
                 echo '</form>';
             }

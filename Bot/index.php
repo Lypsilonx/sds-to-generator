@@ -4,6 +4,9 @@ $token = file_get_contents("token.txt");
 
 $input = file_get_contents('php://input');
 $update = json_decode($input, true);
+
+$domain = "https://www.politischdekoriert.de/sds-to-generator/";
+
 if (isset($update['message'])) {
     $message = $update['message'];
     $message_id = $message['message_id'];
@@ -17,7 +20,10 @@ if (isset($update['message'])) {
                 . PHP_EOL . "Falls ihr einen Fehler findet, meldet ihn bitte an"
                 . PHP_EOL . "support@politischdekoriert.de"
                 . PHP_EOL
-                . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst.";
+                . PHP_EOL . "Starte am besten indem du mich in deiner Ortsgruppe hinzufügst und danach /init <Ort> <Plenumstag> <Passwort> eingibst."
+                . PHP_EOL . "Beispiel: /init Berlin wednesday 1234"
+                . PHP_EOL
+                . PHP_EOL . "Falls das schon passiert ist und du nur die Befehle von hier aus eingeben willst, gib einfach hier /init <Ort> <Passwort> ein.";
             send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 0);
         }
         // Initialize a group
@@ -156,7 +162,7 @@ if (isset($update['message'])) {
                     $mtoken = createToken($group);
 
                     $response = "Hier ist der Link zum Download der TO: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/downloadto.php?dir=" . $group . "&token=" . $mtoken;
+                        . PHP_EOL . $domain . "downloadto.php?dir=" . $group . "&token=" . $mtoken;
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
                 }
                 // Upload TO
@@ -164,7 +170,7 @@ if (isset($update['message'])) {
                     $mtoken = createToken($group);
 
                     $response = "Clicke hier um die TO Hochzuladen: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/uploadto.php?dir=" . $group . "&token=" . $mtoken;
+                        . PHP_EOL . $domain . "uploadto.php?dir=" . $group . "&token=" . $mtoken;
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 10, deleteAnswer: true);
                 }
                 // Look at TO
@@ -172,7 +178,7 @@ if (isset($update['message'])) {
                     $mtoken = createToken($group);
 
                     $response = "Hier ist der Link zum Download der TO: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
+                        . PHP_EOL . $domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
                 }
                 // Change Password
@@ -256,15 +262,13 @@ if (isset($update['message'])) {
                         $date = $matches[0];
                         if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
                             $date = DateTime::createFromFormat("d.m.Y", $date);
-                            $date = $date->format("Y-m-d");
                         } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
                             $date = DateTime::createFromFormat("d.m.y", $date);
-                            $date = $date->format("Y-m-d");
                         } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
                             $date = DateTime::createFromFormat("d.m.", $date);
-                            $date = $date->format("Y-m-d");
                         }
-                        saveEvent($group, $title, "(Siehe TOP)", $date);
+                        $datef = $date->format("Y-m-d");
+                        saveEvent($group, $title, "(Siehe TOP)", $datef);
                         saveTOP($group, $title, $content);
 
                         // send response
