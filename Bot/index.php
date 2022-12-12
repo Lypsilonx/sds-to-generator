@@ -23,7 +23,7 @@ if (isset($update['message'])) {
 
             // check if rest of message is valid
             if (count($rest) < 3) {
-                $response = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
+                $response = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
                 send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
                 return;
             }
@@ -96,13 +96,16 @@ if (isset($update['message'])) {
         else if (strpos(strtolower($text), "/help") === 0) {
             $response = "Hier ist eine Liste aller Befehle:"
                 . PHP_EOL
-                . PHP_EOL . "/init <Ortsgruppe> <Wochentag>"
+                . PHP_EOL . "/init <Ortsgruppe> <Wochentag> <Passwort>"
                 . PHP_EOL . "Initialisiert eine neue Ortsgruppe"
-                . PHP_EOL . "/init <Ortsgruppe>"
+                . PHP_EOL . "/init <Ortsgruppe> <Passwort>"
                 . PHP_EOL . "(Privatchat) Fügt dich einer Ortsgruppe hinzu"
                 . PHP_EOL
                 . PHP_EOL . "/leave <Ortsgruppe>"
                 . PHP_EOL . "Verlässt eine Ortsgruppe"
+                . PHP_EOL
+                . PHP_EOL . "/changepw <Passwort>"
+                . PHP_EOL . "Ändert das Passwort einer Ortsgruppe"
                 . PHP_EOL
                 . PHP_EOL . "/getto"
                 . PHP_EOL . "Liefert einen Link zum Download der TO"
@@ -153,9 +156,32 @@ if (isset($update['message'])) {
                 }
                 // Look at TO
                 else if (strpos(strtolower($text), "/seeto") === 0) {
+                    $mtoken = createToken($group);
+
                     $response = "Hier ist der Link zum Download der TO: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum";
+                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 10, deleteAnswer: true);
+                }
+                // Change Password
+                else if (strpos(strtolower($text), "/changepw") === 0) {
+                    // get rest of message
+                    $password = substr($text, 10);
+
+                    if (strlen($password) < 4) {
+                        $response = "Das Passwort muss mindestens 4 Zeichen lang sein.";
+                        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+                        return;
+                    }
+                    // set new password
+                    foreach ($chats["groups"] as &$g) {
+                        if ($g["name"] == $group) {
+                            $g["password"] = hash("sha256", $password);
+                            break;
+                        }
+                    }
+                    file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+                    $response = "Passwort für Ortsgruppe " . $group . " wurde geändert.";
+                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
                 }
                 // /top or #top (not regarding capitalization)
                 else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
@@ -303,7 +329,7 @@ if (isset($update['message'])) {
                     }
                 }
             } else {
-                $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
+                $response = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
                 send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
             }
         }
@@ -395,6 +421,37 @@ function send_document($token, $chat_id, $file, $caption)
     // send message and get message id
     $message = json_decode(file_get_contents($url), true);
     $message_id = $message["result"]["message_id"];
+}
+
+function createToken($group)
+{
+    // open tokens.json and create a new token for the group
+    $tokens = json_decode(file_get_contents("tokens.json"), true);
+    // look if group already has a token
+    $found = false;
+    foreach ($tokens as $t) {
+        if ($t["group"] == $group) {
+            $found = true;
+            break;
+        }
+    }
+    // if not create a new array
+    if (!$found) {
+        array_push($tokens, array("group" => $group, "tokens" => array()));
+    }
+    // create new token
+    $mtoken = bin2hex(random_bytes(16));
+    //add token to tokens.json
+    foreach ($tokens as &$t) {
+        if ($t["group"] == $group) {
+            array_push($t["tokens"], $mtoken);
+            break;
+        }
+    }
+    // save tokens.json
+    file_put_contents("tokens.json", json_encode($tokens, JSON_PRETTY_PRINT));
+
+    return $mtoken;
 }
 
 function logToFile($message)

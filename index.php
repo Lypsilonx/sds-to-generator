@@ -46,6 +46,7 @@
     $topsP = array();
     $topsE = array();
     $signedin = false;
+    $signedin_somewhere = false;
 
     if ($dir != "fallback") {
         // try getting json file (permanent)
@@ -89,6 +90,27 @@
             } else {
                 $signedin = false;
             }
+            $signedin_somewhere = true;
+        }
+
+        // check if token is set
+        if (isset($_GET['token'])) {
+            // check if token is valid
+            // load Bot/tokens.json
+            $json = file_get_contents("Bot/tokens.json");
+            $tokens = json_decode($json, true);
+            // check if folder is in tokens.json as "group"
+            for ($i = 0; $i < count($tokens); $i++) {
+                if ($tokens[$i]["group"] == $folder) {
+                    // check if token is in tokens.json
+                    if (in_array($_GET['token'], $tokens[$i]["tokens"])) {
+                        // set session variable
+                        $_SESSION['signedin'] = $folder;
+                        $signedin = true;
+                        $signedin_somewhere = true;
+                    }
+                }
+            }
         }
     } else {
         $tops = $json_data['tops'];
@@ -98,13 +120,19 @@
         <h1>SDS TO Generator</h1>
         <div id="headerbuttons" action="signin.php" method="post">
             <?php
-            echo '<form action="signin.php" method="post">';
-            echo '<input type="hidden" name="dir" value="' . $dir . '">';
             if (!$signedin) {
-                echo '<input type="password" name="password" placeholder="Password" id="passwordfield">';
-                echo '<button type="submit" id="submitbutton"><i class="material-icons">locked</i></button>';
+                echo '<form action="signin.php" method="post">';
+                echo '<input type="hidden" name="dir" value="' . $dir . '">';
+                echo '<input type="password" name="password" placeholder="Password" id="passwordfield" required>';
+                echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
+                echo '</form>';
             }
-            echo '</form>';
+            if ($signedin_somewhere) {
+                echo '<form action="signout.php" method="post">';
+                echo '<input type="hidden" name="dir" value="' . $dir . '">';
+                echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
+                echo '</form>';
+            }
             ?>
             <input type="text" name="dir" placeholder="Directory" value="<?php
             if ($dir != "fallback") {

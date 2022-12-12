@@ -80,8 +80,7 @@ ul {
 }
 
 a,
-input[type="submit"],
-button[type="submit"] {
+input[type="submit"] {
   text-decoration: none;
   background-color: var(--sds-accent-1);
   color: var(--sds-color-font);
@@ -141,6 +140,7 @@ button * {
 
 i {
   cursor: unset;
+  pointer-events: none;
 }
 
 input[type="text"],
@@ -623,9 +623,28 @@ body.hidemenu #mainbottomgradient {
 }
 
 #headerbuttons .editbutton,
-#headerbuttons .searchbutton {
+#headerbuttons .searchbutton,
+#headerbuttons .unlockbutton,
+#headerbuttons .lockbutton {
   height: 2.3em;
-  width: 2.3em;
+  width: 1.5em;
   margin-left: 0;
+}
+
+#headerbuttons .unlockbutton i,
+#headerbuttons .lockbutton i {
+  width: 100%;
+}
+
+#headerbuttons .unlockbutton i::before,
+#headerbuttons .lockbutton:hover i::before {
+  /* change material icon to locked */
+  content: "lock";
+}
+
+#headerbuttons .unlockbutton:hover i::before,
+#headerbuttons .lockbutton i::before {
+  /* cahnge material icon to unlocked */
+  content: "lock_open";
 }
 /* #endregion */

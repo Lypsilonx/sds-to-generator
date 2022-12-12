@@ -34,3 +34,6 @@ foreach ($chats["groups"] as $chat) {
         file_put_contents('TOs/' . $chat['name'] . '/Plenum_to.json', json_encode($plenum, JSON_PRETTY_PRINT));
     }
 }
+
+// delete all tokens in Bot/tokens.json
+file_put_contents('Bot/tokens.json', json_encode([], JSON_PRETTY_PRINT));

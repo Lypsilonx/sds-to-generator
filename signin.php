@@ -31,12 +31,12 @@ if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256",
     // set session variable
     $_SESSION['signedin'] = $folder;
     // redirect to index.php
-    header('Location: index.php');
+    header('Location: index.php?dir=' . $dir);
     exit();
 } else {
     // redirect to index.php
     echo "failure";
-    header('Location: index.php');
+    header('Location: index.php?dir=' . $dir);
     exit();
 }
 ?>
