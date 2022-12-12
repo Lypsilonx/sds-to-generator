@@ -10,9 +10,15 @@ if (isset($update['message'])) {
     if (isset($message['text'])) {
         $text = $message['text'];
         $chat_id = $message['chat']['id'];
+        // Start the bot
         if (strpos($text, "/start") === 0) {
-            $response = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und kann deshalb noch nicht viel.";
-            send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+            $response = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
+                . PHP_EOL
+                . PHP_EOL . "Falls ihr einen Fehler findet, meldet ihn bitte an"
+                . PHP_EOL . "support@politischdekoriert.de"
+                . PHP_EOL
+                . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst.";
+            send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 0);
         }
         // Initialize a group
         else if (strpos($text, "/init") === 0) {
@@ -107,6 +113,9 @@ if (isset($update['message'])) {
                 . PHP_EOL . "/changepw <Passwort>"
                 . PHP_EOL . "Ändert das Passwort einer Ortsgruppe"
                 . PHP_EOL
+                . PHP_EOL . "/plenum <Tag>"
+                . PHP_EOL . "Ändert den Tag des Plenums"
+                . PHP_EOL
                 . PHP_EOL . "/getto"
                 . PHP_EOL . "Liefert einen Link zum Download der TO"
                 . PHP_EOL
@@ -148,7 +157,7 @@ if (isset($update['message'])) {
 
                     $response = "Hier ist der Link zum Download der TO: "
                         . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/downloadto.php?dir=" . $group . "&token=" . $mtoken;
-                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deletaAtMidnight: true);
+                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
                 }
                 // Upload TO
                 else if (strpos(strtolower($text), "/upto") === 0) {
@@ -164,7 +173,7 @@ if (isset($update['message'])) {
 
                     $response = "Hier ist der Link zum Download der TO: "
                         . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
-                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deletaAtMidnight: true);
+                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
                 }
                 // Change Password
                 else if (strpos(strtolower($text), "/changepw") === 0) {
@@ -186,6 +195,35 @@ if (isset($update['message'])) {
                     file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
                     $response = "Passwort für Ortsgruppe " . $group . " wurde geändert.";
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+                }
+                // Change Weekday
+                else if (strpos(strtolower($text), "/plenum") === 0) {
+                    // get rest of message (lowercase)
+                    $weekday = strtolower(substr($text, 8));
+
+                    $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+
+                    if (!in_array($weekday, $weekdays)) {
+                        $response = "Der Tag muss ein Wochentag sein. (z.B. monday, tuesday, ...))";
+                        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+                        return;
+                    }
+
+                    // set new weekday
+                    foreach ($chats["groups"] as &$g) {
+                        if ($g["name"] == $group) {
+                            $g["weekday"] = $weekday;
+                            $response = "Plenumstag für " . $group . " wurde auf " . $weekday . " geändert.";
+                            send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+                            file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                            // change date in TOs/group/Plenum_to.json
+                            $to = json_decode(file_get_contents("../TOs/" . $group . "/Plenum_to.json"), true);
+                            $to["date"] = date("Y-m-d", strtotime("next " . $weekday));
+                            file_put_contents("../TOs/" . $group . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+                            break;
+                        }
+                    }
                 }
                 // /top or #top (not regarding capitalization)
                 else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
@@ -396,7 +434,7 @@ function deleteEvent($og, $title)
     return false;
 }
 
-function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deletaAtMidnight = false)
+function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deleteAtMidnight = false)
 {
     $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response) . "&disable_notification=true";
     // send message and get message id
@@ -408,7 +446,7 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
     $url2 = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $deleteCmd;
 
     // if deleteAtMidnight is true, add to todelete.json
-    if ($deletaAtMidnight) {
+    if ($deleteAtMidnight) {
         $todelete = json_decode(file_get_contents("todelete.json"), true);
         array_push($todelete, $url);
         file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
@@ -426,14 +464,6 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
     if ($deleteCmd != null) {
         file_get_contents($url2);
     }
-}
-
-function send_document($token, $chat_id, $file, $caption)
-{
-    $url = "https://api.telegram.org/bot" . $token . "/sendDocument?chat_id=" . $chat_id . "&document=" . urlencode($file) . "&caption=" . urlencode($caption);
-    // send message and get message id
-    $message = json_decode(file_get_contents($url), true);
-    $message_id = $message["result"]["message_id"];
 }
 
 function createToken($group)
