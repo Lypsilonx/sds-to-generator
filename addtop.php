@@ -1,4 +1,6 @@
 <?php
+// start session
+session_start();
 // prevent script injection
 if (!isset($_POST['title']) || !isset($_POST['content']) || !isset($_POST['dir'])) {
     header('Location: index.php');
@@ -12,13 +14,19 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 // load the json from dir (in form data)
 $dir = $_POST['dir'];
 $file;
+$folder = explode('/', $dir)[0];
 if ($_POST['permanent'] == "on") {
-    $folder = explode('/', $dir)[0];
     $file = "TOs/" . $folder . "/permanent.json";
 } else {
     $file = "TOs/" . $dir . '_to.json';
 }
 $json = file_get_contents($file);
+
+// check if user is signed in
+if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
+    header('Location: index.php');
+    exit();
+}
 
 // decode json to array
 $json_data = json_decode($json, true);

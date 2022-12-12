@@ -12,6 +12,8 @@
 <body>
     <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <?php
+    // start session
+    session_start();
     // load json file from directory in url
     $addto = false;
     $dir;
@@ -43,6 +45,8 @@
     $tops;
     $topsP = array();
     $topsE = array();
+    $signedin = false;
+
     if ($dir != "fallback") {
         // try getting json file (permanent)
         $jsonP;
@@ -76,13 +80,32 @@
         $tops = $json_data['tops'];
         $topsP = $json_dataP['tops'];
         $events = $json_dataE['events'];
+
+
+        // check if logged in
+        if (isset($_SESSION['signedin'])) {
+            if ($_SESSION['signedin'] == $folder) {
+                $signedin = true;
+            } else {
+                $signedin = false;
+            }
+        }
     } else {
         $tops = $json_data['tops'];
     }
     ?>
     <header>
         <h1>SDS TO Generator</h1>
-        <div id="headerbuttons">
+        <div id="headerbuttons" action="signin.php" method="post">
+            <?php
+            echo '<form action="signin.php" method="post">';
+            echo '<input type="hidden" name="dir" value="' . $dir . '">';
+            if (!$signedin) {
+                echo '<input type="password" name="password" placeholder="Password" id="passwordfield">';
+                echo '<button type="submit" id="submitbutton"><i class="material-icons">locked</i></button>';
+            }
+            echo '</form>';
+            ?>
             <input type="text" name="dir" placeholder="Directory" value="<?php
             if ($dir != "fallback") {
                 echo $dir;
@@ -90,9 +113,13 @@
             <a class="searchbutton">
                 <i class="material-icons">search</i>
             </a>
-            <a class="editbutton" toptitle="<?php echo $title; ?>" topdate="<?php echo $date; ?>">
-                <i class="material-icons">edit</i>
-            </a>
+            <?php
+            if ($signedin) {
+                echo '<a class="editbutton" toptitle="<?php echo $title; ?>" topdate="<?php echo $date; ?>">';
+                echo '<i class="material-icons">edit</i>';
+                echo '</a>';
+            }
+            ?>
         </div>
     </header>
     <a id="menubutton">
@@ -153,39 +180,40 @@
                 <h2>
                     <?php echo $title; ?>
                 </h2>
-                <h3>
-                    <?php
-                    if ($dir != "fallback" && $addto == false) {
-                        // datum formatieren nach dd.mm.yyyy
-                        $datec = date_create($date);
-                        $day = date_format($datec, 'l');
-                        // auf deutsch uübersetzen
-                        switch ($day) {
-                            case 'Monday':
-                                $day = 'Montag';
-                                break;
-                            case 'Tuesday':
-                                $day = 'Dienstag';
-                                break;
-                            case 'Wednesday':
-                                $day = 'Mittwoch';
-                                break;
-                            case 'Thursday':
-                                $day = 'Donnerstag';
-                                break;
-                            case 'Friday':
-                                $day = 'Freitag';
-                                break;
-                            case 'Saturday':
-                                $day = 'Samstag';
-                                break;
-                            case 'Sunday':
-                                $day = 'Sonntag';
-                                break;
-                        }
-                        echo $day . ', den ' . date_format($datec, 'd.m.Y');
+                <?php
+                if ($dir != "fallback" && $addto == false) {
+                    echo "<h3>";
+                    // datum formatieren nach dd.mm.yyyy
+                    $datec = date_create($date);
+                    $day = date_format($datec, 'l');
+                    // auf deutsch uübersetzen
+                    switch ($day) {
+                        case 'Monday':
+                            $day = 'Montag';
+                            break;
+                        case 'Tuesday':
+                            $day = 'Dienstag';
+                            break;
+                        case 'Wednesday':
+                            $day = 'Mittwoch';
+                            break;
+                        case 'Thursday':
+                            $day = 'Donnerstag';
+                            break;
+                        case 'Friday':
+                            $day = 'Freitag';
+                            break;
+                        case 'Saturday':
+                            $day = 'Samstag';
+                            break;
+                        case 'Sunday':
+                            $day = 'Sonntag';
+                            break;
                     }
-                    ?>
+                    echo $day . ', den ' . date_format($datec, 'd.m.Y');
+                    echo "</h3>";
+                }
+                ?>
                 </h3>
             </div>
             <?php
@@ -208,9 +236,11 @@
                         echo '<h5>' . $event['date'] . '</h5>';
                         echo '<p>' . $event['content'] . '</p>';
                         echo '</div>';
-                        echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
-                        echo '<i class="material-icons">edit</i>';
-                        echo '</a>';
+                        if ($signedin) {
+                            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+                            echo '<i class="material-icons">edit</i>';
+                            echo '</a>';
+                        }
                         echo '</div>';
                     }
                 }
@@ -234,17 +264,20 @@
                         echo '<h5>' . $event['date'] . '</h5>';
                         echo '<p>' . $event['content'] . '</p>';
                         echo '</div>';
-                        echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
-                        echo '<i class="material-icons">edit</i>';
-                        echo '</a>';
+                        if ($signedin) {
+                            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+                            echo '<i class="material-icons">edit</i>';
+                            echo '</a>';
+                        }
                         echo '</div>';
                     }
                 }
 
-                echo '<a class="addeventb button">';
-                echo '<i class="material-icons">add</i>';
-                echo '</a>';
-
+                if ($signedin) {
+                    echo '<a class="addeventb button">';
+                    echo '<i class="material-icons">add</i>';
+                    echo '</a>';
+                }
                 echo '</div>';
 
                 echo '<div class="catrow" id="wfs">';
@@ -263,9 +296,11 @@
                     $i++;
                     echo '<p>' . $top['content'] . '</p>';
                     echo '</div>';
-                    echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="false">';
-                    echo '<i class="material-icons">edit</i>';
-                    echo '</a>';
+                    if ($signedin) {
+                        echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="false">';
+                        echo '<i class="material-icons">edit</i>';
+                        echo '</a>';
+                    }
                     echo '</div>';
                 }
 
@@ -286,15 +321,19 @@
                     $i++;
                     echo '<p>' . $top['content'] . '</p>';
                     echo '</div>';
-                    echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="true">';
-                    echo '<i class="material-icons">edit</i>';
-                    echo '</a>';
+                    if ($signedin) {
+                        echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="true">';
+                        echo '<i class="material-icons">edit</i>';
+                        echo '</a>';
+                    }
                     echo '</div>';
                 }
 
-                echo '<a class="addtopb button">';
-                echo '<i class="material-icons">add</i>';
-                echo '</a>';
+                if ($signedin) {
+                    echo '<a class="addtopb button">';
+                    echo '<i class="material-icons">add</i>';
+                    echo '</a>';
+                }
             }
 
             echo '<div class="placeholder"></div>';

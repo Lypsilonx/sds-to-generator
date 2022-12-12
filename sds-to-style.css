@@ -80,7 +80,8 @@ ul {
 }
 
 a,
-input[type="submit"] {
+input[type="submit"],
+button[type="submit"] {
   text-decoration: none;
   background-color: var(--sds-accent-1);
   color: var(--sds-color-font);
@@ -90,10 +91,12 @@ input[type="submit"] {
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  border: 0;
 }
 
 a:hover,
-input[type="submit"]:hover {
+input[type="submit"]:hover,
+button[type="submit"]:hover {
   background-color: var(--sds-accent-2);
 }
 
@@ -116,7 +119,23 @@ a {
   cursor: pointer;
 }
 
+a * {
+  cursor: pointer;
+}
+
 input {
+  cursor: pointer;
+}
+
+input * {
+  cursor: pointer;
+}
+
+button {
+  cursor: pointer;
+}
+
+button * {
   cursor: pointer;
 }
 
@@ -124,7 +143,8 @@ i {
   cursor: unset;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="password"] {
   cursor: text;
 }
 /* #endregion */
@@ -587,7 +607,12 @@ body.hidemenu #mainbottomgradient {
   justify-content: center;
 }
 
-#headerbuttons input[type="text"] {
+#headerbuttons form {
+  flex-direction: row;
+}
+
+#headerbuttons input[type="text"],
+#headerbuttons input[type="password"] {
   width: 100%;
   padding: 0.5em;
   font-size: 1em;

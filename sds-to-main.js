@@ -129,7 +129,7 @@ document.querySelectorAll('.deletebutton').forEach(function (button) {
 });
 
 // when .searchbutton is clicked set the dir in the url to the contents of the search field and go to that url
-document.querySelector('.searchbutton').addEventListener('click', function () {
+document.querySelector('.searchbutton').addEventListener('click', function (event) {
     var search = document.querySelector('#searchfield').value;
 
     window.location.href = window.location.href.split('?')[0] + '?dir=' + search;

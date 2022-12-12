@@ -22,7 +22,7 @@ if (isset($update['message'])) {
             $rest = explode(" ", $text);
 
             // check if rest of message is valid
-            if (count($rest) < 2) {
+            if (count($rest) < 3) {
                 $response = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> um eine neue Ortsgruppe hinzuzufügen.";
                 send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
                 return;
@@ -31,19 +31,22 @@ if (isset($update['message'])) {
             // get name
             $name = $rest[1];
 
+            // get password
+            $password = $rest[2];
+
             // if folder for Ortsgruppe does not exist
             if (!file_exists("../TOs/" . $name)) {
 
-                if (count($rest) < 3) {
+                if (count($rest) < 4) {
                     // default weekday is the current weekday
                     $weekday = date("l");
                 } else {
                     // get weekday
-                    $weekday = $rest[2];
+                    $weekday = $rest[3];
                 }
 
                 // enter chat id and name into chats.json
-                array_push($chats["groups"], array("name" => $name, "weekday" => $weekday, "members" => array($chat_id)));
+                array_push($chats["groups"], array("name" => $name, "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($chat_id)));
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                 // create folder for Ortsgruppe
@@ -69,13 +72,23 @@ if (isset($update['message'])) {
                 // enter chat id into  group members
                 foreach ($chats["groups"] as &$g) {
                     if ($g["name"] == $name) {
+                        if (hash("sha256", $password) != $g["password"]) {
+                            $response = "Das Passwort ist falsch.";
+                            send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
+                            return;
+                        }
                         array_push($g["members"], $chat_id);
+
+                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                        $response = "Du bist der Ortsgruppe " . $name . " beigetreten.";
+                        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
                         break;
                     }
                 }
-                file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
-                $response = "Du bist der Ortsgruppe " . $name . " beigetreten.";
+                // send response
+                $response = "Ortsgruppe " . $name . " wurde nicht gefunden.";
                 send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAnswer: true);
             }
         }

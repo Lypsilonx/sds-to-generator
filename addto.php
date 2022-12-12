@@ -1,4 +1,6 @@
 <?php
+// start session
+session_start();
 // prevent script injection
 if (!isset($_POST['title']) || !isset($_POST['date']) || !isset($_POST['dir'])) {
     header('Location: index.php');
@@ -10,6 +12,13 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 
 // recieves form data from sds-to-generator/index.php
 $dir = $_POST['dir'];
+$folder = explode('/', $dir)[0];
+
+// check if user is signed in
+if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
+    header('Location: index.php');
+    exit();
+}
 
 // decode json to array
 $json_data = json_decode($json, true);

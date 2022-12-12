@@ -1,4 +1,6 @@
 <?php
+// start session
+session_start();
 // prevent script injection
 if (!isset($_POST['id']) || !isset($_POST['title']) || !isset($_POST['date']) || !isset($_POST['content']) || !isset($_POST['dir'])) {
     header('Location: index.php');
@@ -14,6 +16,13 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 // load the json from dir (in form data)
 $dir = $_POST['dir'];
 $folder = explode('/', $dir)[0];
+
+// check if user is signed in
+if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
+    header('Location: index.php');
+    exit();
+}
+
 $file = "TOs/" . $folder . "/events.json";
 $json = file_get_contents($file);
 
