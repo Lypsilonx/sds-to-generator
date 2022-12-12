@@ -144,14 +144,18 @@ if (isset($update['message'])) {
             if ($found) {
                 // Get TO
                 if (strpos(strtolower($text), "/getto") === 0) {
+                    $mtoken = createToken($group);
+
                     $response = "Hier ist der Link zum Download der TO: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/downloadto.php?dir=" . $group;
-                    send_message($token, $chat_id, $response, deleteCmd: $message_id);
+                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/downloadto.php?dir=" . $group . "&token=" . $mtoken;
+                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deletaAtMidnight: true);
                 }
                 // Upload TO
                 else if (strpos(strtolower($text), "/upto") === 0) {
+                    $mtoken = createToken($group);
+
                     $response = "Clicke hier um die TO Hochzuladen: "
-                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/uploadto.php?dir=" . $group;
+                        . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/uploadto.php?dir=" . $group . "&token=" . $mtoken;
                     send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 10, deleteAnswer: true);
                 }
                 // Look at TO
@@ -160,7 +164,7 @@ if (isset($update['message'])) {
 
                     $response = "Hier ist der Link zum Download der TO: "
                         . PHP_EOL . "https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
-                    send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 10, deleteAnswer: true);
+                    send_message($token, $chat_id, $response, deleteCmd: $message_id, deletaAtMidnight: true);
                 }
                 // Change Password
                 else if (strpos(strtolower($text), "/changepw") === 0) {
@@ -392,7 +396,7 @@ function deleteEvent($og, $title)
     return false;
 }
 
-function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false)
+function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deletaAtMidnight = false)
 {
     $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response) . "&disable_notification=true";
     // send message and get message id
@@ -403,7 +407,16 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
     $url = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $message_id;
     $url2 = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $deleteCmd;
 
-    sleep($delTime);
+    // if deleteAtMidnight is true, add to todelete.json
+    if ($deletaAtMidnight) {
+        $todelete = json_decode(file_get_contents("todelete.json"), true);
+        array_push($todelete, $url);
+        file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
+    }
+
+    if ($deleteAnswer || $deleteCmd != null) {
+        sleep($delTime);
+    }
 
     // if deleteAnswer is true, delete answer message
     if ($deleteAnswer) {

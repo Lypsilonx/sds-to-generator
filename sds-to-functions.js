@@ -277,7 +277,7 @@ function upload(mask, filename) {
     ).then(
         function (webdavuser) {
             // upload the rendered markdown as a .md file
-            // using webDAV endpoint "https://cloud.linke-sds.org/remote.php/dav/files/Lyx/"
+            // using webDAV endpoint "https://cloud.linke-sds.org/remote.php/dav/files/" + webdavuser["user"]
 
             var request = new XMLHttpRequest();
             var url = 'https://cloud.linke-sds.org/remote.php/dav/files/' + webdavuser["user"] + '/Ortsgruppe ' + dir2 + '/' + filename;

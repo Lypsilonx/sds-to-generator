@@ -37,3 +37,12 @@ foreach ($chats["groups"] as $chat) {
 
 // delete all tokens in Bot/tokens.json
 file_put_contents('Bot/tokens.json', json_encode([], JSON_PRETTY_PRINT));
+
+// file_get_contents() all urls in Bot/todelete.json
+$todelete = json_decode(file_get_contents('Bot/todelete.json'), true);
+foreach ($todelete as $url) {
+    file_get_contents($url);
+}
+
+// delete all files in Bot/todelete.json
+file_put_contents('Bot/todelete.json', json_encode([], JSON_PRETTY_PRINT));

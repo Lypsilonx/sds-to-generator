@@ -4,3 +4,5 @@ TOs/*
 webdavuser.config
 Bot/token.txt
 Bot/chats.json
+Bot/tokens.json
+Bot/todelete.json
