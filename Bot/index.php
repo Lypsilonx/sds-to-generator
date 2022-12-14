@@ -19,6 +19,8 @@ if (isset($update['message'])) {
         //log message
         if ($text[0] == "/" || $text[0] == "#") {
             logToFile($username . ": " . $text);
+        } else {
+            return;
         }
 
         $chat_id = $message['chat']['id'];
@@ -27,9 +29,9 @@ if (isset($update['message'])) {
         // Start the bot
         if (strpos($text, "/start") === 0) {
             if ($ingroup)
-                send_message($token, $chat_id, getMessage("start group"), deleteCmd: $message_id, delTime: 0);
+                send_message($token, $chat_id, getMessage("start group"), deleteCmd: $message_id);
             else
-                send_message($token, $chat_id, getMessage("start"), deleteCmd: $message_id, delTime: 0);
+                send_message($token, $chat_id, getMessage("start"), deleteCmd: $message_id);
         }
         // Initialize a group
         else if (strpos($text, "/init") === 0) {
@@ -136,10 +138,10 @@ if (isset($update['message'])) {
             $group = $groups[0];
             if (!$found) {
                 if (count(explode(" ", $text)) > 1) {
-                    send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id);
+                    send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id, deleteAnswer: true);
                     return;
                 } else {
-                    send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id, deleteAnswer: true);
+                    send_message($token, $chat_id, getMessage("not initialized"), deleteAnswer: true);
                     return;
                 }
             }
@@ -148,7 +150,7 @@ if (isset($update['message'])) {
                 $mtoken = createToken($group);
 
                 $response = getMessage("get to")
-                    . PHP_EOL . $domain . "downloadto.php?dir=" . $group . "&token=" . $mtoken;
+                    . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&token=" . $mtoken;
                 send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
             }
             // Upload TO
@@ -156,8 +158,8 @@ if (isset($update['message'])) {
                 $mtoken = createToken($group);
 
                 $response = getMessage("upload to")
-                    . PHP_EOL . $domain . "uploadto.php?dir=" . $group . "&token=" . $mtoken;
-                send_message($token, $chat_id, $response, deleteCmd: $message_id, delTime: 10, deleteAnswer: true);
+                    . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
+                send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
             }
             // Look at TO
             else if (strpos(strtolower($text), "/seeto") === 0) {
@@ -590,18 +592,16 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
         file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
     }
 
-    if ($deleteAnswer || $deleteCmd != null) {
-        sleep($delTime);
-        // ! Find a better way to do this
+    // if deleteCmd is not null, delete command message
+    if ($deleteCmd != null) {
+        file_get_contents($url2);
     }
 
     // if deleteAnswer is true, delete answer message
     if ($deleteAnswer) {
+        sleep($delTime);
+        // ! Find a better way to do this
         file_get_contents($url);
-    }
-    // if deleteCmd is not null, delete command message
-    if ($deleteCmd != null) {
-        file_get_contents($url2);
     }
 }
 

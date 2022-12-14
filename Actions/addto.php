@@ -3,7 +3,7 @@
 session_start();
 // prevent script injection
 if (!isset($_POST['title']) || !isset($_POST['date']) || !isset($_POST['dir'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit();
 }
 $_POST['title'] = htmlspecialchars($_POST['title']);
@@ -16,7 +16,7 @@ $folder = explode('/', $dir)[0];
 
 // check if user is signed in
 if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit();
 }
 
@@ -34,7 +34,7 @@ if ($_POST["edit"] == "") {
     // if the delete button was pressed
     if ($_POST["delete"] == "true") {
         // delete to file
-        unlink("TOs/" . $dir . '_to.json');
+        unlink("../TOs/" . $dir . '_to.json');
     } else {
         // edit to file
         $json_data['title'] = $_POST['title'];
@@ -43,8 +43,8 @@ if ($_POST["edit"] == "") {
 }
 
 // encode array to json and save to file
-file_put_contents("TOs/" . $dir . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
+file_put_contents("../TOs/" . $dir . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
-header('Location: index.php?dir=' . $dir);
+header('Location: ../index.php?dir=' . $dir);
 ?>

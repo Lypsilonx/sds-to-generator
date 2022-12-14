@@ -236,13 +236,13 @@ header {
   width: 100%;
 }
 
-.downloadb {
+.button {
   align-items: center;
   height: 2.3em;
   min-width: 1.5em;
 }
 
-#sidebar .downloadb {
+#sidebar .button {
   margin-bottom: 0;
   padding: 0.1em;
   padding-left: 0.5em;
@@ -253,7 +253,11 @@ header {
   width: unset;
 }
 
-#sidebar a.downloadb:hover {
+#sidebar .shareb {
+  left: 4.5em;
+}
+
+#sidebar a.button:hover {
   background-color: var(--sds-accent-2);
 }
 
@@ -475,8 +479,12 @@ body.hidemenu #mainbottomgradient {
 }
 
 /* space between p's */
-.top *:not(:last-child) {
-  margin-bottom: 1em;
+.top *:not(:last-child):not(h4, h5, :empty) {
+  margin-bottom: 0.8em;
+}
+
+.top p:last-child:empty {
+  margin-top: -0.8em;
 }
 
 .top ul li {

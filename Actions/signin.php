@@ -3,7 +3,7 @@
 session_start();
 // prevent script injection
 if (!isset($_POST['dir']) || !isset($_POST['password'])) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit();
 }
 
@@ -14,8 +14,8 @@ $_POST['password'] = htmlspecialchars($_POST['password']);
 $dir = $_POST['dir'];
 $folder = explode('/', $dir)[0];
 
-// load chats.json from /Bot
-$json = file_get_contents("Bot/chats.json");
+// load chats.json from ../Bot
+$json = file_get_contents("../Bot/chats.json");
 // decode json to array
 $chats = json_decode($json, true);
 
@@ -31,11 +31,11 @@ if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256",
     // set session variable
     $_SESSION['signedin'] = $folder;
     // redirect to index.php
-    header('Location: index.php?dir=' . $dir);
+    header('Location: ../index.php?dir=' . $dir);
     exit();
 } else {
     // redirect to index.php
-    header('Location: index.php?dir=' . $dir);
+    header('Location: ../index.php?dir=' . $dir);
     exit();
 }
 ?>

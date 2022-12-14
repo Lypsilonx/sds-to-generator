@@ -5,6 +5,14 @@ window.addEventListener('resize', function () {
     resize();
 });
 
+
+// Change share icon on Apple devices
+if (navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)) {
+    for (var i = 0; i < document.querySelectorAll('.shareb').length; i++) {
+        document.querySelectorAll('.shareb')[i].querySelector('i').innerText = 'ios_share';
+    }
+}
+
 // when any of the .addtopb buttons are clicked, toggle the .addtop .hidden class
 document.querySelectorAll('.addtopb').forEach(function (button) {
   button.addEventListener('click', function () {
@@ -155,3 +163,23 @@ document.querySelectorAll('.downloadb').forEach(function (button) {
         renderMarkDown(dir, download);
     });
 });
+
+// upon pressing .shareb, share a link to the TO
+document.querySelectorAll('.shareb').forEach(function (button) {
+    button.addEventListener('click', function () {
+        var dir = window.location.href.split('?')[1].split('=')[1];
+        var url = window.location.href.split('?')[0] + '?dir=' + dir;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'TO ' + dir,
+                text: 'TO ' + dir,
+                url: url
+            }).then(() => {
+                console.log('Thanks for sharing!');
+            })
+            .catch(console.error);
+        }
+    });
+});
+

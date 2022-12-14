@@ -6,9 +6,9 @@ function resize() {
     }
 }
 
-function renderMarkDown(dir, process = () => { }) {
+function renderMarkDown(dir, process = () => { }, extern = "") {
     // get the JSON from the directory and render it as markdown
-    fetch('TOs/' + dir + '_to.json').then(
+    fetch(extern + 'TOs/' + dir + '_to.json').then(
         function (response) {
             return response.json();
         }
@@ -16,7 +16,7 @@ function renderMarkDown(dir, process = () => { }) {
         function (data) {
             // get the perms from the directory
             var dir2 = dir.split('/')[0];
-            fetch('TOs/' + dir2 + '/permanent.json').then(
+            fetch(extern + 'TOs/' + dir2 + '/permanent.json').then(
                 function (response) {
                     return response.json();
                 }
@@ -24,14 +24,14 @@ function renderMarkDown(dir, process = () => { }) {
                 function (permanent) {
                     // get the events from the directory
                     var dir2 = dir.split('/')[0];
-                    fetch('TOs/' + dir2 + '/events.json').then(
+                    fetch(extern + 'TOs/' + dir2 + '/events.json').then(
                         function (response) {
                             return response.json();
                         }
                     ).then(
                         function (events) {
                             // load Markdown/top-format.md
-                            fetch('Markdown/top-format.md').then(
+                            fetch(extern + 'Markdown/top-format.md').then(
                                 function (response) {
                                     return response.text();
                                 }
@@ -39,7 +39,7 @@ function renderMarkDown(dir, process = () => { }) {
                                 function (topFormat) {
                                     var topFormatOriginal = topFormat;
                                     // load Markdown/day-format.md
-                                    fetch('Markdown/day-format.md').then(
+                                    fetch(extern + 'Markdown/day-format.md').then(
                                         function (response) {
                                             return response.text();
                                         }
@@ -47,7 +47,7 @@ function renderMarkDown(dir, process = () => { }) {
                                         function (dayFormat) {
                                             var dayFormatOriginal = dayFormat;
                                             // load Markdown/event-format.md
-                                            fetch('Markdown/event-format.md').then(
+                                            fetch(extern + 'Markdown/event-format.md').then(
                                                 function (response) {
                                                     return response.text();
                                                 }
@@ -55,7 +55,7 @@ function renderMarkDown(dir, process = () => { }) {
                                                 function (eventFormat) {
                                                     var eventFormatOriginal = eventFormat;
                                                     // load Markdown/perm-format.md
-                                                    fetch('Markdown/perm-format.md').then(
+                                                    fetch(extern + 'Markdown/perm-format.md').then(
                                                         function (response) {
                                                             return response.text();
                                                         }
@@ -75,7 +75,7 @@ function renderMarkDown(dir, process = () => { }) {
                                                             }
                                                             fdate = day + '.' + month + '.' + year;
                                                             // load Markdown/mask.md
-                                                            fetch('Markdown/mask.md').then(
+                                                            fetch(extern + 'Markdown/mask.md').then(
                                                                 function (response) {
                                                                     return response.text();
                                                                 }
@@ -230,6 +230,9 @@ function renderMarkDown(dir, process = () => { }) {
                                                                     // replace %awarenessfrage% and %zusatzfrage% with a random question
                                                                     mask = mask.replace(new RegExp('%awarenessfrage%', 'g'), generateQuestion());
                                                                     mask = mask.replace(new RegExp('%zusatzfrage%', 'g'), generateQuestion());
+
+                                                                    // replace &quot; with "
+                                                                    mask = mask.replace(new RegExp('&quot;', 'g'), '"');
 
                                                                     return mask;
                                                                 }

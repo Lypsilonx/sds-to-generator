@@ -124,17 +124,17 @@ session_start();
     ?>
     <header>
         <h1>SDS TO Generator</h1>
-        <div id="headerbuttons" action="signin.php" method="post">
+        <div id="headerbuttons" action="Actions/signin.php" method="post">
             <?php
             if (!$signedin) {
-                echo '<form action="signin.php" method="post">';
+                echo '<form action="Actions/signin.php" method="post">';
                 echo '<input type="hidden" name="dir" value="' . $dir . '">';
                 echo '<input type="password" name="password" placeholder="Passwort" id="passwordfield" title="Das Passwort, dass deine Gruppe festgelegt hat." required>';
                 echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
                 echo '</form>';
             }
             if ($signedin_somewhere) {
-                echo '<form action="signout.php" method="post">';
+                echo '<form action="Actions/signout.php" method="post">';
                 echo '<input type="hidden" name="dir" value="' . $dir . '">';
                 echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
                 echo '</form>';
@@ -203,6 +203,10 @@ session_start();
                     if ($dir != "fallback" && $addto == false) {
                         echo '<a class="downloadb button">';
                         echo '<i class="material-icons">file_download</i>';
+                        echo '</a>';
+
+                        echo '<a class="shareb button">';
+                        echo '<i class="material-icons">share</i>';
                         echo '</a>';
                     }
                     ?>
@@ -380,7 +384,7 @@ session_start();
     </div>
 
     <div class="addtop menu hidden">
-        <form action="addtop.php" method="post" id="addtopform">
+        <form action="Actions/addtop.php" method="post" id="addtopform">
             <h2>TOP hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
@@ -410,7 +414,7 @@ session_start();
     <div class="addto menu<?php if (!$addto) {
         echo ' hidden';
     } ?>">
-        <form action="addto.php" method="post" id="addtoform">
+        <form action="Actions/addto.php" method="post" id="addtoform">
             <h2>TO hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
@@ -430,7 +434,7 @@ session_start();
     </div>
 
     <div class="addevent menu hidden">
-        <form action="addevent.php" method="post" id="addeventform">
+        <form action="Actions/addevent.php" method="post" id="addeventform">
             <h2>Event hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
@@ -464,7 +468,7 @@ session_start();
         $out = $text;
 
         // use parsedown
-        require_once 'Parsedown.php';
+        require_once 'Plugins/Parsedown.php';
         $Parsedown = new Parsedown();
         $out = $Parsedown->text($out);
 
