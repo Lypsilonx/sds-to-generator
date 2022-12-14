@@ -13,8 +13,11 @@ if (isset($update['message'])) {
     if (isset($message['text'])) {
         $text = $message['text'];
 
+        //get username
+        $username = $message['from']['username'];
+
         //log message
-        logToFile("Message: " . $text);
+        logToFile($username . ": " . $text);
 
         $chat_id = $message['chat']['id'];
         // user is in a group
@@ -85,6 +88,12 @@ if (isset($update['message'])) {
                         // check if user is already in group
                         if (in_array($chat_id, $g['members'])) {
                             send_message($token, $chat_id, getMessage("already in group", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+                            return;
+                        }
+
+                        // check if message is 3 words long
+                        if (count($rest) > 3) {
+                            send_message($token, $chat_id, getMessage("not correct init private"), deleteCmd: $message_id, deleteAnswer: true);
                             return;
                         }
 
@@ -219,7 +228,7 @@ if (isset($update['message'])) {
 
                 // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
                 $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $content, $matches);
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $text, $matches);
 
                 // if no date is found, set date to today
                 if (count($matches) == 0) {
@@ -475,6 +484,8 @@ function getMessage($id, $args = [])
             break;
         case "not correct init":
             $msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
+        case "not correct init private":
+            $msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Passwort> um einer Ortsgruppe beizutreten.";
             break;
         case "password changed":
             $msg = "Passwort für Ortsgruppe " . $args[0] . " wurde geändert.";
@@ -672,4 +683,5 @@ function logToFile($message)
     fwrite($log, $message . PHP_EOL);
     fclose($log);
 }
+?>
 ?>

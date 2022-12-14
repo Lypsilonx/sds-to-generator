@@ -469,6 +469,43 @@ body.hidemenu #mainbottomgradient {
   padding: 0;
 }
 
+.top > *:not(h4, h5) {
+  margin-left: 1em;
+  display: table;
+}
+
+/* space between p's */
+.top *:not(:last-child) {
+  margin-bottom: 0.5em;
+}
+
+.top ul li {
+  display: block;
+}
+
+.top ul li::before {
+  content: "•";
+  margin-right: 0.5em;
+}
+
+.top ol li {
+  display: block;
+}
+
+.top ol {
+  counter-reset: li;
+}
+
+.top ol li::before {
+  counter-increment: li;
+  content: counter(li) ".";
+  margin-right: 0.5em;
+}
+
+.top p a {
+  display: table;
+}
+
 #main .catrow {
   display: table;
   margin-top: 4em;

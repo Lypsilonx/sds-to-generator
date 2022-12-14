@@ -83,6 +83,11 @@ session_start();
         $topsP = $json_dataP['tops'];
         $events = $json_dataE['events'];
 
+        // sort events by date
+        usort($events, function ($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
 
         // check if logged in
         if (isset($_SESSION['signedin'])) {
@@ -263,7 +268,7 @@ session_start();
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<h5>' . $event['date'] . '</h5>';
-                        echo '<p>' . $event['content'] . '</p>';
+                        echo '<p>' . formatMD($event['content']) . '</p>';
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -291,7 +296,7 @@ session_start();
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<h5>' . $event['date'] . '</h5>';
-                        echo '<p>' . $event['content'] . '</p>';
+                        echo '<p>' . formatMD($event['content']) . '</p>';
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -323,7 +328,7 @@ session_start();
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
                     echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
-                    echo '<p>' . $top['content'] . '</p>';
+                    echo '<p>' . formatMD($top['content']) . '</p>';
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="false">';
@@ -348,7 +353,7 @@ session_start();
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
                     echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
-                    echo '<p>' . $top['content'] . '</p>';
+                    echo '<p>' . formatMD($top['content']) . '</p>';
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="true">';
@@ -451,6 +456,21 @@ session_start();
 
     <script src="sds-to-functions.js"></script>
     <script src="sds-to-main.js"></script>
+
+    <?php
+
+    function formatMD($text)
+    {
+        $out = $text;
+
+        // use parsedown
+        require_once 'Parsedown.php';
+        $Parsedown = new Parsedown();
+        $out = $Parsedown->text($out);
+
+        return $out;
+    }
+    ?>
 </body>
 
 </html>
