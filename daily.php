@@ -46,3 +46,6 @@ foreach ($todelete as $url) {
 
 // delete all files in Bot/todelete.json
 file_put_contents('Bot/todelete.json', json_encode([], JSON_PRETTY_PRINT));
+
+// open a new reion for the day in log.txt
+file_put_contents('Bot/log.txt', '# endregion' . PHP_EOL . '# region ' . date('Y-m-d') . PHP_EOL, FILE_APPEND);

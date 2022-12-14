@@ -17,7 +17,9 @@ if (isset($update['message'])) {
         $username = $message['from']['username'];
 
         //log message
-        logToFile($username . ": " . $text);
+        if ($text[0] == "/" || $text[0] == "#") {
+            logToFile($username . ": " . $text);
+        }
 
         $chat_id = $message['chat']['id'];
         // user is in a group
@@ -205,7 +207,12 @@ if (isset($update['message'])) {
 
                         // change date in TOs/group/Plenum_to.json
                         $to = json_decode(file_get_contents("../TOs/" . $group . "/Plenum_to.json"), true);
-                        $to['date'] = date("Y-m-d", strtotime("next " . $weekday));
+                        // set date to next weekday from today (if today is weekday, set date to today)
+                        if (date("l") == $weekday) {
+                            $to['date'] = date("Y-m-d");
+                        } else {
+                            $to['date'] = date("Y-m-d", strtotime("next " . $weekday));
+                        }
                         file_put_contents("../TOs/" . $group . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
                         break;
                     }
@@ -680,7 +687,9 @@ function weekdayDE($day)
 function logToFile($message)
 {
     $log = fopen("log.txt", "a");
-    fwrite($log, $message . PHP_EOL);
+    // get current time
+    $time = date("d.m.Y H:i:s");
+    fwrite($log, $time . " | " . $message . PHP_EOL);
     fclose($log);
 }
 ?>

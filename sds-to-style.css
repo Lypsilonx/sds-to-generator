@@ -476,7 +476,7 @@ body.hidemenu #mainbottomgradient {
 
 /* space between p's */
 .top *:not(:last-child) {
-  margin-bottom: 0.5em;
+  margin-bottom: 1em;
 }
 
 .top ul li {
