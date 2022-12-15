@@ -1,358 +1,386 @@
 <?php
+
 // load token from token.txt
 $token = file_get_contents("token.txt");
-
 $input = file_get_contents('php://input');
 $update = json_decode($input, true);
 
+if (!isset($update['message'])) {
+    return;
+}
+
+$message = $update['message'];
+$text = $message['text'];
+
+if (!isset($message['text'])) {
+    return;
+}
+
 $domain = "https://www.politischdekoriert.de/sds-to-generator/";
+$message_id = $message['message_id'];
+$username = $message['from']['username'];
 
-if (isset($update['message'])) {
-    $message = $update['message'];
-    $message_id = $message['message_id'];
-    if (isset($message['text'])) {
-        $text = $message['text'];
+if (!isset($username)) {
+    // use id if no username is set
+    $username = $message['from']['id'];
+}
 
-        //get username
-        $username = $message['from']['username'];
-
-        //log message
-        if ($text[0] == "/" || $text[0] == "#") {
-            logToFile($username . ": " . $text);
+//log message
+if ($text[0] == "/" || $text[0] == "#") {
+    // not /init
+    if (strpos($text, "/init") !== 0) {
+        logToFile($username . ": " . $text);
+    } else {
+        // log /init without password
+        $rest = explode(" ", $text);
+        if (count($rest) > 3) {
+            logToFile($username . ": " . $rest[0] . " " . $rest[1] . " " . $rest[2] . " ********");
+        } else if (count($rest) > 2) {
+            logToFile($username . ": " . $rest[0] . " " . $rest[1] . " ********");
         } else {
-            return;
+            logToFile($username . ": " . $text);
         }
+    }
+} else {
+    return;
+}
 
-        $chat_id = $message['chat']['id'];
-        // user is in a group
-        $ingroup = $chat_id < 0;
-        // Start the bot
-        if (strpos($text, "/start") === 0) {
-            if ($ingroup)
-                send_message($token, $chat_id, getMessage("start group"), deleteCmd: $message_id);
-            else
-                send_message($token, $chat_id, getMessage("start"), deleteCmd: $message_id);
-        }
-        // Initialize a group
-        else if (strpos($text, "/init") === 0) {
-            // load chats.json
-            $chats = json_decode(file_get_contents("chats.json"), true);
+$chat_id = $message['chat']['id'];
+// user is in a group
+$ingroup = $chat_id < 0;
+// Start the bot
+if (strpos($text, "/start") === 0) {
+    if ($ingroup) {
+        send_message($token, $chat_id, getMessage("start group"), deleteCmd: $message_id);
+    } else {
+        send_message($token, $chat_id, getMessage("start"), deleteCmd: $message_id);
+    }
+}
+// Initialize a group
+else if (strpos($text, "/init") === 0) {
+    // load chats.json
+    $chats = json_decode(file_get_contents("chats.json"), true);
 
-            $rest = explode(" ", $text);
+    $rest = explode(" ", $text);
 
-            // check if rest of message is valid
-            if (count($rest) < 3) {
-                send_message($token, $chat_id, getMessage("not correct init"), deleteCmd: $message_id, deleteAnswer: true);
-                return;
-            }
+    // check if rest of message is valid
+    if (count($rest) < 3) {
+        send_message($token, $chat_id, getMessage("not correct init"), deleteCmd: $message_id, deleteAnswer: true);
+        return;
+    }
 
-            // get name
-            $name = $rest[1];
+    // get name
+    $name = $rest[1];
+
+    // if folder for Ortsgruppe does not exist
+    if (!file_exists("../TOs/" . $name)) {
+
+        if (count($rest) < 4) {
+            // default weekday is the current weekday
+            $weekday = strtolower(date("l"));
 
             // get password
             $password = $rest[2];
+        } else {
+            // get weekday
+            $weekday = weekdayDE($rest[2]);
 
-            // if folder for Ortsgruppe does not exist
-            if (!file_exists("../TOs/" . $name)) {
+            // get password
+            $password = $rest[3];
+        }
 
-                if (count($rest) < 4) {
-                    // default weekday is the current weekday
-                    $weekday = date("l");
-                } else {
-                    // get weekday
-                    $weekday = weekdayDE($rest[3]);
+        // enter chat id and name into chats.json
+        array_push($chats['groups'], array("name" => $name, "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($chat_id)));
+        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+        // create folder for Ortsgruppe
+        mkdir("../TOs/" . $name);
+        // create Plenum_to.json (with title, date (next $weekday) and tops array)
+        $date = new DateTime();
+        $date->modify('next ' . $weekday);
+        // to format: yyyy-mm-dd
+        $date = $date->format('Y-m-d');
+        $to = array("title" => "Plenum", "date" => $date, "tops" => array());
+        file_put_contents("../TOs/" . $name . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+        // create permanent.json (tops array)
+        $permanent = array("tops" => array());
+        file_put_contents("../TOs/" . $name . "/permanent.json", json_encode($permanent, JSON_PRETTY_PRINT));
+        // create events.json (events array)
+        $events = array("events" => array());
+        file_put_contents("../TOs/" . $name . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
+
+        // send response
+        send_message($token, $chat_id, getMessage("init", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+    } else {
+
+        // get password
+        $password = $rest[2];
+
+        // enter chat id into group members
+        foreach ($chats['groups'] as &$g) {
+            if ($g['name'] == $name) {
+                // check if user is already in group
+                if (in_array($chat_id, $g['members'])) {
+                    send_message($token, $chat_id, getMessage("already in group", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+                    return;
                 }
 
-                // enter chat id and name into chats.json
-                array_push($chats['groups'], array("name" => $name, "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($chat_id)));
+                // check if message is 3 words long
+                if (count($rest) > 3) {
+                    send_message($token, $chat_id, getMessage("not correct init private"), deleteCmd: $message_id, deleteAnswer: true);
+                    return;
+                }
+
+                // check if password is correct
+                if (hash("sha256", $password) != $g['password']) {
+                    send_message($token, $chat_id, getMessage("wrong password"), deleteCmd: $message_id, deleteAnswer: true);
+                    return;
+                }
+                array_push($g['members'], $chat_id);
+
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
-                // create folder for Ortsgruppe
-                mkdir("../TOs/" . $name);
-                // create Plenum_to.json (with title, date (next $weekday) and tops array)
-                $date = new DateTime();
-                $date->modify('next ' . $weekday);
-                // to format: yyyy-mm-dd
-                $date = $date->format('Y-m-d');
-                $to = array("title" => "Plenum", "date" => $date, "tops" => array());
-                file_put_contents("../TOs/" . $name . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
-                // create permanent.json (tops array)
-                $permanent = array("tops" => array());
-                file_put_contents("../TOs/" . $name . "/permanent.json", json_encode($permanent, JSON_PRETTY_PRINT));
-                // create events.json (events array)
-                $events = array("events" => array());
-                file_put_contents("../TOs/" . $name . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
-
-                // send response
-                send_message($token, $chat_id, getMessage("init", [$name]), deleteCmd: $message_id, deleteAnswer: true);
-            } else {
-                // enter chat id into  group members
-                foreach ($chats['groups'] as &$g) {
-                    if ($g['name'] == $name) {
-                        // check if user is already in group
-                        if (in_array($chat_id, $g['members'])) {
-                            send_message($token, $chat_id, getMessage("already in group", [$name]), deleteCmd: $message_id, deleteAnswer: true);
-                            return;
-                        }
-
-                        // check if message is 3 words long
-                        if (count($rest) > 3) {
-                            send_message($token, $chat_id, getMessage("not correct init private"), deleteCmd: $message_id, deleteAnswer: true);
-                            return;
-                        }
-
-                        // check if password is correct
-                        if (hash("sha256", $password) != $g['password']) {
-                            send_message($token, $chat_id, getMessage("wrong password"), deleteCmd: $message_id, deleteAnswer: true);
-                            return;
-                        }
-                        array_push($g['members'], $chat_id);
-
-                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-
-                        send_message($token, $chat_id, getMessage("joined group", [$name]), deleteCmd: $message_id, deleteAnswer: true);
-                        return;
-                    }
-                }
-
-                // send response
-                send_message($token, $chat_id, getMessage("group not found", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+                send_message($token, $chat_id, getMessage("joined group", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+                return;
             }
         }
-        // Help
-        else if (strpos(strtolower($text), "/help") === 0) {
-            send_message($token, $chat_id, getMessage("help"), deleteCmd: $message_id);
+
+        // send response
+        send_message($token, $chat_id, getMessage("group not found", [$name]), deleteCmd: $message_id, deleteAnswer: true);
+    }
+}
+// Help
+else if (strpos(strtolower($text), "/help") === 0) {
+    send_message($token, $chat_id, getMessage("help"), deleteCmd: $message_id);
+} else {
+    // load chats.json
+    $chats = json_decode(file_get_contents("chats.json"), true);
+    // check if chat id is in any group in chats.json
+    $found = false;
+    $group;
+    $groups = array();
+    foreach ($chats['groups'] as $g) {
+        if (in_array($chat_id, $g['members'])) {
+            $found = true;
+            array_push($groups, $g['name']);
+        }
+    }
+    $group = $groups[0];
+    if (!$found) {
+        if (count(explode(" ", $text)) > 1) {
+            send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id, deleteAnswer: true);
+            return;
         } else {
-            // load chats.json
-            $chats = json_decode(file_get_contents("chats.json"), true);
-            // check if chat id is in any group in chats.json
-            $found = false;
-            $group;
-            $groups = array();
-            foreach ($chats['groups'] as $g) {
-                if (in_array($chat_id, $g['members'])) {
-                    $found = true;
-                    array_push($groups, $g['name']);
-                }
-            }
-            $group = $groups[0];
-            if (!$found) {
-                if (count(explode(" ", $text)) > 1) {
-                    send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id, deleteAnswer: true);
-                    return;
-                } else {
-                    send_message($token, $chat_id, getMessage("not initialized"), deleteAnswer: true);
-                    return;
-                }
-            }
-            // Get TO
-            if (strpos(strtolower($text), "/getto") === 0) {
-                $mtoken = createToken($group);
+            send_message($token, $chat_id, getMessage("not initialized"), deleteAnswer: true);
+            return;
+        }
+    }
+    // Get TO
+    if (strpos(strtolower($text), "/getto") === 0) {
+        $mtoken = createToken($group);
 
-                $response = getMessage("get to")
-                    . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&token=" . $mtoken;
-                send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
-            }
-            // Upload TO
-            else if (strpos(strtolower($text), "/upto") === 0) {
-                $mtoken = createToken($group);
+        $response = getMessage("get to")
+            . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&token=" . $mtoken;
+        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
+    }
+    // Upload TO
+    else if (strpos(strtolower($text), "/upto") === 0) {
+        $mtoken = createToken($group);
 
-                $response = getMessage("upload to")
-                    . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
-                send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
-            }
-            // Look at TO
-            else if (strpos(strtolower($text), "/seeto") === 0) {
-                $mtoken = createToken($group);
+        $response = getMessage("upload to")
+            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
+        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
+    }
+    // Look at TO
+    else if (strpos(strtolower($text), "/seeto") === 0) {
+        $mtoken = createToken($group);
 
-                $response = getMessage("see to")
-                    . PHP_EOL . $domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
-                send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
-            }
-            // Change Password
-            else if (strpos(strtolower($text), "/changepw") === 0) {
-                // get rest of message
-                $password = substr($text, 10);
+        $response = getMessage("see to")
+            . PHP_EOL . $domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
+        send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
+    }
+    // Change Password
+    else if (strpos(strtolower($text), "/changepw") === 0) {
+        // get rest of message
+        $password = substr($text, 10);
 
-                if (strlen($password) < 4) {
-                    send_message($token, $chat_id, getMessage("password too short"), deleteCmd: $message_id, deleteAnswer: true);
-                    return;
-                }
-                // set new password
-                foreach ($chats['groups'] as &$g) {
-                    if ($g['name'] == $group) {
-                        $g['password'] = hash("sha256", $password);
-                        break;
-                    }
-                }
+        if (strlen($password) < 4) {
+            send_message($token, $chat_id, getMessage("password too short"), deleteCmd: $message_id, deleteAnswer: true);
+            return;
+        }
+        // set new password
+        foreach ($chats['groups'] as &$g) {
+            if ($g['name'] == $group) {
+                $g['password'] = hash("sha256", $password);
+                break;
+            }
+        }
+        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+        send_message($token, $chat_id, getMessage("password changed", [$group]), deleteCmd: $message_id, deleteAnswer: true);
+    }
+    // Change Weekday
+    else if (strpos(strtolower($text), "/plenum") === 0) {
+        // get rest of message (lowercase)
+        $weekday = weekdayDE(strtolower(substr($text, 8)));
+
+        $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+
+        if (!in_array($weekday, $weekdays)) {
+            send_message($token, $chat_id, getMessage("has to be weekday"), deleteCmd: $message_id, deleteAnswer: true);
+            return;
+        }
+
+        // set new weekday
+        foreach ($chats['groups'] as &$g) {
+            if ($g['name'] == $group) {
+                $g['weekday'] = $weekday;
+                send_message($token, $chat_id, getMessage("plenum changed", [$group, weekdayED($weekday)]), deleteCmd: $message_id, deleteAnswer: true);
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-                send_message($token, $chat_id, getMessage("password changed", [$group]), deleteCmd: $message_id, deleteAnswer: true);
+
+                // change date in TOs/group/Plenum_to.json
+                $to = json_decode(file_get_contents("../TOs/" . $group . "/Plenum_to.json"), true);
+                // set date to next weekday from today (if today is weekday, set date to today)
+                if (date("l") == $weekday) {
+                    $to['date'] = date("Y-m-d");
+                } else {
+                    $to['date'] = date("Y-m-d", strtotime("next " . $weekday));
+                }
+                file_put_contents("../TOs/" . $group . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+                break;
             }
-            // Change Weekday
-            else if (strpos(strtolower($text), "/plenum") === 0) {
-                // get rest of message (lowercase)
-                $weekday = weekdayDE(strtolower(substr($text, 8)));
+        }
+    }
+    // /top or #top (not regarding capitalization)
+    else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
+        // get rest of message
+        // set title to first line
+        $lines = explode(PHP_EOL, $text);
+        // first line without first 4 characters
+        if (strlen($lines[0]) > 4) {
+            $title = substr($lines[0], 5);
+            // slice title from rest of message
+            $content = substr($text, strlen($title) + 6);
+        } else {
+            $title = "Kein Titel";
+            $content = substr($text, 5);
+        }
 
-                $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+        // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
+        $matches = array();
+        preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $text, $matches);
 
-                if (!in_array($weekday, $weekdays)) {
-                    send_message($token, $chat_id, getMessage("has to be weekday"), deleteCmd: $message_id, deleteAnswer: true);
-                    return;
-                }
+        // if no date is found, set date to today
+        if (count($matches) == 0) {
+            saveTOP($group, $title, $content);
 
-                // set new weekday
-                foreach ($chats['groups'] as &$g) {
-                    if ($g['name'] == $group) {
-                        $g['weekday'] = $weekday;
-                        send_message($token, $chat_id, getMessage("plenum changed", [$group, weekdayED($weekday)]), deleteCmd: $message_id, deleteAnswer: true);
-                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-
-                        // change date in TOs/group/Plenum_to.json
-                        $to = json_decode(file_get_contents("../TOs/" . $group . "/Plenum_to.json"), true);
-                        // set date to next weekday from today (if today is weekday, set date to today)
-                        if (date("l") == $weekday) {
-                            $to['date'] = date("Y-m-d");
-                        } else {
-                            $to['date'] = date("Y-m-d", strtotime("next " . $weekday));
-                        }
-                        file_put_contents("../TOs/" . $group . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
-                        break;
-                    }
-                }
+            // send response
+            send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
+        } else {
+            // bring date to format yyyy-mm-dd
+            $date = $matches[0];
+            if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                $date = DateTime::createFromFormat("d.m.Y", $date);
+            } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                $date = DateTime::createFromFormat("d.m.y", $date);
+            } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                $date = DateTime::createFromFormat("d.m.", $date);
             }
-            // /top or #top (not regarding capitalization)
-            else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
-                // get rest of message
-                // set title to first line
-                $lines = explode(PHP_EOL, $text);
-                // first line without first 4 characters
-                if (strlen($lines[0]) > 4) {
-                    $title = substr($lines[0], 5);
-                    // slice title from rest of message
-                    $content = substr($text, strlen($title) + 6);
-                } else {
-                    $title = "Kein Titel";
-                    $content = substr($text, 5);
-                }
+            $datef = $date->format("Y-m-d");
+            saveEvent($group, $title, "(Siehe TOP)", $datef);
+            saveTOP($group, $title, $content);
 
-                // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
-                $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $text, $matches);
+            // send response
+            send_message($token, $chat_id, getMessage("event recognized", [$date->format("d.m.")]), deleteAnswer: true);
+            send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
+        }
+    }
+    // /termin or #termin (not regarding capitalization)
+    else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
+        // get rest of message
+        // set title to first line
+        $lines = explode(PHP_EOL, $text);
+        // first line without first 7 characters
+        if (strlen($lines[0]) > 7) {
+            $title = substr($lines[0], 8);
+            // slice title from rest of message
+            $content = substr($text, strlen($title) + 9);
+        } else {
+            $title = "Kein Titel";
+            $content = substr($text, 8);
+        }
 
-                // if no date is found, set date to today
-                if (count($matches) == 0) {
-                    saveTOP($group, $title, $content);
+        // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
+        $matches = array();
+        preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $content, $matches);
 
-                    // send response
-                    send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
-                } else {
-                    // bring date to format yyyy-mm-dd
-                    $date = $matches[0];
-                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
-                        $date = DateTime::createFromFormat("d.m.Y", $date);
-                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
-                        $date = DateTime::createFromFormat("d.m.y", $date);
-                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
-                        $date = DateTime::createFromFormat("d.m.", $date);
-                    }
-                    $datef = $date->format("Y-m-d");
-                    saveEvent($group, $title, "(Siehe TOP)", $datef);
-                    saveTOP($group, $title, $content);
-
-                    // send response
-                    send_message($token, $chat_id, getMessage("event recognized", [$date->format("d.m.")]), deleteAnswer: true);
-                    send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
-                }
+        // if no date is found, set date to today
+        if (count($matches) == 0) {
+            $date = new DateTime();
+            $date = $date->format('Y-m-d');
+        } else {
+            // bring date to format yyyy-mm-dd
+            $date = $matches[0];
+            if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                $date = DateTime::createFromFormat("d.m.Y", $date);
+                $date = $date->format("Y-m-d");
+            } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                $date = DateTime::createFromFormat("d.m.y", $date);
+                $date = $date->format("Y-m-d");
+            } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                $date = DateTime::createFromFormat("d.m.", $date);
+                $date = $date->format("Y-m-d");
             }
-            // /termin or #termin (not regarding capitalization)
-            else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
-                // get rest of message
-                // set title to first line
-                $lines = explode(PHP_EOL, $text);
-                // first line without first 7 characters
-                if (strlen($lines[0]) > 7) {
-                    $title = substr($lines[0], 8);
-                    // slice title from rest of message
-                    $content = substr($text, strlen($title) + 9);
-                } else {
-                    $title = "Kein Titel";
-                    $content = substr($text, 8);
-                }
+        }
 
-                // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
-                $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $content, $matches);
+        saveEvent($group, $title, $content, $date);
 
-                // if no date is found, set date to today
-                if (count($matches) == 0) {
-                    $date = new DateTime();
-                    $date = $date->format('Y-m-d');
-                } else {
-                    // bring date to format yyyy-mm-dd
-                    $date = $matches[0];
-                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
-                        $date = DateTime::createFromFormat("d.m.Y", $date);
-                        $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
-                        $date = DateTime::createFromFormat("d.m.y", $date);
-                        $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
-                        $date = DateTime::createFromFormat("d.m.", $date);
-                        $date = $date->format("Y-m-d");
-                    }
-                }
+        // send response
+        send_message($token, $chat_id, getMessage("event saved", [$title]), deleteAnswer: true);
+    }
+    // /del or #del (not regarding capitalization)
+    else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
+        // get rest of message
+        // set title to first line
+        $lines = explode(PHP_EOL, $text);
+        // first line without first 4 characters
+        $title = substr($lines[0], 5);
 
-                saveEvent($group, $title, $content, $date);
+        // delete top
+        if (deleteTOP($group, $title)) {
+            // send response
+            send_message($token, $chat_id, getMessage("top deleted", [$title]), deleteCmd: $message_id, deleteAnswer: true);
+        } else {
+            send_message($token, $chat_id, getMessage("top not found", [$title]), deleteCmd: $message_id, deleteAnswer: true);
+        }
 
-                // send response
-                send_message($token, $chat_id, getMessage("event saved", [$title]), deleteAnswer: true);
-            }
-            // /del or #del (not regarding capitalization)
-            else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
-                // get rest of message
-                // set title to first line
-                $lines = explode(PHP_EOL, $text);
-                // first line without first 4 characters
-                $title = substr($lines[0], 5);
-
-                // delete top
-                if (deleteTOP($group, $title)) {
-                    // send response
-                    send_message($token, $chat_id, getMessage("top deleted", [$title]), deleteCmd: $message_id, deleteAnswer: true);
-                } else {
-                    send_message($token, $chat_id, getMessage("top not found", [$title]), deleteCmd: $message_id, deleteAnswer: true);
-                }
-
-                // delete event
-                if (deleteEvent($group, $title)) {
-                    // send response
-                    send_message($token, $chat_id, getMessage("event deleted", [$title]), deleteCmd: $message_id, deleteAnswer: true);
-                } else {
-                    send_message($token, $chat_id, getMessage("event not found", [$title]), deleteCmd: $message_id, deleteAnswer: true);
+        // delete event
+        if (deleteEvent($group, $title)) {
+            // send response
+            send_message($token, $chat_id, getMessage("event deleted", [$title]), deleteCmd: $message_id, deleteAnswer: true);
+        } else {
+            send_message($token, $chat_id, getMessage("event not found", [$title]), deleteCmd: $message_id, deleteAnswer: true);
+        }
+    }
+    // Leave Group
+    else if (strpos(strtolower($text), "/leave") === 0) {
+        if (strlen($text) > 7) {
+            $group = substr($text, 7);
+        }
+        // if group name in groups
+        if (in_array($group, $groups)) {
+            // remove chat_id from group members array of group in chats.jsons groups array
+            foreach ($chats['groups'] as &$g) {
+                if ($g['name'] == $group) {
+                    $g['members'] = array_diff($g['members'], array($chat_id));
                 }
             }
-            // Leave Group
-            else if (strpos(strtolower($text), "/leave") === 0) {
-                if (strlen($text) > 7) {
-                    $group = substr($text, 7);
-                }
-                // if group name in groups
-                if (in_array($group, $groups)) {
-                    // remove chat_id from group members array of group in chats.jsons groups array
-                    foreach ($chats['groups'] as &$g) {
-                        if ($g['name'] == $group) {
-                            $g['members'] = array_diff($g['members'], array($chat_id));
-                        }
-                    }
-                    file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+            file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
-                    // send response
-                    send_message($token, $chat_id, getMessage("left group", [$group]), deleteCmd: $message_id, deleteAnswer: true);
-                } else {
-                    // send response
-                    send_message($token, $chat_id, getMessage("not in group", [$group]), deleteCmd: $message_id, deleteAnswer: true);
-                }
-            }
+            // send response
+            send_message($token, $chat_id, getMessage("left group", [$group]), deleteCmd: $message_id, deleteAnswer: true);
+        } else {
+            // send response
+            send_message($token, $chat_id, getMessage("not in group", [$group]), deleteCmd: $message_id, deleteAnswer: true);
         }
     }
 }
@@ -689,7 +717,11 @@ function logToFile($message)
     $log = fopen("log.txt", "a");
     // get current time
     $time = date("d.m.Y H:i:s");
-    fwrite($log, $time . " | " . $message . PHP_EOL);
+
+    // tab before every line
+    $message = str_replace(PHP_EOL, PHP_EOL . "\t", $message);
+
+    fwrite($log, "\t" . $time . " | " . $message . PHP_EOL);
     fclose($log);
 }
 ?>

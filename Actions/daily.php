@@ -25,7 +25,7 @@ foreach ($chats["groups"] as $chat) {
         $date = date('Y-m-d', strtotime('next ' . $chat['weekday']));
         // reset the TO
         $plenum = [
-            'name' => 'Plenum',
+            'title' => 'Plenum',
             'date' => $date,
             'tops' => [],
         ];

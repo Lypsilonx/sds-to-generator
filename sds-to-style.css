@@ -504,6 +504,15 @@ body.hidemenu #mainbottomgradient {
   counter-reset: li;
 }
 
+.top ul,
+.top ol {
+  margin-left: 1em;
+}
+
+.top li:first-child {
+  margin-top: 0.8em;
+}
+
 .top ol li::before {
   counter-increment: li;
   content: counter(li) ".";
