@@ -27,10 +27,8 @@ if (!isset($username)) {
 
 //log message
 if ($text[0] == "/" || $text[0] == "#") {
-    // not /init
-    if (strpos($text, "/init") !== 0) {
-        logToFile($username . ": " . $text);
-    } else {
+    // if /init
+    if (strpos($text, "/init") === 0) {
         // log /init without password
         $rest = explode(" ", $text);
         if (count($rest) > 3) {
@@ -40,6 +38,16 @@ if ($text[0] == "/" || $text[0] == "#") {
         } else {
             logToFile($username . ": " . $text);
         }
+    } else if (strpos($text, "/changepw") === 0) {
+        // log /changepw without password
+        $rest = explode(" ", $text);
+        if (count($rest) > 2) {
+            logToFile($username . ": " . $rest[0] . " ********");
+        } else {
+            logToFile($username . ": " . $text);
+        }
+    } else {
+        logToFile($username . ": " . $text);
     }
 } else {
     return;
