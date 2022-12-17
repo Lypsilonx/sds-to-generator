@@ -16,9 +16,9 @@ foreach ($chats["groups"] as $chat) {
         // load ../TOs/group/Plenum_to.json
         $plenum = json_decode(file_get_contents('../TOs/' . $chat['name'] . '/Plenum_to.json'), true);
 
-        // save file to ../TOs/group/Plenum_<date>_to.json
+        // save file to ../TOs/group/Plenum-<date>_to.json
         $date = $plenum['date'];
-        file_put_contents('../TOs/' . $chat['name'] . '/Plenum_' . $date . '_to.json', json_encode($plenum, JSON_PRETTY_PRINT));
+        file_put_contents('../TOs/' . $chat['name'] . '/Plenum-' . $date . '_to.json', json_encode($plenum, JSON_PRETTY_PRINT));
 
         // reset the plenum
         // set date to next weekday

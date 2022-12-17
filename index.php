@@ -22,10 +22,10 @@ session_start();
         $dir = 'fallback';
     } else {
         // sanitize input
-        $dir = preg_replace('/[^a-zA-Z0-9\/]/', '', $_GET['dir']);
+        $dir = preg_replace('/[^a-zA-Z0-9\/_-]/', '', $_GET['dir']);
 
         // check if directory is valid (exactly one folder deep) and at least one character long (before and after /)
-        if (preg_match('/^[a-zA-Z0-9]{1,}\/[a-zA-Z0-9]{1,}$/', $dir) == 0) {
+        if (preg_match('/^[a-zA-Z0-9_-]{1,}\/[a-zA-Z0-9_-]{1,}$/', $dir) == 0) {
             $dir = 'fallback';
         }
     }
@@ -220,6 +220,7 @@ session_start();
                 </h2>
                 <?php
                 if ($dir != "fallback" && $addto == false) {
+                    echo '<a href="Actions/ics.php?date=' . $date . '&time=18Uhr&title=' . $title . '">';
                     echo "<h3>";
                     // datum formatieren nach dd.mm.yyyy
                     $datec = date_create($date);
@@ -250,6 +251,7 @@ session_start();
                     }
                     echo $day . ', den ' . date_format($datec, 'd.m.Y');
                     echo "</h3>";
+                    echo '</a>';
                 }
                 ?>
                 </h3>
@@ -271,7 +273,9 @@ session_start();
                         $event['content'] = str_replace('"', '&quot;', $event['content']);
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
+                        echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
                         echo '<h5>' . $event['date'] . '</h5>';
+                        echo '</a>';
                         echo '<p>' . formatMD($event['content']) . '</p>';
                         echo '</div>';
                         if ($signedin) {
@@ -471,6 +475,10 @@ session_start();
         require_once 'Plugins/Parsedown.php';
         $Parsedown = new Parsedown();
         $out = $Parsedown->text($out);
+
+
+        // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
+        $out = preg_replace('/((&quot;[a-zA-Z0-9äüö ]*&quot; )|([a-zA-Z0-9äüö]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
 
         return $out;
     }

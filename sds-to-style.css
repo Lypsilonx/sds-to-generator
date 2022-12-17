@@ -368,6 +368,16 @@ body.hidemenu #menubutton {
   display: table;
 }
 
+#main a:has(h3) {
+  display: table;
+  margin-block-start: 0;
+  margin-block-end: 0;
+  justify-self: unset;
+  width: unset;
+  margin: 0;
+  padding: 0;
+}
+
 #main h3 {
   display: table;
   font-size: 1.2em;
@@ -378,6 +388,10 @@ body.hidemenu #menubutton {
   padding: 0.1em;
   padding-left: 0.5em;
   padding-right: 0.5em;
+}
+
+#main a > h3:hover {
+  background-color: var(--sds-accent-2);
 }
 
 #main h4 {
@@ -473,18 +487,18 @@ body.hidemenu #mainbottomgradient {
   padding: 0;
 }
 
-.top > *:not(h4, h5) {
+.top > *:not(h4, h5, a:has(h5, h4), :empty) {
   margin-left: 1em;
-  display: table;
+  display: inline;
 }
 
 /* space between p's */
-.top *:not(:last-child):not(h4, h5, :empty) {
-  margin-bottom: 0.8em;
+.top *:not(:first-child):not(h4, h5, a:has(h5, h4), :empty) {
+  margin-top: 0.8em;
 }
 
 .top p:last-child:empty {
-  margin-top: -0.8em;
+  margin-top: 0;
 }
 
 .top ul li {
@@ -509,10 +523,6 @@ body.hidemenu #mainbottomgradient {
   margin-left: 1em;
 }
 
-.top li:first-child {
-  margin-top: 0.8em;
-}
-
 .top ol li::before {
   counter-increment: li;
   content: counter(li) ".";
@@ -520,7 +530,7 @@ body.hidemenu #mainbottomgradient {
 }
 
 .top p a {
-  display: table;
+  display: inline;
 }
 
 #main .catrow {
