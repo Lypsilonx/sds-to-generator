@@ -164,7 +164,7 @@ session_start();
             <h2>
                 <?php
                 // prevent script injection
-                $title = preg_replace('/[^a-zA-Z0-9 ]/', '', $title);
+                $title = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $title);
                 echo $title;
                 ?>
             </h2>
@@ -179,7 +179,7 @@ session_start();
                     $i = 1;
                     foreach ($tops as $top) {
                         // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9 ]/', '', $top['title']);
+                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $top['title']);
                         echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
                         $i++;
                     }
@@ -191,7 +191,7 @@ session_start();
 
                     foreach ($topsP as $top) {
                         // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9 ]/', '', $top['title']);
+                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $top['title']);
                         echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
                         $i++;
                     }
@@ -478,7 +478,16 @@ session_start();
 
 
         // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
-        $out = preg_replace('/((&quot;[a-zA-Z0-9äüö ]*&quot; )|([a-zA-Z0-9äüö]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
+        $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß ]*&quot; )|([a-zA-Z0-9äüöß]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
+
+        // replace -> with arrow
+        $out = str_replace('-&gt;', '→', $out);
+        // replace <- with arrow
+        $out = str_replace('&lt;-', '←', $out);
+        // replace => with arrow
+        $out = str_replace('=&gt;', '⇒', $out);
+        // replace <= with arrow
+        $out = str_replace('&lt;=', '⇐', $out);
 
         return $out;
     }

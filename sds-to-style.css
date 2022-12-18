@@ -233,7 +233,7 @@ header {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  width: 100%;
+  width: calc(100% - 1em);
 }
 
 .button {
@@ -521,6 +521,7 @@ body.hidemenu #mainbottomgradient {
 .top ul,
 .top ol {
   margin-left: 1em;
+  margin-top: 0.8em;
 }
 
 .top ol li::before {
@@ -531,6 +532,18 @@ body.hidemenu #mainbottomgradient {
 
 .top p a {
   display: inline;
+  background-color: unset;
+  color: var(--sds-color-1);
+  padding: 0;
+}
+
+.top p a:hover {
+  color: var(--sds-color-2);
+  text-decoration: underline;
+}
+
+.top p a:visited {
+  color: var(--sds-color-1);
 }
 
 #main .catrow {
