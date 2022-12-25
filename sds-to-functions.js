@@ -1,8 +1,8 @@
 function resize() {
     if (window.innerWidth < 800) {
-        document.querySelector('body').classList.add('hidemenu');
+        document.querySelector('body').classList.add('hovermenu');
     } else {
-        document.querySelector('body').classList.remove('hidemenu');
+        document.querySelector('body').classList.remove('hovermenu');
     }
 }
 
@@ -233,6 +233,15 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
 
                                                                     // replace &quot; with "
                                                                     mask = mask.replace(new RegExp('&quot;', 'g'), '"');
+
+                                                                    // replace &amp; with &
+                                                                    mask = mask.replace(new RegExp('&amp;', 'g'), '&');
+
+                                                                    // replace &lt; with <
+                                                                    mask = mask.replace(new RegExp('&lt;', 'g'), '<');
+
+                                                                    // replace &gt; with >
+                                                                    mask = mask.replace(new RegExp('&gt;', 'g'), '>');
 
                                                                     return mask;
                                                                 }

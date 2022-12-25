@@ -140,7 +140,7 @@ session_start();
                 echo '</form>';
             }
             ?>
-            <input type="text" name="dir" placeholder="Directory" value="<?php
+            <input type="text" name="dir" placeholder="Ortsgruppe/Plenum" value="<?php
             if ($dir != "fallback") {
                 echo $dir;
             } ?>" id="searchfield">
@@ -156,15 +156,15 @@ session_start();
             ?>
         </div>
     </header>
-    <a id="menubutton">
-        <i class="material-icons">menu</i>
-    </a>
     <div id="rbody">
         <div id="sidebar">
+            <a id="menubutton" onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')">
+                <i class="material-icons"></i>
+            </a>
             <h2>
                 <?php
                 // prevent script injection
-                $title = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $title);
+                $title = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $title);
                 echo $title;
                 ?>
             </h2>
@@ -179,7 +179,8 @@ session_start();
                     $i = 1;
                     foreach ($tops as $top) {
                         // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $top['title']);
+                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
+                        // tab before title
                         echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
                         $i++;
                     }
@@ -191,7 +192,7 @@ session_start();
 
                     foreach ($topsP as $top) {
                         // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß ]/', '', $top['title']);
+                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
                         echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
                         $i++;
                     }
@@ -380,7 +381,6 @@ session_start();
 
             echo '<div class="placeholder"></div>';
 
-            echo '<div id="mainbottomgradient">';
             echo '</div>';
             ?>
 

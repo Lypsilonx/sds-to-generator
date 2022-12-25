@@ -67,6 +67,7 @@ body * {
 h1 {
   margin-block-start: 0;
   margin-block-end: 0;
+  text-align: left;
 }
 
 li {
@@ -172,8 +173,8 @@ header {
 }
 
 #sidebar {
+  position: relative;
   width: 20%;
-  height: 96%;
   background-color: var(--main-bg-color);
   justify-content: flex-start;
   align-items: flex-start;
@@ -181,26 +182,23 @@ header {
   padding: 1%;
   min-width: 200px;
   box-shadow: 0 0 5px var(--sds-color-shadow);
-  overflow: scroll;
+  z-index: 2;
 
-  transition: transform 0.5s ease-in-out;
+  transition: left 0.5s ease-in-out;
 }
 /* #endregion */
 /* ------------------------- Sidebar ------------------------- */
 /* #region Sidebar */
 .placeholder {
-  height: 7%;
-  margin-top: 10%;
+  margin-top: 15%;
 }
 
 #sidebar h2 {
+  top: 0;
+  left: 0;
   position: absolute;
-  width: calc(max(20%, 200px) - 2%);
-  margin-left: -1%;
-  padding-left: 1%;
-  padding-right: 1%;
-  padding-top: 1%;
-  top: calc(max(10%, 50px));
+  width: calc(98% - 1rem);
+  padding: calc(1% + 0.5rem);
   background-image: linear-gradient(
     180deg,
     var(--main-bg-color) 0%,
@@ -208,7 +206,7 @@ header {
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
-  height: 10%;
+  height: 2em;
   font-size: 1.5em;
   font-family: "Bitter";
   margin-block-start: 0;
@@ -219,6 +217,7 @@ header {
 #sidebar ul {
   height: 96%;
   width: 100%;
+  overflow: scroll;
 }
 
 #sidebar li {
@@ -233,7 +232,6 @@ header {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  width: calc(100% - 1em);
 }
 
 .button {
@@ -247,7 +245,7 @@ header {
   padding: 0.1em;
   padding-left: 0.5em;
   padding-right: 0.5em;
-  position: absolute;
+  position: fixed;
   bottom: 1em;
   background-color: var(--sds-accent-1);
   width: unset;
@@ -257,6 +255,10 @@ header {
   left: 4.5em;
 }
 
+#sidebar .downloadb {
+  left: 1em;
+}
+
 #sidebar a.button:hover {
   background-color: var(--sds-accent-2);
 }
@@ -264,7 +266,8 @@ header {
 #sidebarbottomgradient {
   position: absolute;
   bottom: 0;
-  width: calc(max(20%, 200px) - 2%);
+  left: 0;
+  width: 98%;
   margin-left: -1%;
   padding-left: 1%;
   padding-right: 1%;
@@ -278,7 +281,6 @@ header {
 }
 
 #sidebar a {
-  width: 100%;
   background-color: unset;
   justify-content: left;
   padding: 0.5em;
@@ -289,52 +291,62 @@ header {
   color: var(--main-bg-color);
 }
 
-#menubutton {
+#sidebar #menubutton {
   display: flex;
   position: absolute;
-  top: calc(max(10%, 50px));
+  top: 0;
+  left: 100%;
+  width: 1.5em;
   padding: 0.1em;
   padding-left: 0.5em;
   padding-right: 0.5em;
   height: 2.3em;
   align-items: center;
   justify-content: center;
-  left: calc(max(20%, 200px));
   background-color: var(--sds-accent-1);
-  z-index: 1;
-
-  transition: left 0.5s ease-in-out;
 }
 
-#menubutton:hover {
+#sidebar #menubutton.hover {
   background-color: var(--sds-accent-2);
   color: var(--sds-color-font);
 }
 
-body.hidemenu #sidebar {
-  transform: translateX(-100%);
+#sidebar #menubutton i::before {
+  content: "menu";
 }
 
-body.hidemenu #menubutton {
-  left: 0;
+#sidebar #menubutton.hover i::before {
+  content: "arrow_back";
+}
+
+body.hidemenu #sidebar #menubutton.hover i::before {
+  content: "arrow_forward";
+}
+
+body.hidemenu #sidebar {
+  left: calc(-1 * max(20%, 200px) - 2%);
+}
+
+body.hovermenu #sidebar {
+  position: absolute;
+  height: 100%;
+}
+
+body.hovermenu header h1 {
+  font-size: 1em;
 }
 
 @media screen and (min-width: 800px) {
   #sidebar {
-    transform: unset;
-  }
-
-  #menubutton {
-    left: calc(max(20%, 200px));
-    display: none;
+    left: 0;
   }
 }
 /* #endregion */
 /* -------------------------- Main --------------------------- */
 /* #region Main */
 #main {
+  position: relative;
   width: calc(min(78%, 98% - 200px));
-  height: calc(96% - max(10%, 50px));
   margin: 2%;
   padding: 3%;
   margin-bottom: 0;
@@ -347,7 +359,6 @@ body.hidemenu #menubutton {
 
 #main * {
   justify-content: left;
-  width: unset;
   text-align: left;
 }
 
@@ -401,20 +412,6 @@ body.hidemenu #menubutton {
   margin-block-end: 0;
 }
 
-#mainbottomgradient {
-  position: absolute;
-  bottom: 0;
-  left: max(20%, 200px);
-  width: calc(100% - max(20%, 200px));
-  height: 8%;
-  background-image: linear-gradient(
-    0deg,
-    var(--main-bg-color) 0%,
-    var(--main-bg-color) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-}
-
 #main .button {
   position: relative;
   width: 8vw;
@@ -433,23 +430,22 @@ body.hidemenu #menubutton {
   content: "Neues Event";
 }
 
-body.hidemenu #main {
-  width: 100%;
+body.hidemenu:not(.hovermenu) #main {
+  width: 90%;
   margin-left: calc(-1 * max(20%, 200px));
 }
 
-body.hidemenu #main .button {
+body.hovermenu #main {
+  width: auto;
+}
+
+body.hidemenu:not(.hovermenu) #main .button {
   width: 1.5em;
   left: calc(50% - 1.75em);
 }
 
-body.hidemenu #main .button::after {
+body.hidemenu:not(.hovermenu) #main .button::after {
   content: "";
-}
-
-body.hidemenu #mainbottomgradient {
-  left: 0;
-  width: 100%;
 }
 
 @media screen and (min-width: 800px) {
@@ -469,11 +465,6 @@ body.hidemenu #mainbottomgradient {
 
   #main .addeventb::after {
     content: "Neues Event";
-  }
-
-  #mainbottomgradient {
-    left: max(20%, 200px);
-    width: calc(100% - max(20%, 200px));
   }
 }
 
@@ -551,7 +542,7 @@ body.hidemenu #mainbottomgradient {
   margin-top: 4em;
   flex-direction: column;
   align-items: left;
-  width: 100%;
+
   padding: 0;
 }
 
@@ -568,10 +559,9 @@ body.hidemenu #mainbottomgradient {
 /* -------------------------- Menus -------------------------- */
 /* #region Menus */
 .menu {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
@@ -655,7 +645,6 @@ body.hidemenu #mainbottomgradient {
 
 .menu form input[type="text"],
 .menu form input[type="date"] {
-  width: 100%;
   height: 2em;
   padding: 0.5em;
   font-size: 1em;
@@ -666,7 +655,6 @@ body.hidemenu #mainbottomgradient {
 }
 
 .menu form #contentfield {
-  width: 100%;
   padding: 0.5em;
   height: 70%;
   border: 1px solid var(--sds-color-font);
@@ -682,21 +670,24 @@ body.hidemenu #mainbottomgradient {
   flex-direction: row;
   align-content: center;
   justify-content: center;
+  width: max(50%, 20em);
 }
 
 #headerbuttons form {
   flex-direction: row;
+  width: 50%;
 }
 
 #headerbuttons input[type="text"],
 #headerbuttons input[type="password"] {
-  width: 100%;
   padding: 0.5em;
   font-size: 1em;
   background-color: var(--sds-color-font);
   color: var(--main-bg-color);
   font-family: "Bitter";
   font-size: 1.2em;
+  width: calc(100% - 2.5em);
+  min-width: 5em;
 }
 
 #headerbuttons .editbutton,
@@ -706,11 +697,6 @@ body.hidemenu #mainbottomgradient {
   height: 2.3em;
   width: 1.5em;
   margin-left: 0;
-}
-
-#headerbuttons .unlockbutton i,
-#headerbuttons .lockbutton i {
-  width: 100%;
 }
 
 #headerbuttons .unlockbutton i::before,

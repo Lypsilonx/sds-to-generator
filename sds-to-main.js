@@ -154,6 +154,16 @@ document.querySelector('#searchfield').addEventListener('keyup', function (event
 // upon pressing #menubutton, toggle body .hidemenu
 document.querySelector('#menubutton').addEventListener('click', function () {
     document.querySelector('body').classList.toggle('hidemenu');
+
+    // keep the menu button from being clicked again until the menu is hidden
+    document.querySelector('#menubutton').disabled = true;
+    // untrigger the :hover state by removing the :hover class from it
+    document.querySelector('#menubutton').classList.remove('hover');
+    // reenable the button after 500ms
+    setTimeout(function () {
+        document.querySelector('#menubutton').disabled = false;
+    }
+    , 500);
 });
 
 // upon pressing .downloadb, download the TO using the renderMarkDown function
