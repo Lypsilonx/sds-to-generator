@@ -79,9 +79,20 @@ session_start();
 
         $json_dataE = json_decode($jsonE, true);
 
-        $tops = $json_data['tops'];
-        $topsP = $json_dataP['tops'];
-        $events = $json_dataE['events'];
+        $tops = array();
+        if ($json_data['tops'] != null) {
+            $tops = $json_data['tops'];
+        }
+
+        $topsP = array();
+        if ($json_dataP['tops'] != null) {
+            $topsP = $json_dataP['tops'];
+        }
+
+        $events = array();
+        if ($json_dataE['events'] != null) {
+            $events = $json_dataE['events'];
+        }
 
         // sort events by date
         usort($events, function ($a, $b) {
@@ -149,7 +160,7 @@ session_start();
             </a>
             <?php
             if ($signedin) {
-                echo '<a class="editbutton" toptitle="<?php echo $title; ?>" topdate="<?php echo $date; ?>">';
+                echo '<a class="editbutton" toptitle="' . $json_data['title'] . '" topdate="' . $json_data['date'] . '">';
                 echo '<i class="material-icons">edit</i>';
                 echo '</a>';
             }
@@ -174,7 +185,10 @@ session_start();
                 if ($dir != "fallback" && $addto == false) {
                     echo '<li><a href="#wrb">Wochenrückblick</a></li>';
                     echo '<li><a href="#wfs">Wochenvorschau</a></li>';
-                    echo '<hr>';
+
+                    if ($tops != null) {
+                        echo '<hr>';
+                    }
 
                     $i = 1;
                     foreach ($tops as $top) {
@@ -266,7 +280,7 @@ session_start();
 
                 foreach ($events as $event) {
                     // if event was within the last 7 days of $date
-                    if (strtotime($event['date']) >= strtotime('-7 days', strtotime($date)) && strtotime($event['date']) <= strtotime($date)) {
+                    if (strtotime($event['date']) >= strtotime('-7 days', strtotime($date)) && strtotime($event['date']) < strtotime($date)) {
                         echo '<div class="toprow">';
                         echo '<div class="top">';
                         // prevent script injection
@@ -274,10 +288,12 @@ session_start();
                         $event['content'] = str_replace('"', '&quot;', $event['content']);
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
+                        echo '<div class="eventdate">';
                         echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
                         echo '<h5>' . $event['date'] . '</h5>';
                         echo '</a>';
-                        echo '<p>' . formatMD($event['content']) . '</p>';
+                        echo '</div>';
+                        echo formatMD($event['content']);
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -296,7 +312,7 @@ session_start();
 
                 foreach ($events as $event) {
                     // if event is within the next 7 days of $date
-                    if (strtotime($event['date']) >= strtotime($date) && strtotime($event['date']) <= strtotime('+7 days', strtotime($date))) {
+                    if (strtotime($event['date']) >= strtotime($date) && strtotime($event['date']) < strtotime('+7 days', strtotime($date))) {
                         echo '<div class="toprow">';
                         echo '<div class="top">';
                         // prevent script injection
@@ -304,8 +320,12 @@ session_start();
                         $event['content'] = str_replace('"', '&quot;', $event['content']);
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
+                        echo '<div class="eventdate">';
+                        echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
                         echo '<h5>' . $event['date'] . '</h5>';
-                        echo '<p>' . formatMD($event['content']) . '</p>';
+                        echo '</a>';
+                        echo '</div>';
+                        echo formatMD($event['content']);
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -316,12 +336,13 @@ session_start();
                     }
                 }
 
+                echo '</div>';
+
                 if ($signedin) {
                     echo '<a class="addeventb button">';
                     echo '<i class="material-icons">add</i>';
                     echo '</a>';
                 }
-                echo '</div>';
 
                 echo '<div class="catrow" id="wfs">';
                 echo '<hr>';
@@ -337,7 +358,7 @@ session_start();
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
                     echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
-                    echo '<p>' . formatMD($top['content']) . '</p>';
+                    echo formatMD($top['content']);
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="false">';
@@ -362,7 +383,7 @@ session_start();
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
                     echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
-                    echo '<p>' . formatMD($top['content']) . '</p>';
+                    echo formatMD($top['content']);
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="true">';
@@ -407,7 +428,7 @@ session_start();
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
                 <div id="pfield">
-                    <label for="permanentfield">Laufender Arbeitsauftrag</label>
+                    Lauf. Arbeitsauftrag
                     <input type="checkbox" name="permanent" id="permanentfield">
                 </div>
                 <input type="submit" value="Add" class="submitbutton">
@@ -478,7 +499,7 @@ session_start();
 
 
         // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
-        $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß ]*&quot; )|([a-zA-Z0-9äüöß]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
+        $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß\- ]*&quot; )|([a-zA-Z0-9äüöß\-]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
 
         // replace -> with arrow
         $out = str_replace('-&gt;', '→', $out);

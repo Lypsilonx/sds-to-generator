@@ -1,2 +1,1 @@
-   * %title%
-      * %content%
+   * %title%%content%

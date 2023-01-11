@@ -5,7 +5,7 @@ if (!isset($_GET['dir'])) {
     exit();
 }
 $_GET['dir'] = htmlspecialchars($_GET['dir']);
-$_GER['token'] = htmlspecialchars($_GET['token']);
+$_GET['token'] = htmlspecialchars($_GET['token']);
 
 // recieves dir
 $folder = $_GET['dir'];

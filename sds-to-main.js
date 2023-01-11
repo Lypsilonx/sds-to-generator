@@ -169,7 +169,9 @@ document.querySelector('#menubutton').addEventListener('click', function () {
 // upon pressing .downloadb, download the TO using the renderMarkDown function
 document.querySelectorAll('.downloadb').forEach(function (button) {
     button.addEventListener('click', function () {
-        var dir = window.location.href.split('?')[1].split('=')[1];
+        var args = window.location.href.split('?')[1]
+        // use regex to get the dir from the url
+        var dir = args.match(/dir=([^&#]*)/)[1];
         renderMarkDown(dir, download);
     });
 });
@@ -185,10 +187,7 @@ document.querySelectorAll('.shareb').forEach(function (button) {
                 title: 'TO ' + dir,
                 text: 'TO ' + dir,
                 url: url
-            }).then(() => {
-                console.log('Thanks for sharing!');
             })
-            .catch(console.error);
         }
     });
 });

@@ -160,7 +160,7 @@ header {
   min-height: 50px;
   background-color: var(--main-bg-color);
   box-shadow: 0 0 5px var(--sds-color-shadow);
-  z-index: 2;
+  z-index: 10;
   padding-left: 1%;
   padding-right: 1%;
   font-family: "Bitter";
@@ -234,21 +234,16 @@ header {
   white-space: nowrap;
 }
 
-.button {
-  align-items: center;
-  height: 2.3em;
-  min-width: 1.5em;
-}
-
 #sidebar .button {
   margin-bottom: 0;
-  padding: 0.1em;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
   position: fixed;
   bottom: 1em;
   background-color: var(--sds-accent-1);
-  width: unset;
+  width: 1.5em;
+  height: 2.3em;
+  padding: 0.1em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
 
 #sidebar .shareb {
@@ -414,11 +409,14 @@ body.hovermenu header h1 {
 
 #main .button {
   position: relative;
-  width: 8vw;
+  width: 8em;
+  height: 1.9em;
+  padding: 0.3em;
+  left: calc(50% - 5em);
   justify-self: center;
   margin-top: 5%;
   z-index: 1;
-  justify-content: space-evenly;
+  justify-content: space-between;
   text-align: center;
 }
 
@@ -439,12 +437,12 @@ body.hovermenu #main {
   width: auto;
 }
 
-body.hidemenu:not(.hovermenu) #main .button {
+body.hovermenu #main .button {
   width: 1.5em;
   left: calc(50% - 1.75em);
 }
 
-body.hidemenu:not(.hovermenu) #main .button::after {
+body.hovermenu #main .button::after {
   content: "";
 }
 
@@ -452,11 +450,6 @@ body.hidemenu:not(.hovermenu) #main .button::after {
   #main {
     width: calc(min(78%, 98% - 200px));
     margin-left: 2%;
-  }
-
-  #main .button {
-    width: 10vw;
-    left: calc(50% - 5vw);
   }
 
   #main .addtopb::after {
@@ -478,13 +471,21 @@ body.hidemenu:not(.hovermenu) #main .button::after {
   padding: 0;
 }
 
-.top > *:not(h4, h5, a:has(h5, h4), :empty) {
+#main .eventdate {
+  display: table;
+}
+
+#main .eventdate > a {
+  display: table;
+}
+
+.top > *:not(h4, h5, a:has(h5, h4), .eventdate) {
   margin-left: 1em;
   display: inline;
 }
 
 /* space between p's */
-.top *:not(:first-child):not(h4, h5, a:has(h5, h4), :empty) {
+.top *:not(:first-child, h4, h5, a:has(h5, h4), .eventdate) {
   margin-top: 0.8em;
 }
 
@@ -494,6 +495,7 @@ body.hidemenu:not(.hovermenu) #main .button::after {
 
 .top ul li {
   display: block;
+  margin-left: 1em;
 }
 
 .top ul li::before {
@@ -550,7 +552,7 @@ body.hidemenu:not(.hovermenu) #main .button::after {
   background-color: var(--sds-accent-1);
   color: var(--sds-color-font);
   height: 2.5em;
-  width: 2.5em;
+  width: 1.5em;
   align-items: center;
   justify-content: center;
   margin-left: 1em;
@@ -563,6 +565,7 @@ body.hidemenu:not(.hovermenu) #main .button::after {
   top: 0;
   left: 0;
   height: 100%;
+  width: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 100;
   justify-content: center;
@@ -608,15 +611,13 @@ body.hidemenu:not(.hovermenu) #main .button::after {
 
 .menu #pfield {
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
-  font-size: 0.2em;
+  font-size: 0.8em;
   background-color: var(--sds-accent-1);
-  padding: 0.1em;
   padding-left: 0.25em;
   padding-right: 0.25em;
-  width: 12em;
-  padding-left: 4em;
+  width: 14em;
 }
 
 #atmbuttons {
@@ -646,6 +647,7 @@ body.hidemenu:not(.hovermenu) #main .button::after {
 .menu form input[type="text"],
 .menu form input[type="date"] {
   height: 2em;
+  width: 100%;
   padding: 0.5em;
   font-size: 1em;
   border: 1px solid var(--sds-color-font);
@@ -657,6 +659,7 @@ body.hidemenu:not(.hovermenu) #main .button::after {
 .menu form #contentfield {
   padding: 0.5em;
   height: 70%;
+  width: 100%;
   border: 1px solid var(--sds-color-font);
   background-color: var(--main-bg-color);
   font-size: 1em;
@@ -675,7 +678,6 @@ body.hidemenu:not(.hovermenu) #main .button::after {
 
 #headerbuttons form {
   flex-direction: row;
-  width: 50%;
 }
 
 #headerbuttons input[type="text"],

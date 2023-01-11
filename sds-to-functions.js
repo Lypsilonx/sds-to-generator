@@ -112,6 +112,15 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
                                                                     // for each top in permanent.json
                                                                     for (var key2 in permanent["tops"]) {
                                                                         perm = true
+
+                                                                        // if content begins with a list (* or 1.) remove the \ in permFormat
+                                                                        if (permanent["tops"][key2]["content"].startsWith("*") || permanent["tops"][key2]["content"].startsWith("1.")) {
+                                                                            permFormat = permFormat.replace(new RegExp('\\\\', 'g'), '');
+                                                                        }
+
+                                                                        // replace "<number>." with "   <number>." in content (except for the first line)
+                                                                        permanent["tops"][key2]["content"] = permanent["tops"][key2]["content"].replace(new RegExp('\r\n([0-9]+). ', 'g'), '\r\n   $1. ');
+
                                                                         for (var key3 in permanent["tops"][key2]) {
                                                                             // replace the %key% in top-format.md with the value of the key
                                                                             permFormat = permFormat.replace(new RegExp('%' + key3 + '%', 'g'), permanent["tops"][key2][key3]);
@@ -122,6 +131,7 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
                                                                         allPermTops.push(permFormat);
                                                                         permFormat = permFormatOriginal;
                                                                     }
+
                                                                     if (perm) {
                                                                         // replace the %permanent% in mask.md with the value of topFormat
                                                                         mask = mask.replace(new RegExp('%permanent%', 'g'), allPermTops.join('\n'));
@@ -136,7 +146,7 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
                                                                         var date = new Date(data["date"]);
                                                                         var date2 = new Date(events["events"][key2]["date"]);
                                                                         // is the day within the last 7 days of data["date"] and not on the same day?
-                                                                        if (date.getTime() - date2.getTime() < 604800000 && date.getTime() - date2.getTime() > 0) {
+                                                                        if (date.getTime() - date2.getTime() <= 604800000 && date.getTime() - date2.getTime() > 0) {
                                                                             wrb.push(events["events"][key2]);
                                                                         }
                                                                         // is the day within the next 7 days of data["date"] or on the same day?
@@ -164,7 +174,12 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
                                                                             for (var key2 in wrb) {
                                                                                 if (wrb[key2]["date"] == day) {
                                                                                     eventFormat = eventFormat.replace(new RegExp('%title%', 'g'), wrb[key2]["title"]);
-                                                                                    eventFormat = eventFormat.replace(new RegExp('%content%', 'g'), wrb[key2]["content"]);
+                                                                                    if (wrb[key2]["content"] == "" || wrb[key2]["content"] == " ") {
+                                                                                        eventFormat = eventFormat.replace(new RegExp('%content%', 'g'), '');
+                                                                                    } else {
+                                                                                        eventFormat = eventFormat.replace(new RegExp('%content%', 'g'), '\r\n      * ' + wrb[key2]["content"]);
+                                                                                    }
+
                                                                                     allEvents.push(eventFormat);
                                                                                     eventFormat = eventFormatOriginal;
                                                                                 }
@@ -243,11 +258,27 @@ function renderMarkDown(dir, process = () => { }, extern = "") {
                                                                     // replace &gt; with >
                                                                     mask = mask.replace(new RegExp('&gt;', 'g'), '>');
 
+                                                                    // replace \r\n not followed by ' ' or '\' with \r\n\\
+                                                                    // if in safari
+                                                                    if (navigator.userAgent.indexOf('Safari') != -1) {
+                                                                        // replace \r\n\r\n with \r\r\r\r
+                                                                        mask = mask.replace(new RegExp('\r\n\r\n', 'g'), '\r\r\r\r');
+
+                                                                        // replace \r\n with \\r\n if not followed by ' ' or '\' (do not remove the character after \r\n)
+                                                                        mask = mask.replace(new RegExp('\r\n(?![\\ \*]|[0-9].)', 'g'), '\\\r\n');
+
+                                                                        // replace \r\r\r\r with \r\n\r\n
+                                                                        mask = mask.replace(new RegExp('\r\r\r\r', 'g'), '\r\n\r\n');
+                                                                    } else {
+                                                                        mask = mask.replace(new RegExp('(?<!\r\n)\r\n(?![\\ \*]|[0-9].)', 'g'), '\\\r\n');
+                                                                    }
+
                                                                     return mask;
                                                                 }
                                                             ).then(
                                                                 function (mask) {
-                                                                    process(mask, dir.replace("_to", "").replace("/"," ") + " " + fdate + ".md");
+                                                                    // replace - with _ in date
+                                                                    process(mask, data["date"].replace(new RegExp('-', 'g'), '_') + '.md');
                                                                 }
                                                             );
                                                         }
