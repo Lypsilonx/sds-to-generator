@@ -25,14 +25,15 @@ $json_data = json_decode($json, true);
 </head>
 
 <body>
+    <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <script src="../sds-to-functions.js"></script>
     <script style="display: none;">
         var dir = window.location.href.split('?')[1].split('=')[1];
-        renderMarkDown("<?php echo $folder; ?>" + '/Plenum', upload);
+        renderMarkDown("<?php echo $folder; ?>" + '/Plenum', upload, "../");
 
-        // go to index.php after 1 second
-        // setTimeout(function () {
-        //     window.location.href = "../index.php?dir=<?php echo $folder; ?>/Plenum&token=<?php echo $token; ?>";
-        // }, 1000);
+        //go to index.php after 1 second
+        setTimeout(function () {
+            window.location.href = "../index.php?dir=<?php echo $folder; ?>/Plenum&token=<?php echo $token; ?>";
+        }, 1000);
     </script>
 </body>

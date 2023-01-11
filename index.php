@@ -213,11 +213,15 @@ session_start();
                 }
                 ?>
                 <div class="placeholder"></div>
-                <div id=sidebarbottomgradient>
+                <div id=actionbuttons>
                     <?php
                     if ($dir != "fallback" && $addto == false) {
                         echo '<a class="downloadb button">';
                         echo '<i class="material-icons">file_download</i>';
+                        echo '</a>';
+
+                        echo '<a class="uploadb button">';
+                        echo '<i class="material-icons">file_upload</i>';
                         echo '</a>';
 
                         echo '<a class="shareb button">';

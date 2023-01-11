@@ -98,7 +98,7 @@ else if (strpos($text, "/init") === 0) {
         }
 
         // enter chat id and name into chats.json
-        array_push($chats['groups'], array("name" => $name, "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($chat_id)));
+        array_push($chats['groups'], array("name" => $name, "dir" => "Ortsgruppe" . $name . "/", "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($chat_id)));
         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
         // create folder for Ortsgruppe
@@ -282,7 +282,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
             saveTOP($group, $title, $content);
 
             // send response
-            send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
+            $message_id = send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
         } else {
             // bring date to format yyyy-mm-dd
             $date = $matches[0];
@@ -299,8 +299,11 @@ else if (strpos(strtolower($text), "/help") === 0) {
 
             // send response
             send_message($token, $chat_id, getMessage("event recognized", [$date->format("d.m.")]), deleteAnswer: true);
-            send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
+            $message_id = send_message($token, $chat_id, getMessage("top saved", [$title]), deleteAnswer: true);
         }
+
+        // react to message with tick
+        react($token, $chat_id, $message_id, "✅");
     }
     // /termin or #termin (not regarding capitalization)
     else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
@@ -343,7 +346,10 @@ else if (strpos(strtolower($text), "/help") === 0) {
         saveEvent($group, $title, $content, $date);
 
         // send response
-        send_message($token, $chat_id, getMessage("event saved", [$title]), deleteAnswer: true);
+        $message_id = send_message($token, $chat_id, getMessage("event saved", [$title]), deleteAnswer: true);
+
+        // react to message with tick
+        react($token, $chat_id, $message_id, "✅");
     }
     // /del or #del (not regarding capitalization)
     else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
@@ -442,6 +448,9 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "/getto"
                 . PHP_EOL . "Liefert einen Link zum Download der TO"
                 . PHP_EOL
+                . PHP_EOL . "/upto"
+                . PHP_EOL . "Lädt die TO auf den SDS Server hoch"
+                . PHP_EOL
                 . PHP_EOL . "/seeto"
                 . PHP_EOL . "Liefert einen Link zum Ansehen der TO"
                 . PHP_EOL
@@ -465,13 +474,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "/plenum <Tag>"
                 . PHP_EOL . "Ändert den Tag des Plenums"
                 . PHP_EOL
-                . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de"
-                . PHP_EOL
-                . PHP_EOL
-                . PHP_EOL . "Work in Progress:"
-                . PHP_EOL
-                . PHP_EOL . "/upto"
-                . PHP_EOL . "Lädt die TO auf den SDS Server hoch";
+                . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
             $msg = "Hier ist der Link zum Download der TO: ";
@@ -639,6 +642,20 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
         // ! Find a better way to do this
         file_get_contents($url);
     }
+
+    return $message_id;
+}
+
+function react($token, $chat_id, $message_id, $reaction)
+{
+    // react to message
+}
+
+function leave_group($token, $chat_id)
+{
+    // leave group
+    $url = "https://api.telegram.org/bot" . $token . "/leaveChat?chat_id=" . $chat_id;
+    file_get_contents($url);
 }
 
 function createToken($group)
@@ -732,5 +749,4 @@ function logToFile($message)
     fwrite($log, "\t" . $time . " | " . $message . PHP_EOL);
     fclose($log);
 }
-?>
 ?>
