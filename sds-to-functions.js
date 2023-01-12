@@ -6,7 +6,7 @@ function resize() {
   }
 }
 
-function renderMarkDown(dir, process = () => {}, extern = "") {
+function renderMarkDown(dir, process = () => {}, extern = "", cid = "") {
   // get the JSON from the directory and render it as markdown
   fetch(extern + "TOs/" + dir + "_to.json")
     .then(function (response) {
@@ -408,16 +408,28 @@ function renderMarkDown(dir, process = () => {}, extern = "") {
                                   return mask;
                                 })
                                 .then(function (mask) {
-                                  // replace - with _ in date
-                                  process(
-                                    mask,
-                                    data["date"].replace(
-                                      new RegExp("-", "g"),
-                                      "_"
-                                    ) + " (tog-upload).md",
-                                    dir2,
-                                    extern
-                                  );
+                                  if (cid != "") {
+                                    process(
+                                      mask,
+                                      data["date"].replace(
+                                        new RegExp("-", "g"),
+                                        "_"
+                                      ),
+                                      cid,
+                                      extern
+                                    );
+                                  } else {
+                                    // replace - with _ in date
+                                    process(
+                                      mask,
+                                      data["date"].replace(
+                                        new RegExp("-", "g"),
+                                        "_"
+                                      ),
+                                      dir2,
+                                      extern
+                                    );
+                                  }
                                 });
                             });
                         });
@@ -428,24 +440,48 @@ function renderMarkDown(dir, process = () => {}, extern = "") {
     });
 }
 
-function download(markdown, filename, dir, extern = "") {
-  // download the rendered markdown as a .md file
-  var element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:text/plain;charset=utf-8," + encodeURIComponent(markdown)
-  );
-  element.setAttribute("download", filename);
+function download(markdown, filename, cid, extern = "") {
+  // add .md
+  filename = filename + ".md";
 
-  element.style.display = "none";
-  document.body.appendChild(element);
+  // when cid is a number
+  if (cid != "" && !isNaN(cid)) {
+    // go to Actions/botDownload.php
+    // put arguments in a form
+    var form = new FormData();
+    form.append("markdown", markdown);
+    form.append("filename", filename);
+    form.append("chatid", cid);
 
-  element.click();
+    // post by going to Actions/botDownload.php
+    fetch(extern + "Actions/botDownload.php", {
+      method: "POST",
+      body: form,
+    }).then(function (response) {
+      console.log(response);
+    });
+  } else {
+    // download the rendered markdown as a .md file
+    var element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(markdown)
+    );
+    element.setAttribute("download", filename);
 
-  document.body.removeChild(element);
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
 }
 
 function upload(markdown, filename, dir, extern = "") {
+  // prevent overwriting and add .md
+  filename = filename + "-Tagesordnung.md";
+
   // load webdavuser.config from the same directory as this script
   fetch(extern + "webdavuser.config")
     .then(function (response) {
@@ -458,8 +494,6 @@ function upload(markdown, filename, dir, extern = "") {
           return response.json();
         })
         .then(function (chats) {
-          console.log("uploading " + filename + " to " + dir + " ...");
-
           //find chat where name is dir
           for (var i = 0; i < chats["groups"].length; i++) {
             if (chats["groups"][i]["name"] == dir) {

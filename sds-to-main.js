@@ -45,13 +45,16 @@ document.querySelectorAll(".addeventb").forEach(function (button) {
 });
 
 // when cancelbutton is clicked, add .hidden class to .addtopmenu + addtomenu
-document.querySelectorAll(".cancelbutton").forEach(function (button) {
-  button.addEventListener("click", function () {
-    document.querySelectorAll(".menu").forEach(function (menu) {
-      menu.classList.add("hidden");
+document
+  .querySelectorAll(".cancelbutton, body > .menu")
+  .forEach(function (button) {
+    button.addEventListener("click", function (e) {
+      if (e.target !== this) return;
+      document.querySelectorAll(".menu").forEach(function (menu) {
+        menu.classList.add("hidden");
+      });
     });
   });
-});
 
 // when any .editbutton is clicked, toggle the .addtopmenu .hidden class
 document.querySelectorAll(".editbutton").forEach(function (button) {
@@ -69,8 +72,8 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
       form.querySelector("#titlefield").value = button.getAttribute("toptitle");
       form.querySelector("#datefield").value = button.getAttribute("topdate");
 
-      // change the text of the submit button to 'Edit'
-      form.querySelector(".submitbutton").value = "Edit";
+      // change the text of the submit button to 'Save'
+      form.querySelector(".submitbutton").value = "Save";
       // unhide the delete button
       form.querySelector(".deletebutton").classList.remove("hidden");
     } else if (button.classList.contains("event")) {
@@ -88,7 +91,7 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
       form.querySelector("#contentfield").value =
         button.getAttribute("eventcontent");
 
-      // change the text of the submit button to 'Edit'
+      // change the text of the submit button to 'Save'
       form.querySelector(".submitbutton").value = "Save";
       // unhide the delete button
       form.querySelector(".deletebutton").classList.remove("hidden");
@@ -104,7 +107,7 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
       form.querySelector("#contentfield").value =
         button.getAttribute("topcontent");
 
-      // change the text of the submit button to 'Edit'
+      // change the text of the submit button to 'Save'
       form.querySelector(".submitbutton").value = "Save";
       // unhide the delete button
       form.querySelector(".deletebutton").classList.remove("hidden");
@@ -187,6 +190,14 @@ document.querySelectorAll(".downloadb").forEach(function (button) {
     // use regex to get the dir from the url
     var dir = args.match(/dir=([^&#]*)/)[1];
     renderMarkDown(dir, download);
+
+    // cahnge icon to tick for 3 seconds
+    document.querySelectorAll(".downloadb").forEach(function (button) {
+      button.querySelector("i").innerText = "check";
+      setTimeout(function () {
+        button.querySelector("i").innerText = "file_download";
+      }, 3000);
+    });
   });
 });
 
@@ -197,6 +208,11 @@ document.querySelectorAll(".uploadb").forEach(function (button) {
     // use regex to get the dir from the url
     var dir = args.match(/dir=([^&#]*)/)[1];
     renderMarkDown(dir, upload);
+
+    // cahnge icon to tick for 3 seconds
+    document.querySelectorAll(".uploadb").forEach(function (button) {
+      button.querySelector("i").innerText = "check";
+    });
   });
 });
 

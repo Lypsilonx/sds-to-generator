@@ -28,12 +28,28 @@ $json_data = json_decode($json, true);
     <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <script src="../sds-to-functions.js"></script>
     <script style="display: none;">
-        var dir = window.location.href.split('?')[1].split('=')[1];
-        renderMarkDown("<?php echo $folder; ?>" + '/Plenum', upload, "../");
+        var dir = "<?php echo $folder; ?>";
+        renderMarkDown(dir + '/Plenum', upload, "../");
 
-        //go to index.php after 1 second
-        setTimeout(function () {
-            window.location.href = "../index.php?dir=<?php echo $folder; ?>/Plenum&token=<?php echo $token; ?>";
-        }, 1000);
+        fetch("../Bot/chats.json").then(function (response) {
+            return response.json();
+        })
+            .then(function (chats) {
+                //go to index.php after 1 second
+                setTimeout(function () {
+                    //find chat where name is dir
+                    for (var i = 0; i < chats["groups"].length; i++) {
+                        if (chats["groups"][i]["name"] == dir) {
+                            dir = chats["groups"][i]["dir"];
+                            // html encode dir
+                            dir = encodeURIComponent(dir);
+                            console.log(dir);
+                            break;
+                        }
+                    }
+
+                    window.location.href = "https://cloud.linke-sds.org/apps/files/?dir=/" + dir;
+                }, 1000);
+            });
     </script>
 </body>

@@ -185,18 +185,14 @@ else if (strpos(strtolower($text), "/help") === 0) {
     }
     // Get TO
     if (strpos(strtolower($text), "/getto") === 0) {
-        $mtoken = createToken($group);
-
         $response = getMessage("get to")
-            . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&token=" . $mtoken;
+            . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id;
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Upload TO
     else if (strpos(strtolower($text), "/upto") === 0) {
-        $mtoken = createToken($group);
-
         $response = getMessage("upload to")
-            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
+            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group;
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Look at TO
@@ -477,7 +473,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
-            $msg = "Hier ist der Link zum Download der TO: ";
+            $msg = "Klicke hier um die TO zu erhalten: ";
             break;
         case "upload to":
             $msg = "Klicke hier um die TO Hochzuladen: ";

@@ -221,7 +221,7 @@ session_start();
                         echo '</a>';
 
                         echo '<a class="uploadb button">';
-                        echo '<i class="material-icons">file_upload</i>';
+                        echo '<i class="material-icons">cloud_upload</i>';
                         echo '</a>';
 
                         echo '<a class="shareb button">';
