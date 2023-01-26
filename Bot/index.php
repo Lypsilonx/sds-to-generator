@@ -191,8 +191,10 @@ else if (strpos(strtolower($text), "/help") === 0) {
     }
     // Upload TO
     else if (strpos(strtolower($text), "/upto") === 0) {
+        $mtoken = createToken($group);
+
         $response = getMessage("upload to")
-            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group;
+            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Look at TO
