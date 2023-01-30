@@ -430,7 +430,7 @@ session_start();
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="Titel" id="titlefield" value="" required>
             <textarea name="content" placeholder="Bechreibung" id="contentfield" required></textarea>
-            <div id="atmbuttons">
+            <div class="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
                 <div id="pfield">
@@ -456,7 +456,7 @@ session_start();
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="TO Title" id="titlefield" value="" required>
             <input type="date" name="date" placeholder="TO Date" id="datefield" value="" required>
-            <div id="atmbuttons">
+            <div class="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
                 <input type="submit" value="Add" class="submitbutton">
@@ -481,7 +481,7 @@ session_start();
             <input type="text" name="title" placeholder="Event Title" id="titlefield" value="" required>
             <input type="date" name="date" placeholder="Event Date" id="datefield" value="" required>
             <textarea name="content" placeholder="Event Description" id="contentfield" required></textarea>
-            <div id="atmbuttons">
+            <div class="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
                 <input type="submit" value="Add" class="submitbutton">
@@ -515,6 +515,12 @@ session_start();
         $out = str_replace('=&gt;', '⇒', $out);
         // replace <= with arrow
         $out = str_replace('&lt;=', '⇐', $out);
+
+        // replace [book-list:...] with book list iframe
+        $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
+
+        // replace [book-list:single:<type>|<title>] with book list iframe
+        $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
 
         return $out;
     }

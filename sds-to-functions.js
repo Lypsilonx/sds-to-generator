@@ -373,6 +373,21 @@ function renderMarkDown(dir, process = () => {}, extern = "", cid = "") {
                                     ">"
                                   );
 
+                                  // replace [book-list:...] with link to book-list
+                                  mask = mask.replace(
+                                    new RegExp("\\[book-list:(.*)\\]", "g"),
+                                    "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)"
+                                  );
+
+                                  // replace [book-list:single:<type>|<title>] with link to book-list
+                                  mask = mask.replace(
+                                    new RegExp(
+                                      "\\[book-list:single:(.*)\\|(.*?)\\]",
+                                      "g"
+                                    ),
+                                    "$2"
+                                  );
+
                                   // replace \r\n not followed by ' ' or '\' with \r\n\\
                                   // if in safari
                                   if (

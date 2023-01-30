@@ -395,7 +395,9 @@ body.hovermenu header h1 {
   width: 8em;
   height: 1.9em;
   padding: 0.3em;
-  left: calc(50% - 5em);
+  padding-right: 0.7em;
+  left: 50%;
+  transform: translateX(-50%);
   justify-self: center;
   margin-top: 5%;
   z-index: 1;
@@ -449,7 +451,7 @@ body.hovermenu #main .button::after {
   margin-left: 2em;
   flex-direction: row;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   width: calc(100% - 2em);
   padding: 0;
 }
@@ -603,22 +605,23 @@ body.hovermenu #main .button::after {
   width: 14em;
 }
 
-#atmbuttons {
+.atmbuttons {
   height: 2.5em;
-  width: 60%;
+  width: 80%;
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
 }
 
 @media (max-width: 1200px) {
-  #atmbuttons {
+  .atmbuttons {
     width: 80%;
   }
 }
 
-#atmbuttons * {
-  width: 20%;
+.atmbuttons * {
+  width: 30%;
+  gap: 1em;
   height: 100%;
   font-size: 1em;
   padding: 0;
