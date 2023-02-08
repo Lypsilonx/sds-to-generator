@@ -155,6 +155,25 @@ function renderMarkDown(dir, process = () => {}, extern = "", cid = "") {
                                       new RegExp("%num%", "g"),
                                       p
                                     );
+
+                                    // replace \r\n\r\n with \r\r\r\r in content
+                                    permFormat = permFormat.replace(
+                                      new RegExp("\r\n\r\n", "g"),
+                                      "\r\r\r\n"
+                                    );
+
+                                    // add "   " to the beginning of each line in content
+                                    permFormat = permFormat.replace(
+                                      new RegExp("\r\n", "g"),
+                                      "\r\n   "
+                                    );
+
+                                    // replace \r\r\r\r with \r\n\r\n in content
+                                    permFormat = permFormat.replace(
+                                      new RegExp("\r\r\r\n", "g"),
+                                      "\r\n\r\n"
+                                    );
+
                                     p++;
                                     allPermTops.push(permFormat);
                                     permFormat = permFormatOriginal;
@@ -373,12 +392,6 @@ function renderMarkDown(dir, process = () => {}, extern = "", cid = "") {
                                     ">"
                                   );
 
-                                  // replace [book-list:...] with link to book-list
-                                  mask = mask.replace(
-                                    new RegExp("\\[book-list:(.*)\\]", "g"),
-                                    "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)"
-                                  );
-
                                   // replace [book-list:single:<type>|<title>] with link to book-list
                                   mask = mask.replace(
                                     new RegExp(
@@ -386,6 +399,12 @@ function renderMarkDown(dir, process = () => {}, extern = "", cid = "") {
                                       "g"
                                     ),
                                     "$2"
+                                  );
+
+                                  // replace [book-list:...] with link to book-list
+                                  mask = mask.replace(
+                                    new RegExp("\\[book-list:(.*)\\]", "g"),
+                                    "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)"
                                   );
 
                                   // replace \r\n not followed by ' ' or '\' with \r\n\\

@@ -501,6 +501,7 @@ session_start();
         // use parsedown
         require_once 'Plugins/Parsedown.php';
         $Parsedown = new Parsedown();
+        $Parsedown->setBreaksEnabled(true);
         $out = $Parsedown->text($out);
 
 
@@ -520,7 +521,7 @@ session_start();
         $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
 
         // replace [book-list:single:<type>|<title>] with book list iframe
-        $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
+        $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/single-view.php?type=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
 
         return $out;
     }
