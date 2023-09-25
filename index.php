@@ -22,10 +22,10 @@ session_start();
         $dir = 'fallback';
     } else {
         // sanitize input
-        $dir = preg_replace('/[^a-zA-Z0-9\/_-]/', '', $_GET['dir']);
+        $dir = preg_replace('/[^a-zA-Z0-9äüöß\/_-]/', '', $_GET['dir']);
 
         // check if directory is valid (exactly one folder deep) and at least one character long (before and after /)
-        if (preg_match('/^[a-zA-Z0-9_-]{1,}\/[a-zA-Z0-9_-]{1,}$/', $dir) == 0) {
+        if (preg_match('/^[a-zA-Z0-9äüöß_-]{1,}\/[a-zA-Z0-9äüöß_-]{1,}$/', $dir) == 0) {
             $dir = 'fallback';
         }
     }
@@ -243,34 +243,7 @@ session_start();
                 if ($dir != "fallback" && $addto == false) {
                     echo '<a href="Actions/ics.php?date=' . $date . '&time=18Uhr&title=' . $title . '">';
                     echo "<h3>";
-                    // datum formatieren nach dd.mm.yyyy
-                    $datec = date_create($date);
-                    $day = date_format($datec, 'l');
-                    // auf deutsch uübersetzen
-                    switch ($day) {
-                        case 'Monday':
-                            $day = 'Montag';
-                            break;
-                        case 'Tuesday':
-                            $day = 'Dienstag';
-                            break;
-                        case 'Wednesday':
-                            $day = 'Mittwoch';
-                            break;
-                        case 'Thursday':
-                            $day = 'Donnerstag';
-                            break;
-                        case 'Friday':
-                            $day = 'Freitag';
-                            break;
-                        case 'Saturday':
-                            $day = 'Samstag';
-                            break;
-                        case 'Sunday':
-                            $day = 'Sonntag';
-                            break;
-                    }
-                    echo $day . ', den ' . date_format($datec, 'd.m.Y');
+                    echo format_date($date);
                     echo "</h3>";
                     echo '</a>';
                 }
@@ -296,7 +269,7 @@ session_start();
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';
                         echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
-                        echo '<h5>' . $event['date'] . '</h5>';
+                        echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
                         echo formatMD($event['content']);
@@ -328,7 +301,7 @@ session_start();
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';
                         echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
-                        echo '<h5>' . $event['date'] . '</h5>';
+                        echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
                         echo formatMD($event['content']);
@@ -524,6 +497,38 @@ session_start();
         $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/single-view.php?type=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
 
         return $out;
+    }
+
+    function format_date($date)
+    {
+        // datum formatieren nach dd.mm.yyyy
+        $datec = date_create($date);
+        $day = date_format($datec, 'l');
+        // auf deutsch uübersetzen
+        switch ($day) {
+            case 'Monday':
+                $day = 'Montag';
+                break;
+            case 'Tuesday':
+                $day = 'Dienstag';
+                break;
+            case 'Wednesday':
+                $day = 'Mittwoch';
+                break;
+            case 'Thursday':
+                $day = 'Donnerstag';
+                break;
+            case 'Friday':
+                $day = 'Freitag';
+                break;
+            case 'Saturday':
+                $day = 'Samstag';
+                break;
+            case 'Sunday':
+                $day = 'Sonntag';
+                break;
+        }
+        return $day . ', den ' . date_format($datec, 'd.m.Y');
     }
     ?>
 </body>

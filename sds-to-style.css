@@ -3,10 +3,10 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --main-bg-color: #161616;
-    --sds-color-1: #00bba4;
-    --sds-color-2: #c6d53a;
-    --sds-accent-1: #2d0a41;
-    --sds-accent-2: #b1003a;
+    --sds-color-1: #c6d53a;
+    --sds-color-2: #00bba4;
+    --sds-accent-1: #b1003a;
+    --sds-accent-2: #2d0a41;
     --sds-color-shadow: #000;
     --sds-color-font: white;
   }
@@ -48,7 +48,7 @@ body {
   justify-content: center;
   text-align: center;
   height: 100vh;
-  width: 100vw;
+  height: 100svh;
   background-color: var(--sds-color-2);
   margin: 0;
   padding: 0;
@@ -74,6 +74,14 @@ li {
   list-style-type: none;
 }
 
+li a,
+p a {
+  display: inline-block;
+  padding: 0.1em 0.25em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+}
+
 ul {
   margin-block-start: 0;
   margin-block-end: 0;
@@ -97,7 +105,7 @@ input[type="submit"] {
 a:hover,
 input[type="submit"]:hover,
 button[type="submit"]:hover {
-  background-color: var(--sds-accent-2);
+  background-color: var(--sds-color-2);
 }
 
 hr {
@@ -255,7 +263,7 @@ header {
 }
 
 #sidebar a.button:hover {
-  background-color: var(--sds-accent-2);
+  background-color: var(--sds-color-2);
 }
 
 #sidebar a {
@@ -380,7 +388,7 @@ body.hovermenu header h1 {
 }
 
 #main a > h3:hover {
-  background-color: var(--sds-accent-2);
+  background-color: var(--sds-color-2);
 }
 
 #main h4 {
@@ -506,22 +514,6 @@ body.hovermenu #main .button::after {
   counter-increment: li;
   content: counter(li) ".";
   margin-right: 0.5em;
-}
-
-.top p a {
-  display: inline;
-  background-color: unset;
-  color: var(--sds-color-1);
-  padding: 0;
-}
-
-.top p a:hover {
-  color: var(--sds-color-2);
-  text-decoration: underline;
-}
-
-.top p a:visited {
-  color: var(--sds-color-1);
 }
 
 #main .catrow {

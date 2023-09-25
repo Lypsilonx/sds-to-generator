@@ -83,6 +83,12 @@ else if (strpos($text, "/init") === 0) {
     // if folder for Ortsgruppe does not exist
     if (!file_exists("../TOs/" . $name)) {
 
+        // check if name is valid
+        if (preg_match("/[^a-zA-Z0-9äüöß]/", $name)) {
+            send_message($token, $chat_id, getMessage("not correct init characters"), deleteCmd: $message_id, deleteAnswer: true);
+            return;
+        }
+
         if (count($rest) < 4) {
             // default weekday is the current weekday
             $weekday = strtolower(date("l"));
@@ -174,6 +180,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         }
     }
     $group = $groups[0];
+
     if (!$found) {
         if (count(explode(" ", $text)) > 1) {
             send_message($token, $chat_id, getMessage("not initialized"), deleteCmd: $message_id, deleteAnswer: true);
@@ -256,6 +263,21 @@ else if (strpos(strtolower($text), "/help") === 0) {
             }
         }
     }
+    // Change Directory
+    else if (strpos(strtolower($text), "/folder") === 0) {
+        // get rest of message
+        $folder = substr($text, 8);
+
+        // set new directory
+            if ($g['name'] == $group) {
+                $g['dir'] = $folder;
+                send_message($token, $chat_id, getMessage("folder changed", [$group, $folder]), deleteCmd: $message_id, deleteAnswer: true);
+                file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                break;
+            }
+        }
+    }
     // /top or #top (not regarding capitalization)
     else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
         // get rest of message
@@ -293,6 +315,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
             }
             $datef = $date->format("Y-m-d");
             saveEvent($group, $title, "(Siehe TOP)", $datef);
+
             saveTOP($group, $title, $content);
 
             // send response
@@ -472,6 +495,9 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "/plenum <Tag>"
                 . PHP_EOL . "Ändert den Tag des Plenums"
                 . PHP_EOL
+                . PHP_EOL . "/folder <Dateipfad>"
+                . PHP_EOL . "Ändert den Speicherort der TO (Bsp. \"/folder Ortsgruppe Berlin/2023 SoSe/\")"
+                . PHP_EOL
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
@@ -510,6 +536,9 @@ function getMessage($id, $args = [])
         case "plenum changed":
             $msg = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
             break;
+        case "folder changed":
+            $msg = "Speicherort für " . $args[0] . " wurde auf \"" . $args[1] . "\" geändert.";
+            break;
         case "joined group":
             $msg = "Du bist der Ortsgruppe " . $args[0] . " beigetreten.";
             break;
@@ -532,6 +561,9 @@ function getMessage($id, $args = [])
             $msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
         case "not correct init private":
             $msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Passwort> um einer Ortsgruppe beizutreten.";
+            break;
+        case "not correct init characters":
+            $msg = "Der Ortsgruppenname darf nur Buchstaben und Zahlen enthalten.";
             break;
         case "password changed":
             $msg = "Passwort für Ortsgruppe " . $args[0] . " wurde geändert.";
