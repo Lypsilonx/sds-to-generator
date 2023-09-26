@@ -11,10 +11,13 @@ if (!isset($update['message'])) {
 
 $message = $update['message'];
 $text = $message['text'];
+$chat_id = $message['chat']['id'];
 
 if (!isset($message['text'])) {
     return;
 }
+
+// https://api.telegram.org/bot5964490526:AAFIP5x542D0jhClc_eiZmWsA8RiX7emrNs/setWebhook?url=www.politischdekoriert.de/sds-to-generator/Bot/index.php&drop_pending_updates=true
 
 $domain = "https://www.politischdekoriert.de/sds-to-generator/";
 $message_id = $message['message_id'];
@@ -53,7 +56,6 @@ if ($text[0] == "/" || $text[0] == "#") {
     return;
 }
 
-$chat_id = $message['chat']['id'];
 // user is in a group
 $ingroup = $chat_id < 0;
 // Start the bot
@@ -190,6 +192,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
             return;
         }
     }
+
     // Get TO
     if (strpos(strtolower($text), "/getto") === 0) {
         $response = getMessage("get to")
@@ -269,6 +272,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         $folder = substr($text, 8);
 
         // set new directory
+        foreach ($chats['groups'] as &$g) {
             if ($g['name'] == $group) {
                 $g['dir'] = $folder;
                 send_message($token, $chat_id, getMessage("folder changed", [$group, $folder]), deleteCmd: $message_id, deleteAnswer: true);
@@ -417,6 +421,9 @@ else if (strpos(strtolower($text), "/help") === 0) {
             // send response
             send_message($token, $chat_id, getMessage("not in group", [$group]), deleteCmd: $message_id, deleteAnswer: true);
         }
+    } else {
+        // send response
+        send_message($token, $chat_id, getMessage("command not found"), deleteCmd: $message_id, deleteAnswer: true);
     }
 }
 
@@ -577,6 +584,9 @@ function getMessage($id, $args = [])
         case "not initialized":
             $msg = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
             break;
+        case "command not found":
+            $msg = "Dieser Befehl wurde nicht gefunden. Gib /help ein um eine Liste aller Befehle zu erhalten.";
+            break;
         default:
             $msg = "Fehler: Nachricht nicht gefunden.";
             break;
@@ -601,7 +611,7 @@ function saveEvent($og, $title, $content, $date)
     $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
     // generate unique id
     $id = uniqid();
-    // add top to tops array
+    // add event to events array
     array_push($events['events'], array("id" => $id, "title" => $title, "content" => $content, "date" => $date));
     file_put_contents("../TOs/" . $og . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
 }
