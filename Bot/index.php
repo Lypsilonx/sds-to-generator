@@ -17,7 +17,7 @@ if (!isset($message['text'])) {
     return;
 }
 
-// https://api.telegram.org/bot5964490526:AAFIP5x542D0jhClc_eiZmWsA8RiX7emrNs/setWebhook?url=www.politischdekoriert.de/sds-to-generator/Bot/index.php&drop_pending_updates=true
+// https://api.telegram.org/botXXXX/setWebhook?url=www.politischdekoriert.de/sds-to-generator/Bot/index.php&drop_pending_updates=true
 
 $domain = "https://www.politischdekoriert.de/sds-to-generator/";
 $message_id = $message['message_id'];
