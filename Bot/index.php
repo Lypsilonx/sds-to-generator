@@ -505,13 +505,13 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
-            $msg = "Klicke <a href=\"" . $args[0] . "\">hier</a> um die TO zu erhalten.";
+            $msg = "Klicke [hier](" . $args[0] . ") um die TO zu erhalten.";
             break;
         case "upload to":
-            $msg = "Klicke <a href=\"" . $args[0] . "\">hier</a> um die TO Hochzuladen.";
+            $msg = "Klicke [hier](" . $args[0] . ") um die TO hochzuladen.";
             break;
         case "see to":
-            $msg = "Hier ist der Link zur <a href=\"" . $args[0] . "\">TO</a>.";
+            $msg = "Hier ist der Link zur [TO](" . $args[0] . ").";
             break;
         case "top saved":
             $msg = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
@@ -649,20 +649,25 @@ function deleteEvent($og, $title)
 
 function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deleteAtMidnight = false)
 {
-    $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response) . "&disable_notification=true&parse_mode=HTML";
-    // send message and get message id
-    $message = json_decode(file_get_contents($url), true);
+    $message = send_bot_api_request($token, "sendMessage", array(
+        "chat_id" => $chat_id,
+        "text" => urlencode($response),
+        "disable_notification" => true,
+        "parse_mode" => "Markdown"
+    )
+    );
     $message_id = $message['result']['message_id'];
-
-    // delete message after delTime seconds
-    $url = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $message_id;
-    $url2 = "https://api.telegram.org/bot" . $token . "/deleteMessage?chat_id=" . $chat_id . "&message_id=" . $deleteCmd;
 
     // log answer
     logToFile("Answer: " . $response);
 
     // if deleteAtMidnight is true, add to todelete.json
     if ($deleteAtMidnight) {
+        $url = build_bot_api_link($token, "deleteMessage", array(
+            "chat_id" => $chat_id,
+            "message_id" => $message_id
+        )
+        );
         $todelete = json_decode(file_get_contents("todelete.json"), true);
         array_push($todelete, $url);
         file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
@@ -670,14 +675,22 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
 
     // if deleteCmd is not null, delete command message
     if ($deleteCmd != null) {
-        file_get_contents($url2);
+        send_bot_api_request($token, "deleteMessage", array(
+            "chat_id" => $chat_id,
+            "message_id" => $deleteCmd
+        )
+        );
     }
 
     // if deleteAnswer is true, delete answer message
     if ($deleteAnswer) {
         sleep($delTime);
         // ! Find a better way to do this
-        file_get_contents($url);
+        send_bot_api_request($token, "deleteMessage", array(
+            "chat_id" => $chat_id,
+            "message_id" => $message_id
+        )
+        );
     }
 
     return $message_id;
@@ -690,9 +703,22 @@ function react($token, $chat_id, $message_id, $reaction)
 
 function leave_group($token, $chat_id)
 {
-    // leave group
-    $url = "https://api.telegram.org/bot" . $token . "/leaveChat?chat_id=" . $chat_id;
-    file_get_contents($url);
+    send_bot_api_request($token, "leaveChat", array("chat_id" => $chat_id));
+}
+
+function send_bot_api_request($token, $method, $params = [])
+{
+    return json_decode(file_get_contents(build_bot_api_link($token, $method, $params)), true);
+}
+
+function build_bot_api_link($token, $method, $params = [])
+{
+    $url = "https://api.telegram.org/bot" . $token . "/" . $method . "?";
+    foreach ($params as $key => $value) {
+        $url .= $key . "=" . $value . "&";
+    }
+    $url = substr($url, 0, -1);
+    return $url;
 }
 
 function createToken($group)
