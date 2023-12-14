@@ -4,36 +4,68 @@ $token = file_get_contents("token.txt");
 $input = file_get_contents('php://input');
 $update = json_decode($input, true);
 
+$callback_do = false;
+
 // Check if callback is set
 if (isset($update['callback_query'])) {
     $chat_id = $update['callback_query']['from']['id'];
     $callback_message = $update['callback_query']['data'];
 
-    getMessage($callback_message)->send($token, $chat_id);
-    return;
+    if ($callback_message == "") {
+        return;
+    }
+
+    // delete callback message
+    $callback_message_id = $update['callback_query']['message']['message_id'];
+    send_bot_api_request($token, "deleteMessage", array(
+        "chat_id" => $chat_id,
+        "message_id" => $callback_message_id
+    ));
+
+
+    if (strpos($callback_message, "say:") === 0) {
+        $callback_message = substr($callback_message, 4);
+        getMessage($callback_message)->send($token, $chat_id);
+        return;
+    } else if (strpos($callback_message, "do:") === 0) {
+        $text = substr($callback_message, 3);
+        $message_id = null;
+        $callback_do = true;
+        $username = $update['callback_query']['from']['username'];
+
+        if (!isset($username)) {
+            // use id if no username is set
+            $username = $update['callback_query']['from']['id'];
+        }
+    } else {
+        return;
+    }
 }
 
-if (!isset($update['message'])) {
-    return;
-}
-
-$message = $update['message'];
-$text = $message['text'];
-$chat_id = $message['chat']['id'];
-
-if (!isset($message['text'])) {
-    return;
-}
 
 // https://api.telegram.org/botXXXX/setWebhook?url=www.politischdekoriert.de/sds-to-generator/Bot/index.php&drop_pending_updates=true
 
 $domain = "https://www.politischdekoriert.de/sds-to-generator/";
-$message_id = $message['message_id'];
-$username = $message['from']['username'];
 
-if (!isset($username)) {
-    // use id if no username is set
-    $username = $message['from']['id'];
+if (!$callback_do) {
+    if (!isset($update['message'])) {
+        return;
+    }
+
+    $message = $update['message'];
+
+    if (!isset($message['text'])) {
+        return;
+    }
+    $text = $message['text'];
+    $chat_id = $message['chat']['id'];
+    $message_id = $message['message_id'];
+    $username = $message['from']['username'];
+
+    if (!isset($username)) {
+        // use id if no username is set
+        $username = $message['from']['id'];
+    }
 }
 
 //log message
@@ -319,14 +351,12 @@ else if (strpos(strtolower($text), "/help") === 0) {
             } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
                 $date = DateTime::createFromFormat("d.m.", $date);
             }
-            $datef = $date->format("Y-m-d");
-            saveEvent($group, $title, "(Siehe TOP)", $datef);
 
             saveTOP($group, $title, $content);
 
             // send response
-            getMessage("event recognized", [$date->format("d.m.")])->send($token, $chat_id);
             $message_id = getMessage("top saved", [$title])->send($token, $chat_id);
+            getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . $content])->send($token, $chat_id);
         }
 
         // react to message with tick
@@ -409,7 +439,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         }
         // if group name in groups
         if (in_array($group, $groups)) {
-            // remove chat_id from group members array of group in chats.jsons groups array
+            // remove chat_id from group members of group in chats.jsons groups array
             foreach ($chats['groups'] as &$g) {
                 if ($g['name'] == $group) {
                     $g['members'] = array_values(array_diff($g['members'], array($chat_id)));
@@ -429,7 +459,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
     }
 }
 
-function saveTOP(string $og, string $title, string $content)
+function saveTOP($og, $title, $content)
 {
     // enter TOP into TOs/Ortsgruppe/Plenum_to.json
     $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
@@ -440,7 +470,7 @@ function saveTOP(string $og, string $title, string $content)
     file_put_contents("../TOs/" . $og . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
 }
 
-function saveEvent(string $og, string $title, string $content, string $date)
+function saveEvent($og, $title, $content, $date)
 {
     // enter TOP into TOs/Ortsgruppe/events.json
     $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
@@ -451,7 +481,7 @@ function saveEvent(string $og, string $title, string $content, string $date)
     file_put_contents("../TOs/" . $og . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
 }
 
-function deleteTOP(string $og, string $title)
+function deleteTOP($og, $title)
 {
     // load TOs/Ortsgruppe/Plenum_to.json
     $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
@@ -468,7 +498,7 @@ function deleteTOP(string $og, string $title)
     return false;
 }
 
-function deleteEvent(string $og, string $title)
+function deleteEvent($og, $title)
 {
     // load TOs/Ortsgruppe/events.json
     $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
@@ -487,7 +517,7 @@ function deleteEvent(string $og, string $title)
 
 class Response
 {
-    function __construct(string $text, string $deleteCmd = null, float $delTime = 5, bool $deleteAnswer = false, bool $deleteAtMidnight = false, $buttons)
+    function __construct($text = "", $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deleteAtMidnight = false, $buttons = [])
     {
         $this->text = $text;
         $this->deleteCmd = $deleteCmd;
@@ -497,29 +527,31 @@ class Response
         $this->buttons = $buttons;
     }
 
-    public string $text;
-    public string $deleteCmd;
-    public float $delTime;
-    public bool $deleteAnswer;
-    public bool $deleteAtMidnight;
-    public array $buttons;
+    public $text;
+    public $deleteCmd;
+    public $delTime;
+    public $deleteAnswer;
+    public $deleteAtMidnight;
+    public $buttons;
 
-    function send(string $token, string $chat_id)
+    function send($token, $chat_id)
     {
-        $keyboard = [
-            'inline_keyboard' => [
-                $this->buttons
-            ]
-        ];
-        $encodedKeyboard = json_encode($keyboard);
-
-        $message = send_bot_api_request($token, "sendMessage", array(
-            "chat_id" => $chat_id,
-            "text" => $this->text,
-            "disable_notification" => true,
-            "parse_mode" => "Markdown",
-            "reply_markup" => $encodedKeyboard
-        )
+        $message = send_bot_api_request(
+            $token,
+            "sendMessage",
+            array(
+                "chat_id" => $chat_id,
+                "text" => $this->text,
+                "disable_notification" => true,
+                "parse_mode" => "Markdown",
+                "reply_markup" => json_encode(
+                    [
+                        'inline_keyboard' => [
+                            $this->buttons
+                        ]
+                    ]
+                )
+            )
         );
         $message_id = $message['result']['message_id'];
 
@@ -562,14 +594,13 @@ class Response
     }
 }
 
-function getMessage(string $id, array $args = [], $deleteCmd = null)
+function getMessage($id, $args = [], $deleteCmd = null)
 {
-    $response = new Response("");
-    $response->deleteCmd = $deleteCmd;
+    $response = new Response(deleteCmd: $deleteCmd);
 
     switch ($id) {
         case "start":
-            $response->msg = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
+            $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Du kannst deiner Ortsgruppe beitreten indem du /init <Ort> <Passwort> eingibst."
                 . PHP_EOL . "Beispiel: /init Berlin 1234"
@@ -584,7 +615,7 @@ function getMessage(string $id, array $args = [], $deleteCmd = null)
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "start group":
-            $response->msg = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
+            $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst."
                 . PHP_EOL . "Beispiel: /init Berlin Mittwoch 1234"
@@ -597,7 +628,7 @@ function getMessage(string $id, array $args = [], $deleteCmd = null)
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "help":
-            $response->msg = "Hier ist eine Liste aller Befehle:"
+            $response->text = "Hier ist eine Liste aller Befehle:"
                 . PHP_EOL
                 . PHP_EOL . "/top <Titel>"
                 . PHP_EOL . "<Text>"
@@ -647,139 +678,146 @@ function getMessage(string $id, array $args = [], $deleteCmd = null)
             break;
         case "get to":
             $response->deleteAtMidnight = true;
-            $response->msg = "Klicke hier um die TO zu erhalten.";
+            $response->text = "Klicke hier um die TO zu erhalten.";
             $response->buttons = [
                 ['text' => 'TO Herunterladen', 'url' => $args[0]]
             ];
             break;
         case "upload to":
             $response->deleteAtMidnight = true;
-            $response->msg = "Klicke hier um die TO hochzuladen.";
+            $response->text = "Klicke hier um die TO hochzuladen.";
             $response->buttons = [
                 ['text' => 'TO Hochladen', 'url' => $args[0]]
             ];
             break;
         case "see to":
             $response->deleteAtMidnight = true;
-            $response->msg = "Hier ist der Link zur TO";
+            $response->text = "Hier ist der Link zur TO";
             $response->buttons = [
                 ["text" => "TO Anschauen", "url" => $args[0]]
             ];
             break;
         case "top saved":
             $response->deleteAnswer = true;
-            $response->msg = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
+            $response->text = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
             break;
         case "event saved":
             $response->deleteAnswer = true;
-            $response->msg = "Termin \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
+            $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
             break;
         case "event recognized":
+            $response->text = "Event am " . $args[0] . " erkannt. Hinzufügen?";
+            $response->buttons = [
+                ["text" => "Ja", "callback_data" => "do:/termin " . $args[1]],
+                ["text" => "Nein", "callback_data" => "say:event recognized/no"]
+            ];
+            break;
+        case "event recognized/no":
             $response->deleteAnswer = true;
-            $response->msg = "Event am " . $args[0] . " erkannt. Event wurde hinzugefügt.";
+            $response->text = "Event wurde nicht hinzugefügt.";
             break;
         case "top deleted":
             $response->deleteAnswer = true;
-            $response->msg = "TOP \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
+            $response->text = "TOP \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
         case "event deleted":
             $response->deleteAnswer = true;
-            $response->msg = "Termin \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
+            $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
         case "top not found":
             $response->deleteAnswer = true;
-            $response->msg = "TOP \"" . $args[0] . "\" wurde nicht gefunden.";
+            $response->text = "TOP \"" . $args[0] . "\" wurde nicht gefunden.";
             break;
         case "event not found":
             $response->deleteAnswer = true;
-            $response->msg = "Termin \"" . $args[0] . "\" wurde nicht gefunden.";
+            $response->text = "Termin \"" . $args[0] . "\" wurde nicht gefunden.";
             break;
         case "init":
             $response->deleteAnswer = true;
-            $response->msg = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt.";
+            $response->text = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt.";
             break;
         case "plenum changed":
             $response->deleteAnswer = true;
-            $response->msg = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
+            $response->text = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
             break;
         case "folder changed":
             $response->deleteAnswer = true;
-            $response->msg = "Speicherort für " . $args[0] . " wurde auf \"" . $args[1] . "\" geändert.";
+            $response->text = "Speicherort für " . $args[0] . " wurde auf \"" . $args[1] . "\" geändert.";
             break;
         case "joined group":
             $response->deleteAnswer = true;
-            $response->msg = "Du bist der Ortsgruppe " . $args[0] . " beigetreten.";
+            $response->text = "Du bist der Ortsgruppe " . $args[0] . " beigetreten.";
             break;
         case "left group":
             $response->deleteAnswer = true;
-            $response->msg = "Du hast die Ortsgruppe " . $args[0] . " verlassen.";
+            $response->text = "Du hast die Ortsgruppe " . $args[0] . " verlassen.";
             break;
         case "group not found":
             $response->deleteAnswer = true;
-            $response->msg = "Die Ortsgruppe " . $args[0] . " wurde nicht gefunden.";
+            $response->text = "Die Ortsgruppe " . $args[0] . " wurde nicht gefunden.";
             break;
         case "not in group":
             $response->deleteAnswer = true;
-            $response->msg = "Du bist nicht in der Ortsgruppe " . $args[0] . ".";
+            $response->text = "Du bist nicht in der Ortsgruppe " . $args[0] . ".";
             break;
         case "already in group":
             $response->deleteAnswer = true;
-            $response->msg = "Du bist bereits in der Ortsgruppe " . $args[0] . ".";
+            $response->text = "Du bist bereits in der Ortsgruppe " . $args[0] . ".";
             break;
         case "has to be weekday":
             $response->deleteAnswer = true;
-            $response->msg = "Der Tag muss ein Wochentag sein. (z.B. Montag, Dienstag, ...)";
+            $response->text = "Der Tag muss ein Wochentag sein. (z.B. Montag, Dienstag, ...)";
             break;
         case "not correct init":
             $response->deleteAnswer = true;
-            $response->msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
+            $response->text = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
         case "not correct init private":
             $response->deleteAnswer = true;
-            $response->msg = "Bitte benutze den Befehl /init <Ortsgruppe> <Passwort> um einer Ortsgruppe beizutreten.";
+            $response->text = "Bitte benutze den Befehl /init <Ortsgruppe> <Passwort> um einer Ortsgruppe beizutreten.";
             break;
         case "not correct init characters":
             $response->deleteAnswer = true;
-            $response->msg = "Der Ortsgruppenname darf nur Buchstaben und Zahlen enthalten.";
+            $response->text = "Der Ortsgruppenname darf nur Buchstaben und Zahlen enthalten.";
             break;
         case "password changed":
             $response->deleteAnswer = true;
-            $response->msg = "Passwort für Ortsgruppe " . $args[0] . " wurde geändert.";
+            $response->text = "Passwort für Ortsgruppe " . $args[0] . " wurde geändert.";
             break;
         case "wrong password":
             $response->deleteAnswer = true;
-            $response->msg = "Das Passwort ist falsch.";
+            $response->text = "Das Passwort ist falsch.";
             break;
         case "password too short":
             $response->deleteAnswer = true;
-            $response->msg = "Das Passwort muss mindestens 4 Zeichen lang sein.";
+            $response->text = "Das Passwort muss mindestens 4 Zeichen lang sein.";
             break;
         case "not initialized":
             $response->deleteAnswer = true;
-            $response->msg = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
+            $response->text = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
             break;
         case "command not found":
             $response->deleteAnswer = true;
-            $response->msg = "Dieser Befehl wurde nicht gefunden. Gib /help ein um eine Liste aller Befehle zu erhalten.";
+            $response->text = "Dieser Befehl wurde nicht gefunden. Gib /help ein um eine Liste aller Befehle zu erhalten.";
             break;
         default:
-            $response->msg = "Fehler: Nachricht nicht gefunden.";
+            $response->text = "Fehler: Nachricht nicht gefunden.";
             break;
     }
 
     return $response;
 }
 
-function react(string $token, string $chat_id, string $message_id, string $reaction)
+function react($token, $chat_id, $message_id, $reaction)
 {
     // react to message with $reaction
 }
 
-function leave_group(string $token, string $chat_id)
+function leave_group($token, $chat_id)
 {
     send_bot_api_request($token, "leaveChat", array("chat_id" => $chat_id));
 }
 
-function send_bot_api_request(string $token, string $method, array $params = [])
+function send_bot_api_request($token, $method, $params = [])
 {
     $unencoded = $params;
     foreach ($unencoded as $key => $value) {
@@ -789,7 +827,7 @@ function send_bot_api_request(string $token, string $method, array $params = [])
     return json_decode(file_get_contents(build_bot_api_link($token, $method, $params)), true);
 }
 
-function build_bot_api_link(string $token, string $method, array $params = [])
+function build_bot_api_link($token, $method, $params = [])
 {
     $url = "https://api.telegram.org/bot" . $token . "/" . $method . "?";
     foreach ($params as $key => $value) {
@@ -799,7 +837,7 @@ function build_bot_api_link(string $token, string $method, array $params = [])
     return $url;
 }
 
-function createToken(string $group)
+function createToken($group)
 {
     // open tokens.json and create a new token for the group
     $tokens = json_decode(file_get_contents("tokens.json"), true);
@@ -830,7 +868,7 @@ function createToken(string $group)
     return $mtoken;
 }
 
-function weekdayED(string $day)
+function weekdayED($day)
 {
     switch (strtolower($day)) {
         case "monday":
@@ -850,7 +888,7 @@ function weekdayED(string $day)
     }
 }
 
-function weekdayDE(string $day)
+function weekdayDE($day)
 {
     switch (strtolower($day)) {
         case "montag":
@@ -878,7 +916,7 @@ function weekdayDE(string $day)
     }
 }
 
-function logToFile(string $message)
+function logToFile($message)
 {
     $log = fopen("log.txt", "a");
     // get current time
