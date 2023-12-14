@@ -7,11 +7,6 @@ $chats = json_decode(file_get_contents('../Bot/chats.json'), true);
 // for every group check if it is the day after the groups weekday (monday, tuesday, wednesday, thursday, friday, saturday, sunday)
 foreach ($chats["groups"] as $chat) {
     if (date('Y-m-d', strtotime('yesterday')) == date('Y-m-d', strtotime('last ' . $chat['weekday']))) {
-        // if it is, send the message
-        $message = 'Resetting the group for the next week.';
-        $url = 'https://api.telegram.org/bot' . $token . '/sendMessage?chat_id=' . $chat['id'] . '&text=' . urlencode($message);
-        file_get_contents($url);
-
         // reset the group
         // load ../TOs/group/Plenum_to.json
         $plenum = json_decode(file_get_contents('../TOs/' . $chat['name'] . '/Plenum_to.json'), true);

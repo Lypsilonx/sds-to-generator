@@ -578,8 +578,6 @@ function getDate(date) {
 function generateQuestion() {
   switch (Math.floor(Math.random() * 4)) {
     case 0:
-      var question = "Was ist dein(e)";
-      question += Math.floor(Math.random() * 2) == 0 ? " lieblings" : " hass";
       var things = [
         "Farbe",
         "Tier",
@@ -597,10 +595,15 @@ function generateQuestion() {
         "Theorie",
         "Wissenschaftler*in",
       ];
-      question += " " + things[Math.floor(Math.random() * things.length)] + "?";
+      var question =
+        "Was ist dein(e)" + Math.floor(Math.random() * 2) == 0
+          ? " lieblings"
+          : " hass" +
+            " " +
+            things[Math.floor(Math.random() * things.length)] +
+            "?";
       break;
     case 1:
-      var question = "Was ist deine Meinung zu ";
       var things = [
         "Clowns",
         "Oliver Pocher",
@@ -609,10 +612,12 @@ function generateQuestion() {
         "Kaffee",
         "Vögeln",
       ];
-      question += things[Math.floor(Math.random() * things.length)] + "?";
+      var question =
+        "Was ist deine Meinung zu " +
+        things[Math.floor(Math.random() * things.length)] +
+        "?";
       break;
     case 2:
-      var question = "Welche(s/r) ";
       var things = [
         "Wort",
         "Konzept",
@@ -621,7 +626,8 @@ function generateQuestion() {
         "Erfindung",
         "Spruch",
       ];
-      question +=
+      var question =
+        "Welche(s/r) " +
         things[Math.floor(Math.random() * things.length)] +
         " kommt dir gerade in den Sinn, und warum?";
       break;
