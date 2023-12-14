@@ -195,24 +195,21 @@ else if (strpos(strtolower($text), "/help") === 0) {
 
     // Get TO
     if (strpos(strtolower($text), "/getto") === 0) {
-        $response = getMessage("get to")
-            . PHP_EOL . $domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id;
+        $response = getMessage("get to", [$domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id]);
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Upload TO
     else if (strpos(strtolower($text), "/upto") === 0) {
         $mtoken = createToken($group);
 
-        $response = getMessage("upload to")
-            . PHP_EOL . $domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken;
+        $response = getMessage("upload to", [$domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken]);
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Look at TO
     else if (strpos(strtolower($text), "/seeto") === 0) {
         $mtoken = createToken($group);
 
-        $response = getMessage("see to")
-            . PHP_EOL . $domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken;
+        $response = getMessage("see to", [$domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken]);
         send_message($token, $chat_id, $response, deleteCmd: $message_id, deleteAtMidnight: true);
     }
     // Change Password
@@ -508,13 +505,13 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
-            $msg = "Klicke hier um die TO zu erhalten: ";
+            $msg = "Klicke <a href=\"" . $args[0] . "\">hier</a> um die TO zu erhalten.";
             break;
         case "upload to":
-            $msg = "Klicke hier um die TO Hochzuladen: ";
+            $msg = "Klicke <a href=\"" . $args[0] . "\">hier</a> um die TO Hochzuladen.";
             break;
         case "see to":
-            $msg = "Hier ist der Link zur TO: ";
+            $msg = "Hier ist der Link zur <a href=\"" . $args[0] . "\">TO</a>.";
             break;
         case "top saved":
             $msg = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
@@ -652,7 +649,7 @@ function deleteEvent($og, $title)
 
 function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime = 5, $deleteAnswer = false, $deleteAtMidnight = false)
 {
-    $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response) . "&disable_notification=true";
+    $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chat_id . "&text=" . urlencode($response) . "&disable_notification=true&parse_mode=HTML";
     // send message and get message id
     $message = json_decode(file_get_contents($url), true);
     $message_id = $message['result']['message_id'];
@@ -688,7 +685,7 @@ function send_message($token, $chat_id, $response, $deleteCmd = null, $delTime =
 
 function react($token, $chat_id, $message_id, $reaction)
 {
-    // react to message
+    // react to message with $reaction
 }
 
 function leave_group($token, $chat_id)
