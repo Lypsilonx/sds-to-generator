@@ -9,7 +9,7 @@ if (isset($update['callback_query'])) {
     $chat_id = $update['callback_query']['from']['id'];
     $callback_message = $update['callback_query']['data'];
 
-    send_message($token, $chat_id, getMessage($callback_message));
+    getMessage($callback_message)->send($token, $chat_id);
     return;
 }
 
@@ -69,9 +69,9 @@ $ingroup = $chat_id < 0;
 // Start the bot
 if (strpos($text, "/start") === 0) {
     if ($ingroup) {
-        send_message($token, $chat_id, getMessage("start group", deleteCmd: $message_id));
+        getMessage("start group", deleteCmd: $message_id)->send($token, $chat_id);
     } else {
-        send_message($token, $chat_id, getMessage("start", deleteCmd: $message_id));
+        getMessage("start", deleteCmd: $message_id)->send($token, $chat_id);
     }
 }
 // Initialize a group
@@ -83,7 +83,7 @@ else if (strpos($text, "/init") === 0) {
 
     // check if rest of message is valid
     if (count($rest) < 3) {
-        send_message($token, $chat_id, getMessage("not correct init", deleteCmd: $message_id));
+        getMessage("not correct init", deleteCmd: $message_id)->send($token, $chat_id);
         return;
     }
 
@@ -95,7 +95,7 @@ else if (strpos($text, "/init") === 0) {
 
         // check if name is valid
         if (preg_match("/[^a-zA-Z0-9äüöß]/", $name)) {
-            send_message($token, $chat_id, getMessage("not correct init characters", deleteCmd: $message_id));
+            getMessage("not correct init characters", deleteCmd: $message_id)->send($token, $chat_id);
             return;
         }
 
@@ -134,7 +134,7 @@ else if (strpos($text, "/init") === 0) {
         file_put_contents("../TOs/" . $name . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
 
         // send response
-        send_message($token, $chat_id, getMessage("init", [$name], deleteCmd: $message_id));
+        getMessage("init", [$name], deleteCmd: $message_id)->send($token, $chat_id);
     } else {
 
         // get password
@@ -145,37 +145,37 @@ else if (strpos($text, "/init") === 0) {
             if ($g['name'] == $name) {
                 // check if user is already in group
                 if (in_array($chat_id, $g['members'])) {
-                    send_message($token, $chat_id, getMessage("already in group", [$name], deleteCmd: $message_id));
+                    getMessage("already in group", [$name], deleteCmd: $message_id)->send($token, $chat_id);
                     return;
                 }
 
                 // check if message is 3 words long
                 if (count($rest) > 3) {
-                    send_message($token, $chat_id, getMessage("not correct init private", deleteCmd: $message_id));
+                    getMessage("not correct init private", deleteCmd: $message_id)->send($token, $chat_id);
                     return;
                 }
 
                 // check if password is correct
                 if (hash("sha256", $password) != $g['password']) {
-                    send_message($token, $chat_id, getMessage("wrong password", deleteCmd: $message_id));
+                    getMessage("wrong password", deleteCmd: $message_id)->send($token, $chat_id);
                     return;
                 }
                 array_push($g['members'], $chat_id);
 
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
-                send_message($token, $chat_id, getMessage("joined group", [$name], deleteCmd: $message_id));
+                getMessage("joined group", [$name], deleteCmd: $message_id)->send($token, $chat_id);
                 return;
             }
         }
 
         // send response
-        send_message($token, $chat_id, getMessage("group not found", [$name], deleteCmd: $message_id));
+        getMessage("group not found", [$name], deleteCmd: $message_id)->send($token, $chat_id);
     }
 }
 // Help
 else if (strpos(strtolower($text), "/help") === 0) {
-    send_message($token, $chat_id, getMessage("help", deleteCmd: $message_id));
+    getMessage("help", deleteCmd: $message_id)->send($token, $chat_id);
 } else {
     // load chats.json
     $chats = json_decode(file_get_contents("chats.json"), true);
@@ -193,32 +193,29 @@ else if (strpos(strtolower($text), "/help") === 0) {
 
     if (!$found) {
         if (count(explode(" ", $text)) > 1) {
-            send_message($token, $chat_id, getMessage("not initialized", deleteCmd: $message_id));
+            getMessage("not initialized", deleteCmd: $message_id)->send($token, $chat_id);
             return;
         } else {
-            send_message($token, $chat_id, getMessage("not initialized"));
+            getMessage("not initialized")->send($token, $chat_id);
             return;
         }
     }
 
     // Get TO
     if (strpos(strtolower($text), "/getto") === 0) {
-        $response = getMessage("get to", [$domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id]);
-        send_message($token, $chat_id, new Response($response, deleteCmd: $message_id));
+        getMessage("get to", [$domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id], deleteCmd: $message_id)->send($token, $chat_id);
     }
     // Upload TO
     else if (strpos(strtolower($text), "/upto") === 0) {
         $mtoken = createToken($group);
 
-        $response = getMessage("upload to", [$domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken]);
-        send_message($token, $chat_id, new Response($response, deleteCmd: $message_id));
+        getMessage("upload to", [$domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken], deleteCmd: $message_id)->send($token, $chat_id);
     }
     // Look at TO
     else if (strpos(strtolower($text), "/seeto") === 0) {
         $mtoken = createToken($group);
 
-        $response = getMessage("see to", [$domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken]);
-        send_message($token, $chat_id, new Response($response, deleteCmd: $message_id));
+        getMessage("see to", [$domain . "index.php?dir=" . $group . "/Plenum&token=" . $mtoken], deleteCmd: $message_id)->send($token, $chat_id);
     }
     // Change Password
     else if (strpos(strtolower($text), "/changepw") === 0) {
@@ -226,7 +223,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         $password = substr($text, 10);
 
         if (strlen($password) < 4) {
-            send_message($token, $chat_id, getMessage("password too short", deleteCmd: $message_id));
+            getMessage("password too short", deleteCmd: $message_id)->send($token, $chat_id);
             return;
         }
         // set new password
@@ -237,7 +234,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
             }
         }
         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-        send_message($token, $chat_id, getMessage("password changed", [$group], deleteCmd: $message_id));
+        getMessage("password changed", [$group], deleteCmd: $message_id)->send($token, $chat_id);
     }
     // Change Weekday
     else if (strpos(strtolower($text), "/plenum") === 0) {
@@ -247,7 +244,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
 
         if (!in_array($weekday, $weekdays)) {
-            send_message($token, $chat_id, getMessage("has to be weekday", deleteCmd: $message_id));
+            getMessage("has to be weekday", deleteCmd: $message_id)->send($token, $chat_id);
             return;
         }
 
@@ -255,7 +252,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         foreach ($chats['groups'] as &$g) {
             if ($g['name'] == $group) {
                 $g['weekday'] = $weekday;
-                send_message($token, $chat_id, getMessage("plenum changed", [$group, weekdayED($weekday)], deleteCmd: $message_id));
+                getMessage("plenum changed", [$group, weekdayED($weekday)], deleteCmd: $message_id)->send($token, $chat_id);
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                 // change date in TOs/group/Plenum_to.json
@@ -280,7 +277,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         foreach ($chats['groups'] as &$g) {
             if ($g['name'] == $group) {
                 $g['dir'] = $folder;
-                send_message($token, $chat_id, getMessage("folder changed", [$group, $folder], deleteCmd: $message_id));
+                getMessage("folder changed", [$group, $folder], deleteCmd: $message_id)->send($token, $chat_id);
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                 break;
@@ -311,7 +308,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
             saveTOP($group, $title, $content);
 
             // send response
-            $message_id = send_message($token, $chat_id, getMessage("top saved", [$title]));
+            $message_id = getMessage("top saved", [$title])->send($token, $chat_id);
         } else {
             // bring date to format yyyy-mm-dd
             $date = $matches[0];
@@ -328,8 +325,8 @@ else if (strpos(strtolower($text), "/help") === 0) {
             saveTOP($group, $title, $content);
 
             // send response
-            send_message($token, $chat_id, getMessage("event recognized", [$date->format("d.m.")]));
-            $message_id = send_message($token, $chat_id, getMessage("top saved", [$title]));
+            getMessage("event recognized", [$date->format("d.m.")])->send($token, $chat_id);
+            $message_id = getMessage("top saved", [$title])->send($token, $chat_id);
         }
 
         // react to message with tick
@@ -376,7 +373,7 @@ else if (strpos(strtolower($text), "/help") === 0) {
         saveEvent($group, $title, $content, $date);
 
         // send response
-        $message_id = send_message($token, $chat_id, getMessage("event saved", [$title]), deleteAnswer: true);
+        $message_id = getMessage("event saved", [$title])->send($token, $chat_id);
 
         // react to message with tick
         react($token, $chat_id, $message_id, "✅");
@@ -392,17 +389,17 @@ else if (strpos(strtolower($text), "/help") === 0) {
         // delete top
         if (deleteTOP($group, $title)) {
             // send response
-            send_message($token, $chat_id, getMessage("top deleted", [$title], deleteCmd: $message_id));
+            getMessage("top deleted", [$title], deleteCmd: $message_id)->send($token, $chat_id);
         } else {
-            send_message($token, $chat_id, getMessage("top not found", [$title], deleteCmd: $message_id));
+            getMessage("top not found", [$title], deleteCmd: $message_id)->send($token, $chat_id);
         }
 
         // delete event
         if (deleteEvent($group, $title)) {
             // send response
-            send_message($token, $chat_id, getMessage("event deleted", [$title], deleteCmd: $message_id));
+            getMessage("event deleted", [$title], deleteCmd: $message_id)->send($token, $chat_id);
         } else {
-            send_message($token, $chat_id, getMessage("event not found", [$title], deleteCmd: $message_id));
+            getMessage("event not found", [$title], deleteCmd: $message_id)->send($token, $chat_id);
         }
     }
     // Leave Group
@@ -421,14 +418,14 @@ else if (strpos(strtolower($text), "/help") === 0) {
             file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
             // send response
-            send_message($token, $chat_id, getMessage("left group", [$group], deleteCmd: $message_id));
+            getMessage("left group", [$group], deleteCmd: $message_id)->send($token, $chat_id);
         } else {
             // send response
-            send_message($token, $chat_id, getMessage("not in group", [$group], deleteCmd: $message_id));
+            getMessage("not in group", [$group], deleteCmd: $message_id)->send($token, $chat_id);
         }
     } else {
         // send response
-        send_message($token, $chat_id, getMessage("command not found", deleteCmd: $message_id));
+        getMessage("command not found", deleteCmd: $message_id)->send($token, $chat_id);
     }
 }
 
@@ -506,6 +503,63 @@ class Response
     public bool $deleteAnswer;
     public bool $deleteAtMidnight;
     public array $buttons;
+
+    function send(string $token, string $chat_id)
+    {
+        $keyboard = [
+            'inline_keyboard' => [
+                $this->buttons
+            ]
+        ];
+        $encodedKeyboard = json_encode($keyboard);
+
+        $message = send_bot_api_request($token, "sendMessage", array(
+            "chat_id" => $chat_id,
+            "text" => $this->text,
+            "disable_notification" => true,
+            "parse_mode" => "Markdown",
+            "reply_markup" => $encodedKeyboard
+        )
+        );
+        $message_id = $message['result']['message_id'];
+
+        // log answer
+        logToFile("Answer: " . $this->text);
+
+        // if deleteAtMidnight is true, add to todelete.json
+        if ($this->deleteAtMidnight) {
+            $url = build_bot_api_link($token, "deleteMessage", array(
+                "chat_id" => $chat_id,
+                "message_id" => $message_id
+            )
+            );
+            $todelete = json_decode(file_get_contents("todelete.json"), true);
+            array_push($todelete, $url);
+            file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
+        }
+
+        // if deleteCmd is not null, delete command message
+        if ($this->deleteCmd != null) {
+            send_bot_api_request($token, "deleteMessage", array(
+                "chat_id" => $chat_id,
+                "message_id" => $this->deleteCmd
+            )
+            );
+        }
+
+        // if deleteAnswer is true, delete answer message
+        if ($this->deleteAnswer) {
+            sleep($this->delTime);
+            // ! Find a better way to do this
+            send_bot_api_request($token, "deleteMessage", array(
+                "chat_id" => $chat_id,
+                "message_id" => $message_id
+            )
+            );
+        }
+
+        return $message_id;
+    }
 }
 
 function getMessage(string $id, array $args = [], $deleteCmd = null)
@@ -594,14 +648,14 @@ function getMessage(string $id, array $args = [], $deleteCmd = null)
         case "get to":
             $response->deleteAtMidnight = true;
             $response->msg = "Klicke hier um die TO zu erhalten.";
-            $buttons = [
+            $response->buttons = [
                 ['text' => 'TO Herunterladen', 'url' => $args[0]]
             ];
             break;
         case "upload to":
             $response->deleteAtMidnight = true;
             $response->msg = "Klicke hier um die TO hochzuladen.";
-            $buttons = [
+            $response->buttons = [
                 ['text' => 'TO Hochladen', 'url' => $args[0]]
             ];
             break;
@@ -713,63 +767,6 @@ function getMessage(string $id, array $args = [], $deleteCmd = null)
     }
 
     return $response;
-}
-
-function send_message(string $token, string $chat_id, Response $response)
-{
-    $keyboard = [
-        'inline_keyboard' => [
-            $response->buttons
-        ]
-    ];
-    $encodedKeyboard = json_encode($keyboard);
-
-    $message = send_bot_api_request($token, "sendMessage", array(
-        "chat_id" => $chat_id,
-        "text" => $response->text,
-        "disable_notification" => true,
-        "parse_mode" => "Markdown",
-        "reply_markup" => $encodedKeyboard
-    )
-    );
-    $message_id = $message['result']['message_id'];
-
-    // log answer
-    logToFile("Answer: " . $response->text);
-
-    // if deleteAtMidnight is true, add to todelete.json
-    if ($response->deleteAtMidnight) {
-        $url = build_bot_api_link($token, "deleteMessage", array(
-            "chat_id" => $chat_id,
-            "message_id" => $message_id
-        )
-        );
-        $todelete = json_decode(file_get_contents("todelete.json"), true);
-        array_push($todelete, $url);
-        file_put_contents("todelete.json", json_encode($todelete, JSON_PRETTY_PRINT));
-    }
-
-    // if deleteCmd is not null, delete command message
-    if ($response->deleteCmd != null) {
-        send_bot_api_request($token, "deleteMessage", array(
-            "chat_id" => $chat_id,
-            "message_id" => $response->deleteCmd
-        )
-        );
-    }
-
-    // if deleteAnswer is true, delete answer message
-    if ($response->deleteAnswer) {
-        sleep($response->delTime);
-        // ! Find a better way to do this
-        send_bot_api_request($token, "deleteMessage", array(
-            "chat_id" => $chat_id,
-            "message_id" => $message_id
-        )
-        );
-    }
-
-    return $message_id;
 }
 
 function react(string $token, string $chat_id, string $message_id, string $reaction)
