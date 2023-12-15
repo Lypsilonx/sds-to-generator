@@ -471,15 +471,31 @@ session_start();
     {
         $out = $text;
 
+        // dates within links ([... 12.12. ...](xy) -> [... 12p12p ...](xy))
+        preg_match('/\[.*\d{1,2}\.\d{1,2}\.(\d{2,4})?.*\]\(.*\)/', $out, $matches);
+        foreach ($matches as $match) {
+            // replace only the dots in the date
+            $replace_with = preg_replace('/(\d{1,2})\.(\d{1,2})\.(\d{2,4})?/', '$1p$2p$3', $match);
+            $out = str_replace($match, $replace_with, $out);
+        }
+
+        // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
+        $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß\- ]*&quot; )|([a-zA-Z0-9äüöß\-]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '[$2$3$4$5$6$7$8$9](Actions/ics.php?date=$5&time=$9&title=$2$3)', $out);
+
+
+        // change p back to .
+        preg_match('/\[.*\d{1,2}p\d{1,2}p(\d{2,4})?.*\]\(.*\)/', $out, $matches);
+        foreach ($matches as $match) {
+            $replace_with = preg_replace('/(\d{1,2})p(\d{1,2})p(\d{2,4})?/', '$1.$2.$3', $match);
+            $out = str_replace($match, $replace_with, $out);
+        }
+
+
         // use parsedown
         require_once 'Plugins/Parsedown.php';
         $Parsedown = new Parsedown();
         $Parsedown->setBreaksEnabled(true);
         $out = $Parsedown->text($out);
-
-
-        // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
-        $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß\- ]*&quot; )|([a-zA-Z0-9äüöß\-]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '<a href="Actions/ics.php?date=$5&time=$9&title=$2$3">$2$3$4$5$6$7$8$9</a>', $out);
 
         // replace -> with arrow
         $out = str_replace('-&gt;', '→', $out);
