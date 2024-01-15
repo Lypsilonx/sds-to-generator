@@ -1,5 +1,447 @@
 <?php
 require_once "response.php";
+class CallbackInfo
+{
+    public $text = "";
+    public $message_id = null;
+    public $username = null;
+}
+
+interface BotApi
+{
+    public function handle_callback($update): ?CallbackInfo;
+    public function send_message(Response $response, $deleteCmd = null);
+    public function delete_message($message_id);
+    public function debug_log($message);
+    public function react($message_id, $reaction);
+    public function leave_group();
+    public function in_group(): bool;
+    public function get_uid(): int;
+}
+class Bot
+{
+    public BotApi $api;
+
+    public function __construct(BotApi $api)
+    {
+        $this->api = $api;
+    }
+
+    public function handle_input($input)
+    {
+        $update = json_decode($input, true);
+
+        $callback_result = $this->api->handle_callback($update);
+
+        if ($callback_result == null) {
+            return;
+        }
+        $text = $callback_result->text;
+        $message_id = $callback_result->message_id;
+        $username = $callback_result->username;
+
+        $this->log_message($text, $username);
+
+        // Start the bot
+        if (strpos($text, "/start") === 0) {
+            if ($this->api->in_group()) {
+                $this->api->send_message(getMessage("start group"), deleteCmd: $message_id);
+            } else {
+                $this->api->send_message(getMessage("start"), deleteCmd: $message_id);
+            }
+        }
+        // Initialize a group
+        else if (strpos($text, "/init") === 0) {
+            // load chats.json
+            $chats = json_decode(file_get_contents("chats.json"), true);
+
+            $rest = explode(" ", $text);
+
+            // check if rest of message is valid
+            if (count($rest) < 3) {
+                $this->api->send_message(getMessage("not correct init"), deleteCmd: $message_id);
+                return;
+            }
+
+            // get name
+            $name = $rest[1];
+
+            // if folder for Ortsgruppe does not exist
+            if (!file_exists("../TOs/" . $name)) {
+
+                // check if name is valid
+                if (preg_match("/[^a-zA-Z0-9äüöß]/", $name)) {
+                    $this->api->send_message(getMessage("not correct init characters"), deleteCmd: $message_id);
+                    return;
+                }
+
+                if (count($rest) < 4) {
+                    // default weekday is the current weekday
+                    $weekday = strtolower(date("l"));
+
+                    // get password
+                    $password = $rest[2];
+                } else {
+                    // get weekday
+                    $weekday = weekdayDE($rest[2]);
+
+                    // get password
+                    $password = $rest[3];
+                }
+
+                // enter chat id and name into chats.json
+                array_push($chats['groups'], array("name" => $name, "dir" => "Ortsgruppe" . $name . "/", "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($this->api->get_uid())));
+                file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                // create folder for Ortsgruppe
+                mkdir("../TOs/" . $name);
+                // create Plenum_to.json (with title, date (next $weekday) and tops array)
+                $date = new DateTime();
+                $date->modify('next ' . $weekday);
+                // to format: yyyy-mm-dd
+                $date = $date->format('Y-m-d');
+                $to = array("title" => "Plenum", "date" => $date, "tops" => array());
+                file_put_contents("../TOs/" . $name . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+                // create permanent.json (tops array)
+                $permanent = array("tops" => array());
+                file_put_contents("../TOs/" . $name . "/permanent.json", json_encode($permanent, JSON_PRETTY_PRINT));
+                // create events.json (events array)
+                $events = array("events" => array());
+                file_put_contents("../TOs/" . $name . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
+
+                // send response
+                $this->api->send_message(getMessage("init", [$name]), deleteCmd: $message_id);
+            } else {
+
+                // get password
+                $password = $rest[2];
+
+                // enter chat id into group members
+                foreach ($chats['groups'] as &$g) {
+                    if ($g['name'] == $name) {
+                        // check if user is already in group
+                        if (in_array($this->api->get_uid(), $g['members'])) {
+                            $this->api->send_message(getMessage("already in group", [$name]), deleteCmd: $message_id);
+                            return;
+                        }
+
+                        // check if message is 3 words long
+                        if (count($rest) > 3) {
+                            $this->api->send_message(getMessage("not correct init private"), deleteCmd: $message_id);
+                            return;
+                        }
+
+                        // check if password is correct
+                        if (hash("sha256", $password) != $g['password']) {
+                            $this->api->send_message(getMessage("wrong password"), deleteCmd: $message_id);
+                            return;
+                        }
+                        array_push($g['members'], $this->api->get_uid());
+
+                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                        $this->api->send_message(getMessage("joined group", [$name]), deleteCmd: $message_id);
+                        return;
+                    }
+                }
+
+                // send response
+                $this->api->send_message(getMessage("group not found", [$name]), deleteCmd: $message_id);
+            }
+        }
+        // Help
+        else if (strpos(strtolower($text), "/help") === 0) {
+            $this->api->send_message(getMessage("help"), deleteCmd: $message_id);
+        } else {
+            // load chats.json
+            $chats = json_decode(file_get_contents("chats.json"), true);
+            // check if chat id is in any group in chats.json
+            $found = false;
+            $groups = array();
+            foreach ($chats['groups'] as $g) {
+                if (in_array($this->api->get_uid(), $g['members'])) {
+                    $found = true;
+                    array_push($groups, $g['name']);
+                }
+            }
+            $group = $groups[0];
+
+            if (!$found) {
+                if (count(explode(" ", $text)) > 1) {
+                    $this->api->send_message(getMessage("not initialized"), deleteCmd: $message_id);
+                    return;
+                } else {
+                    $this->api->send_message(getMessage("not initialized"));
+                    return;
+                }
+            }
+
+            // Get TO
+            if (strpos(strtolower($text), "/getto") === 0) {
+                $result = renderMarkDown($group . "/Plenum");
+                download($result['markdown'], $result['filename'], $this->api->get_uid());
+                $this->api->send_message(getMessage("get to"), deleteCmd: $message_id);
+            }
+            // Upload TO
+            else if (strpos(strtolower($text), "/upto") === 0) {
+                $mtoken = createToken($group);
+                $result = renderMarkDown($group . "/Plenum");
+                upload($result['markdown'], $result['filename'], $group . "/Plenum");
+                $this->api->send_message(getMessage("upload to"), deleteCmd: $message_id);
+            }
+            // Look at TO
+            else if (strpos(strtolower($text), "/seeto") === 0) {
+                $mtoken = createToken($group);
+
+                $this->api->send_message(getMessage("see to", ["https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken]), deleteCmd: $message_id);
+            }
+            // Change Password
+            else if (strpos(strtolower($text), "/changepw") === 0) {
+                // get rest of message
+                $password = substr($text, 10);
+
+                if (strlen($password) < 4) {
+                    $this->api->send_message(getMessage("password too short"), deleteCmd: $message_id);
+                    return;
+                }
+                // set new password
+                foreach ($chats['groups'] as &$g) {
+                    if ($g['name'] == $group) {
+                        $g['password'] = hash("sha256", $password);
+                        break;
+                    }
+                }
+                file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+                $this->api->send_message(getMessage("password changed", [$group]), deleteCmd: $message_id);
+            }
+            // Change Weekday
+            else if (strpos(strtolower($text), "/plenum") === 0) {
+                // get rest of message (lowercase)
+                $weekday = weekdayDE(substr($text, 8));
+
+                $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
+
+                if (!in_array($weekday, $weekdays)) {
+                    $this->api->send_message(getMessage("has to be weekday"), deleteCmd: $message_id);
+                    return;
+                }
+
+                // set new weekday
+                foreach ($chats['groups'] as &$g) {
+                    if ($g['name'] == $group) {
+                        $g['weekday'] = $weekday;
+                        $this->api->send_message(getMessage("plenum changed", [$group, weekdayED($weekday)]), deleteCmd: $message_id);
+                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                        // change date in TOs/group/Plenum_to.json
+                        $to = json_decode(file_get_contents("../TOs/" . $group . "/Plenum_to.json"), true);
+                        // set date to next weekday from today (if today is weekday, set date to today)
+                        if (date("l") == $weekday) {
+                            $to['date'] = date("Y-m-d");
+                        } else {
+                            $to['date'] = date("Y-m-d", strtotime("next " . $weekday));
+                        }
+                        file_put_contents("../TOs/" . $group . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+                        break;
+                    }
+                }
+            }
+            // Change Directory
+            else if (strpos(strtolower($text), "/folder") === 0) {
+                // get rest of message
+                $folder = substr($text, 8);
+
+                // set new directory
+                foreach ($chats['groups'] as &$g) {
+                    if ($g['name'] == $group) {
+                        $g['dir'] = $folder;
+                        $this->api->send_message(getMessage("folder changed", [$group, $folder]), deleteCmd: $message_id);
+                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+
+                        break;
+                    }
+                }
+            }
+            // /top or #top (not regarding capitalization)
+            else if (strpos(strtolower($text), "#top") === 0 || strpos(strtolower($text), "/top") === 0) {
+                // get rest of message
+                // set title to first line
+                $lines = explode(PHP_EOL, $text);
+                // first line without first 4 characters
+                if (strlen($lines[0]) > 4) {
+                    $title = substr($lines[0], 5);
+                    // slice title from rest of message
+                    $content = substr($text, strlen($title) + 6);
+                } else {
+                    $title = "Kein Titel";
+                    $content = substr($text, 5);
+                }
+
+                // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
+                $matches = array();
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $text, $matches);
+
+                // if no date is found, set date to today
+                if (count($matches) == 0) {
+                    saveTOP($group, $title, $content);
+
+                    // send response
+                    $this->api->send_message($message_id = getMessage("top saved", [$title]));
+                } else {
+                    // bring date to format yyyy-mm-dd
+                    $date = $matches[0];
+                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                        $date = DateTime::createFromFormat("d.m.Y", $date);
+                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                        $date = DateTime::createFromFormat("d.m.y", $date);
+                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                        $date = DateTime::createFromFormat("d.m.", $date);
+                    }
+
+                    saveTOP($group, $title, $content);
+
+                    // send response
+                    $this->api->send_message($message_id = getMessage("top saved", [$title]));
+                    $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . $content]));
+                }
+
+                // react to message with tick
+                $this->api->react($message_id, "✅");
+            }
+            // /termin or #termin (not regarding capitalization)
+            else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
+                // get rest of message
+                // set title to first line
+                $lines = explode(PHP_EOL, $text);
+                // first line without first 7 characters
+                if (strlen($lines[0]) > 7) {
+                    $title = substr($lines[0], 8);
+                    // slice title from rest of message
+                    $content = substr($text, strlen($title) + 9);
+                } else {
+                    $title = "Kein Titel";
+                    $content = substr($text, 8);
+                }
+
+                // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
+                $matches = array();
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $content, $matches);
+
+                // if no date is found, set date to today
+                if (count($matches) == 0) {
+                    $date = new DateTime();
+                    $date = $date->format('Y-m-d');
+                } else {
+                    // bring date to format yyyy-mm-dd
+                    $date = $matches[0];
+                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                        $date = DateTime::createFromFormat("d.m.Y", $date);
+                        $date = $date->format("Y-m-d");
+                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                        $date = DateTime::createFromFormat("d.m.y", $date);
+                        $date = $date->format("Y-m-d");
+                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                        $date = DateTime::createFromFormat("d.m.", $date);
+                        $date = $date->format("Y-m-d");
+                    }
+                }
+
+                saveEvent($group, $title, $content, $date);
+
+                // send response
+                $this->api->send_message($message_id = getMessage("event saved", [$title]));
+
+                // react to message with tick
+                $this->api->react($message_id, "✅");
+            }
+            // /del or #del (not regarding capitalization)
+            else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
+                // get rest of message
+                // set title to first line
+                $lines = explode(PHP_EOL, $text);
+                // first line without first 4 characters
+                $title = substr($lines[0], 5);
+
+                // delete top
+                if (deleteTOP($group, $title)) {
+                    // send response
+                    $this->api->send_message(getMessage("top deleted", [$title]), deleteCmd: $message_id);
+                } else {
+                    $this->api->send_message(getMessage("top not found", [$title]), deleteCmd: $message_id);
+                }
+
+                // delete event
+                if (deleteEvent($group, $title)) {
+                    // send response
+                    $this->api->send_message(getMessage("event deleted", [$title]), deleteCmd: $message_id);
+                } else {
+                    $this->api->send_message(getMessage("event not found", [$title]), deleteCmd: $message_id);
+                }
+            }
+            // Leave Group
+            else if (strpos(strtolower($text), "/leave") === 0) {
+                if (strlen($text) > 7) {
+                    $rest = explode(" ", substr($text, 7));
+                    $group = $rest[0];
+
+                    if (count($rest) > 1 && $rest[1] === "confirm") {
+                        // remove chat_id from group members of group in chats.jsons groups array
+                        foreach ($chats['groups'] as &$g) {
+                            if ($g['name'] == $group) {
+                                $g['members'] = array_values(array_diff($g['members'], array($this->api->get_uid())));
+                            }
+                        }
+                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+                        $this->api->send_message(getMessage("left group", [$group]), deleteCmd: $message_id);
+                        return;
+                    }
+                }
+                // if group name in groups
+                if (in_array($group, $groups)) {
+                    // send response
+                    $this->api->send_message(getMessage("leave group", [$group]), deleteCmd: $message_id);
+                } else {
+                    // send response
+                    $this->api->send_message(getMessage("not in group", [$group]), deleteCmd: $message_id);
+                }
+            } else {
+                // send response
+                $this->api->send_message(getMessage("command not found"), deleteCmd: $message_id);
+            }
+        }
+    }
+
+    private function log_message($text, $username)
+    {
+        //log message
+        if ($text[0] == "/" || $text[0] == "#") {
+            // if /init
+            if (strpos($text, "/init") === 0) {
+                // log /init without password
+                $rest = explode(" ", $text);
+                if (count($rest) > 3) {
+                    logToFile($username . ": " . $rest[0] . " " . $rest[1] . " " . $rest[2] . " ********");
+                } else if (count($rest) > 2) {
+                    logToFile($username . ": " . $rest[0] . " " . $rest[1] . " ********");
+                } else {
+                    logToFile($username . ": " . $text);
+                }
+            } else if (strpos($text, "/changepw") === 0) {
+                // log /changepw without password
+                $rest = explode(" ", $text);
+                if (count($rest) > 2) {
+                    logToFile($username . ": " . $rest[0] . " ********");
+                } else {
+                    logToFile($username . ": " . $text);
+                }
+            } else {
+                logToFile($username . ": " . $text);
+            }
+        } else {
+            return;
+        }
+    }
+}
 function getMessage($id, $args = [])
 {
     $response = new Response();
@@ -315,4 +757,59 @@ function logToFile($message)
     fclose($log);
 }
 
+function saveTOP($og, $title, $content)
+{
+    // enter TOP into TOs/Ortsgruppe/Plenum_to.json
+    $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
+    // generate unique id
+    $id = uniqid();
+    // add top to tops array
+    array_push($to['tops'], array("id" => $id, "title" => $title, "content" => $content));
+    file_put_contents("../TOs/" . $og . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+}
+
+function saveEvent($og, $title, $content, $date)
+{
+    // enter TOP into TOs/Ortsgruppe/events.json
+    $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
+    // generate unique id
+    $id = uniqid();
+    // add event to events array
+    array_push($events['events'], array("id" => $id, "title" => $title, "content" => $content, "date" => $date));
+    file_put_contents("../TOs/" . $og . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
+}
+
+function deleteTOP($og, $title)
+{
+    // load TOs/Ortsgruppe/Plenum_to.json
+    $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
+    // search for top with title
+    foreach ($to['tops'] as $key => $top) {
+        if ($top['title'] == $title) {
+            // delete top
+            unset($to['tops'][$key]);
+            // save file
+            file_put_contents("../TOs/" . $og . "/Plenum_to.json", json_encode($to, JSON_PRETTY_PRINT));
+            return true;
+        }
+    }
+    return false;
+}
+
+function deleteEvent($og, $title)
+{
+    // load TOs/Ortsgruppe/events.json
+    $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
+    // search for top with title
+    foreach ($events['events'] as $key => $event) {
+        if ($event['title'] == $title) {
+            // delete top
+            unset($events['events'][$key]);
+            // save file
+            file_put_contents("../TOs/" . $og . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
+            return true;
+        }
+    }
+    return false;
+}
 ?>
