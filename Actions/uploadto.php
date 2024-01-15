@@ -58,4 +58,5 @@ if (!$signedin) {
 
 $result = renderMarkDown($folder);
 upload($result['markdown'], $result['filename'], $folder);
+header('Location: ../index.php?dir=' . $folder);
 ?>

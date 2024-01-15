@@ -150,10 +150,12 @@ session_start();
                 echo '</form>';
             }
             ?>
-            <input type="text" name="dir" placeholder="Ortsgruppe/Plenum" value="<?php
-            if ($dir != "fallback") {
-                echo $dir;
-            } ?>" id="searchfield">
+            <div class="autocomplete">
+                <input type="text" name="dir" placeholder="Ortsgruppe/Plenum" value="<?php
+                if ($dir != "fallback") {
+                    echo $dir;
+                } ?>" id="searchfield">
+            </div>
             <a class="searchbutton">
                 <i class="material-icons">search</i>
             </a>
@@ -215,18 +217,22 @@ session_start();
                 <div id=actionbuttons>
                     <?php
                     if ($dir != "fallback" && $addto == false) {
-                        echo '<a class="downloadb button">';
+                        echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $dir . '">';
                         echo '<i class="material-icons">file_download</i>';
                         echo '</a>';
 
                         if ($signedin) {
-                            echo '<a class="uploadb button">';
+                            echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $dir . '">';
                             echo '<i class="material-icons">cloud_upload</i>';
                             echo '</a>';
                         }
 
                         echo '<a class="shareb button">';
                         echo '<i class="material-icons">share</i>';
+                        echo '</a>';
+
+                        echo '<a class="botb button" href="https://t.me/sds_to_bot">';
+                        echo '<i class="material-icons">smart_toy</i>';
                         echo '</a>';
                     }
                     ?>
@@ -264,6 +270,9 @@ session_start();
                         // prevent script injection
                         $event['title'] = str_replace('"', '&quot;', $event['title']);
                         $event['content'] = str_replace('"', '&quot;', $event['content']);
+                        if ($event['content'] == "(Siehe TOP)") {
+                            $event['content'] = "";
+                        }
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';

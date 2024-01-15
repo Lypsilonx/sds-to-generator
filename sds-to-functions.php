@@ -147,7 +147,7 @@ function renderMarkDown($dir)
       foreach ($wrb as $key2 => $value) {
         if ($wrb[$key2]["date"] == $day) {
           $eventFormat = str_replace("%title%", $wrb[$key2]["title"], $eventFormat);
-          if ($wrb[$key2]["content"] == "" || $wrb[$key2]["content"] == " ") {
+          if ($wrb[$key2]["content"] == "" || $wrb[$key2]["content"] == " " || $wrb[$key2]["content"] == "(Siehe TOP)") {
             $eventFormat = str_replace("%content%", "", $eventFormat);
           } else {
             $eventFormat = str_replace("%content%", "\r\n      * " . $wrb[$key2]["content"], $eventFormat);
