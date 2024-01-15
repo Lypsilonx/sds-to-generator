@@ -5,6 +5,7 @@ class TelegramBotApi implements BotApi
 {
     private $token;
     private $chat_id;
+    private $message_id;
 
     public function __construct($token)
     {
@@ -28,11 +29,11 @@ class TelegramBotApi implements BotApi
 
             if (strpos($callback_message, "say:") === 0) {
                 $callback_message = substr($callback_message, 4);
-                $this->send_message(getMessage($callback_message), $this->chat_id);
+                $this->send_message(getMessage($callback_message));
                 return null;
             } else if (strpos($callback_message, "do:") === 0) {
                 $output->text = substr($callback_message, 3);
-                $output->message_id = null;
+                $this->message_id = null;
                 $callback_do = true;
                 $output->username = $update['callback_query']['from']['username'];
 
@@ -57,7 +58,7 @@ class TelegramBotApi implements BotApi
             }
             $output->text = $message['text'];
             $this->chat_id = $message['chat']['id'];
-            $output->message_id = $message['message_id'];
+            $this->message_id = $message['message_id'];
             $output->username = $message['from']['username'];
 
             if (!isset($username)) {
@@ -69,7 +70,7 @@ class TelegramBotApi implements BotApi
         return $output;
     }
 
-    public function send_message(Response $response, $deleteCmd = null)
+    public function send_message(BotMessage $response)
     {
         $message = $this->send_bot_api_request(
             "sendMessage",
@@ -107,12 +108,12 @@ class TelegramBotApi implements BotApi
         }
 
         // if deleteCmd is not null, delete command message
-        if ($deleteCmd != null) {
+        if ($response->deleteCommand) {
             $this->send_bot_api_request(
                 "deleteMessage",
                 array(
                     "chat_id" => $this->chat_id,
-                    "message_id" => $deleteCmd
+                    "message_id" => $this->message_id
                 )
             );
         }

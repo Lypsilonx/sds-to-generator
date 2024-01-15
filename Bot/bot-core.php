@@ -1,16 +1,15 @@
 <?php
-require_once "response.php";
+require_once "BotMessage.php";
 class CallbackInfo
 {
     public $text = "";
-    public $message_id = null;
     public $username = null;
 }
 
 interface BotApi
 {
     public function handle_callback($update): ?CallbackInfo;
-    public function send_message(Response $response, $deleteCmd = null);
+    public function send_message(BotMessage $response);
     public function delete_message($message_id);
     public function debug_log($message);
     public function react($message_id, $reaction);
@@ -37,17 +36,20 @@ class Bot
             return;
         }
         $text = $callback_result->text;
-        $message_id = $callback_result->message_id;
         $username = $callback_result->username;
 
         $this->log_message($text, $username);
 
+        if ($text[0] != "/" && $text[0] != "#") {
+            return;
+        }
+
         // Start the bot
         if (strpos($text, "/start") === 0) {
             if ($this->api->in_group()) {
-                $this->api->send_message(getMessage("start group"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("start group"));
             } else {
-                $this->api->send_message(getMessage("start"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("start"));
             }
         }
         // Initialize a group
@@ -59,7 +61,7 @@ class Bot
 
             // check if rest of message is valid
             if (count($rest) < 3) {
-                $this->api->send_message(getMessage("not correct init"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("not correct init"));
                 return;
             }
 
@@ -71,7 +73,7 @@ class Bot
 
                 // check if name is valid
                 if (preg_match("/[^a-zA-Z0-9äüöß]/", $name)) {
-                    $this->api->send_message(getMessage("not correct init characters"), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("not correct init characters"));
                     return;
                 }
 
@@ -110,7 +112,7 @@ class Bot
                 file_put_contents("../TOs/" . $name . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
 
                 // send response
-                $this->api->send_message(getMessage("init", [$name]), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("init", [$name]));
             } else {
 
                 // get password
@@ -121,37 +123,37 @@ class Bot
                     if ($g['name'] == $name) {
                         // check if user is already in group
                         if (in_array($this->api->get_uid(), $g['members'])) {
-                            $this->api->send_message(getMessage("already in group", [$name]), deleteCmd: $message_id);
+                            $this->api->send_message(getMessage("already in group", [$name]));
                             return;
                         }
 
                         // check if message is 3 words long
                         if (count($rest) > 3) {
-                            $this->api->send_message(getMessage("not correct init private"), deleteCmd: $message_id);
+                            $this->api->send_message(getMessage("not correct init private"));
                             return;
                         }
 
                         // check if password is correct
                         if (hash("sha256", $password) != $g['password']) {
-                            $this->api->send_message(getMessage("wrong password"), deleteCmd: $message_id);
+                            $this->api->send_message(getMessage("wrong password"));
                             return;
                         }
                         array_push($g['members'], $this->api->get_uid());
 
                         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
-                        $this->api->send_message(getMessage("joined group", [$name]), deleteCmd: $message_id);
+                        $this->api->send_message(getMessage("joined group", [$name]));
                         return;
                     }
                 }
 
                 // send response
-                $this->api->send_message(getMessage("group not found", [$name]), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("group not found", [$name]));
             }
         }
         // Help
         else if (strpos(strtolower($text), "/help") === 0) {
-            $this->api->send_message(getMessage("help"), deleteCmd: $message_id);
+            $this->api->send_message(getMessage("help"));
         } else {
             // load chats.json
             $chats = json_decode(file_get_contents("chats.json"), true);
@@ -168,7 +170,7 @@ class Bot
 
             if (!$found) {
                 if (count(explode(" ", $text)) > 1) {
-                    $this->api->send_message(getMessage("not initialized"), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("not initialized"));
                     return;
                 } else {
                     $this->api->send_message(getMessage("not initialized"));
@@ -180,20 +182,20 @@ class Bot
             if (strpos(strtolower($text), "/getto") === 0) {
                 $result = renderMarkDown($group . "/Plenum");
                 download($result['markdown'], $result['filename'], $this->api->get_uid());
-                $this->api->send_message(getMessage("get to"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("get to"));
             }
             // Upload TO
             else if (strpos(strtolower($text), "/upto") === 0) {
                 $mtoken = createToken($group);
                 $result = renderMarkDown($group . "/Plenum");
                 upload($result['markdown'], $result['filename'], $group . "/Plenum");
-                $this->api->send_message(getMessage("upload to"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("upload to"));
             }
             // Look at TO
             else if (strpos(strtolower($text), "/seeto") === 0) {
                 $mtoken = createToken($group);
 
-                $this->api->send_message(getMessage("see to", ["https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken]), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("see to", ["https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken]));
             }
             // Change Password
             else if (strpos(strtolower($text), "/changepw") === 0) {
@@ -201,7 +203,7 @@ class Bot
                 $password = substr($text, 10);
 
                 if (strlen($password) < 4) {
-                    $this->api->send_message(getMessage("password too short"), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("password too short"));
                     return;
                 }
                 // set new password
@@ -212,7 +214,7 @@ class Bot
                     }
                 }
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-                $this->api->send_message(getMessage("password changed", [$group]), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("password changed", [$group]));
             }
             // Change Weekday
             else if (strpos(strtolower($text), "/plenum") === 0) {
@@ -222,7 +224,7 @@ class Bot
                 $weekdays = array("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday");
 
                 if (!in_array($weekday, $weekdays)) {
-                    $this->api->send_message(getMessage("has to be weekday"), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("has to be weekday"));
                     return;
                 }
 
@@ -230,7 +232,7 @@ class Bot
                 foreach ($chats['groups'] as &$g) {
                     if ($g['name'] == $group) {
                         $g['weekday'] = $weekday;
-                        $this->api->send_message(getMessage("plenum changed", [$group, weekdayED($weekday)]), deleteCmd: $message_id);
+                        $this->api->send_message(getMessage("plenum changed", [$group, weekdayED($weekday)]));
                         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                         // change date in TOs/group/Plenum_to.json
@@ -255,7 +257,7 @@ class Bot
                 foreach ($chats['groups'] as &$g) {
                     if ($g['name'] == $group) {
                         $g['dir'] = $folder;
-                        $this->api->send_message(getMessage("folder changed", [$group, $folder]), deleteCmd: $message_id);
+                        $this->api->send_message(getMessage("folder changed", [$group, $folder]));
                         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                         break;
@@ -279,7 +281,7 @@ class Bot
 
                 // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
                 $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $text, $matches);
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{2|1}\.\d{2|1}\.\d{4}|\d{2|1}\.\d{2|1}\.\d{2|1}|\d{2|1}\.\d{2|1}\./", $text, $matches);
 
                 // if no date is found, set date to today
                 if (count($matches) == 0) {
@@ -290,11 +292,11 @@ class Bot
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
-                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                    if (preg_match("/\d{2|1}\.\d{2|1}\.\d{4}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.Y", $date);
-                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                    } else if (preg_match("/\d{2|1}\.\d{2|1}\.\d{2}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.y", $date);
-                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                    } else if (preg_match("/\d{2|1}\.\d{2|1}\./", $date)) {
                         $date = DateTime::createFromFormat("d.m.", $date);
                     }
 
@@ -325,7 +327,7 @@ class Bot
 
                 // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
                 $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2}\.\d{2}\.\d{4}|\d{2}\.\d{2}\.\d{2}|\d{2}\.\d{2}\./", $content, $matches);
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{2|1}\.\d{2|1}\.\d{4}|\d{2|1}\.\d{2|1}\.\d{2|1}|\d{2|1}\.\d{2|1}\./", $content, $matches);
 
                 // if no date is found, set date to today
                 if (count($matches) == 0) {
@@ -334,13 +336,13 @@ class Bot
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
-                    if (preg_match("/\d{2}\.\d{2}\.\d{4}/", $date)) {
+                    if (preg_match("/\d{2|1}\.\d{2|1}\.\d{4}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.Y", $date);
                         $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2}\.\d{2}\.\d{2}/", $date)) {
+                    } else if (preg_match("/\d{2|1}\.\d{2|1}\.\d{2|1}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.y", $date);
                         $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2}\.\d{2}\./", $date)) {
+                    } else if (preg_match("/\d{2|1}\.\d{2|1}\./", $date)) {
                         $date = DateTime::createFromFormat("d.m.", $date);
                         $date = $date->format("Y-m-d");
                     }
@@ -365,17 +367,17 @@ class Bot
                 // delete top
                 if (deleteTOP($group, $title)) {
                     // send response
-                    $this->api->send_message(getMessage("top deleted", [$title]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("top deleted", [$title]));
                 } else {
-                    $this->api->send_message(getMessage("top not found", [$title]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("top not found", [$title]));
                 }
 
                 // delete event
                 if (deleteEvent($group, $title)) {
                     // send response
-                    $this->api->send_message(getMessage("event deleted", [$title]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("event deleted", [$title]));
                 } else {
-                    $this->api->send_message(getMessage("event not found", [$title]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("event not found", [$title]));
                 }
             }
             // Leave Group
@@ -392,21 +394,21 @@ class Bot
                             }
                         }
                         file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-                        $this->api->send_message(getMessage("left group", [$group]), deleteCmd: $message_id);
+                        $this->api->send_message(getMessage("left group", [$group]));
                         return;
                     }
                 }
                 // if group name in groups
                 if (in_array($group, $groups)) {
                     // send response
-                    $this->api->send_message(getMessage("leave group", [$group]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("leave group", [$group]));
                 } else {
                     // send response
-                    $this->api->send_message(getMessage("not in group", [$group]), deleteCmd: $message_id);
+                    $this->api->send_message(getMessage("not in group", [$group]));
                 }
             } else {
                 // send response
-                $this->api->send_message(getMessage("command not found"), deleteCmd: $message_id);
+                $this->api->send_message(getMessage("command not found"));
             }
         }
     }
@@ -444,10 +446,11 @@ class Bot
 }
 function getMessage($id, $args = [])
 {
-    $response = new Response();
+    $response = new BotMessage();
 
     switch ($id) {
         case "start":
+            $response->deleteAnswer = false;
             $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Du kannst deiner Ortsgruppe beitreten indem du /init <Ort> <Passwort> eingibst."
@@ -463,6 +466,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "start group":
+            $response->deleteAnswer = false;
             $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst."
@@ -476,6 +480,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "help":
+            $response->deleteAnswer = false;
             $response->text = "Hier ist eine Liste aller Befehle:"
                 . PHP_EOL
                 . PHP_EOL . "/top <Titel>"
@@ -525,11 +530,9 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
-            $response->deleteAnswer = true;
             $response->text = "Hier ist die TO";
             break;
         case "upload to":
-            $response->deleteAnswer = true;
             $response->text = "Die TO wurde erfolgreich hochgeladen.";
             break;
         case "see to":
@@ -540,14 +543,15 @@ function getMessage($id, $args = [])
             ];
             break;
         case "top saved":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
             break;
         case "event saved":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
             break;
         case "event recognized":
+            $response->deleteCommand = false;
             $response->text = "Termin am " . $args[0] . " erkannt. Hinzufügen?";
             $response->buttons = [
                 ["text" => "Ja", "callback_data" => "do:/termin " . $args[1]],
@@ -555,39 +559,30 @@ function getMessage($id, $args = [])
             ];
             break;
         case "event recognized/no":
-            $response->deleteAnswer = true;
             $response->text = "Termin wurde nicht hinzugefügt.";
             break;
         case "top deleted":
-            $response->deleteAnswer = true;
             $response->text = "TOP \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
         case "event deleted":
-            $response->deleteAnswer = true;
             $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
         case "top not found":
-            $response->deleteAnswer = true;
             $response->text = "TOP \"" . $args[0] . "\" wurde nicht gefunden.";
             break;
         case "event not found":
-            $response->deleteAnswer = true;
             $response->text = "Termin \"" . $args[0] . "\" wurde nicht gefunden.";
             break;
         case "init":
-            $response->deleteAnswer = true;
             $response->text = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt.";
             break;
         case "plenum changed":
-            $response->deleteAnswer = true;
             $response->text = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
             break;
         case "folder changed":
-            $response->deleteAnswer = true;
             $response->text = "Speicherort für " . $args[0] . " wurde auf \"" . $args[1] . "\" geändert.";
             break;
         case "joined group":
-            $response->deleteAnswer = true;
             $response->text = "Du bist der Ortsgruppe " . $args[0] . " beigetreten.";
             break;
         case "leave group":
@@ -598,23 +593,18 @@ function getMessage($id, $args = [])
             ];
             break;
         case "left group":
-            $response->deleteAnswer = true;
             $response->text = "Du hast die Ortsgruppe " . $args[0] . " verlassen.";
             break;
         case "group not found":
-            $response->deleteAnswer = true;
             $response->text = "Die Ortsgruppe " . $args[0] . " wurde nicht gefunden.";
             break;
         case "not in group":
-            $response->deleteAnswer = true;
             $response->text = "Du bist nicht in der Ortsgruppe " . $args[0] . ".";
             break;
         case "already in group":
-            $response->deleteAnswer = true;
             $response->text = "Du bist bereits in der Ortsgruppe " . $args[0] . ".";
             break;
         case "has to be weekday":
-            $response->deleteAnswer = true;
             $response->text = "Der Tag muss ein Wochentag sein.";
             $response->buttons = [
                 ["text" => "Montag", "callback_data" => "do:/plenum monday"],
@@ -627,37 +617,34 @@ function getMessage($id, $args = [])
             ];
             break;
         case "not correct init":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
         case "not correct init private":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "Bitte benutze den Befehl /init <Ortsgruppe> <Passwort> um einer Ortsgruppe beizutreten.";
             break;
         case "not correct init characters":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "Der Ortsgruppenname darf nur Buchstaben und Zahlen enthalten.";
             break;
         case "password changed":
-            $response->deleteAnswer = true;
             $response->text = "Passwort für Ortsgruppe " . $args[0] . " wurde geändert.";
             break;
         case "wrong password":
-            $response->deleteAnswer = true;
             $response->text = "Das Passwort ist falsch.";
             break;
         case "password too short":
-            $response->deleteAnswer = true;
             $response->text = "Das Passwort muss mindestens 4 Zeichen lang sein.";
             break;
         case "not initialized":
-            $response->deleteAnswer = true;
             $response->text = "Diese Ortsgruppe ist noch nicht initialisiert. Bitte benutze den Befehl /init <Ortsgruppe> <Wochentag> <Passwort> um eine neue Ortsgruppe hinzuzufügen.";
             break;
         case "command not found":
-            $response->deleteAnswer = true;
+            $response->deleteCommand = false;
             $response->text = "Dieser Befehl wurde nicht gefunden. Gib /help ein um eine Liste aller Befehle zu erhalten.";
             break;
         default:
+            $response->deleteCommand = false;
             $response->text = "Fehler: Nachricht nicht gefunden.";
             break;
     }

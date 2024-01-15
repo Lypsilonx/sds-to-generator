@@ -1,6 +1,5 @@
 <?php
 require_once '../sds-to-functions.php';
-require_once "bot-core.php";
 require_once "tg-api.php";
 
 // load token from token.txt
