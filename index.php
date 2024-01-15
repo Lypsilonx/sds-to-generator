@@ -8,7 +8,9 @@ session_start();
     <meta charset="utf-8">
     <title>SDS TO Generator</title>
     <link rel="icon" type="image/x-icon" href="../data/favicon.ico">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        rel="stylesheet" />
     <link rel="stylesheet" href="sds-to-style.css">
 </head>
 
@@ -140,13 +142,13 @@ session_start();
                 echo '<form action="Actions/signin.php" method="post">';
                 echo '<input type="hidden" name="dir" value="' . $dir . '">';
                 echo '<input type="password" name="password" placeholder="Passwort" id="passwordfield" title="Das Passwort, dass deine Gruppe festgelegt hat." required>';
-                echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
+                echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
                 echo '</form>';
             }
             if ($signedin_somewhere) {
                 echo '<form action="Actions/signout.php" method="post">';
                 echo '<input type="hidden" name="dir" value="' . $dir . '">';
-                echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><i class="material-icons"></i></a>';
+                echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
                 echo '</form>';
             }
             ?>
@@ -157,12 +159,12 @@ session_start();
                 } ?>" id="searchfield">
             </div>
             <a class="searchbutton">
-                <i class="material-icons">search</i>
+                <span class="material-symbols-outlined">search</span>
             </a>
             <?php
             if ($signedin) {
                 echo '<a class="editbutton" toptitle="' . $json_data['title'] . '" topdate="' . $json_data['date'] . '">';
-                echo '<i class="material-icons">edit</i>';
+                echo '<span class="material-symbols-outlined">edit</span>';
                 echo '</a>';
             }
             ?>
@@ -171,7 +173,7 @@ session_start();
     <div id="rbody">
         <div id="sidebar">
             <a id="menubutton" onmouseover="this.classList.add('hover')" onmouseout="this.classList.remove('hover')">
-                <i class="material-icons"></i>
+                <span class="material-symbols-outlined"></span>
             </a>
             <h2>
                 <?php
@@ -218,21 +220,21 @@ session_start();
                     <?php
                     if ($dir != "fallback" && $addto == false) {
                         echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $dir . '">';
-                        echo '<i class="material-icons">file_download</i>';
+                        echo '<span class="material-symbols-outlined">file_download</span>';
                         echo '</a>';
 
                         if ($signedin) {
                             echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $dir . '">';
-                            echo '<i class="material-icons">cloud_upload</i>';
+                            echo '<span class="material-symbols-outlined">cloud_upload</span>';
                             echo '</a>';
                         }
 
                         echo '<a class="shareb button">';
-                        echo '<i class="material-icons">share</i>';
+                        echo '<span class="material-symbols-outlined">share</span>';
                         echo '</a>';
 
                         echo '<a class="botb button" href="https://t.me/sds_to_bot">';
-                        echo '<i class="material-icons">smart_toy</i>';
+                        echo '<span class="material-symbols-outlined">smart_toy</span>';
                         echo '</a>';
                     }
                     ?>
@@ -284,7 +286,7 @@ session_start();
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
-                            echo '<i class="material-icons">edit</i>';
+                            echo '<span class="material-symbols-outlined">edit</span>';
                             echo '</a>';
                         }
                         echo '</div>';
@@ -316,7 +318,7 @@ session_start();
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
-                            echo '<i class="material-icons">edit</i>';
+                            echo '<span class="material-symbols-outlined">edit</span>';
                             echo '</a>';
                         }
                         echo '</div>';
@@ -327,7 +329,7 @@ session_start();
 
                 if ($signedin) {
                     echo '<a class="addeventb button">';
-                    echo '<i class="material-icons">add</i>';
+                    echo '<span class="material-symbols-outlined">add</span>';
                     echo '</a>';
                 }
 
@@ -349,7 +351,7 @@ session_start();
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="false">';
-                        echo '<i class="material-icons">edit</i>';
+                        echo '<span class="material-symbols-outlined">edit</span>';
                         echo '</a>';
                     }
                     echo '</div>';
@@ -374,7 +376,7 @@ session_start();
                     echo '</div>';
                     if ($signedin) {
                         echo '<a class="editbutton" topid="' . $top['id'] . '" topcontent="' . $top['content'] . '" toptitle="' . $top['title'] . '" toppermanent="true">';
-                        echo '<i class="material-icons">edit</i>';
+                        echo '<span class="material-symbols-outlined">edit</span>';
                         echo '</a>';
                     }
                     echo '</div>';
@@ -382,7 +384,7 @@ session_start();
 
                 if ($signedin) {
                     echo '<a class="addtopb button">';
-                    echo '<i class="material-icons">add</i>';
+                    echo '<span class="material-symbols-outlined">add</span>';
                     echo '</a>';
                 }
             }

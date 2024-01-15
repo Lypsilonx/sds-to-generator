@@ -16,8 +16,9 @@ window.addEventListener("resize", function () {
 // Change share icon on Apple devices
 if (navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)) {
   for (var i = 0; i < document.querySelectorAll(".shareb").length; i++) {
-    document.querySelectorAll(".shareb")[i].querySelector("i").innerText =
-      "ios_share";
+    document
+      .querySelectorAll(".shareb")
+      [i].querySelector(".material-symbols-outlined").innerText = "ios_share";
   }
 }
 
@@ -195,9 +196,10 @@ document.querySelectorAll(".downloadb").forEach(function (button) {
   button.addEventListener("click", function () {
     // cahnge icon to tick for 3 seconds
     document.querySelectorAll(".downloadb").forEach(function (button) {
-      button.querySelector("i").innerText = "check";
+      button.querySelector(".material-symbols-outlined").innerText = "check";
       setTimeout(function () {
-        button.querySelector("i").innerText = "file_download";
+        button.querySelector(".material-symbols-outlined").innerText =
+          "file_download";
       }, 3000);
     });
   });
@@ -218,7 +220,7 @@ document.querySelectorAll(".uploadb").forEach(function (button) {
 
     // cahnge icon to tick for 3 seconds
     document.querySelectorAll(".uploadb").forEach(function (button) {
-      button.querySelector("i").innerText = "check";
+      button.querySelector(".material-symbols-outlined").innerText = "check";
     });
   });
 });

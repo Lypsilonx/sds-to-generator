@@ -78,6 +78,20 @@
   font-family: Open-Sans-Bold;
   src: url(../fonts/OpenSans-Bold.ttf);
 }
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
 /* #endregion */
 /* ------------------------- General ------------------------- */
 /* #region General */
@@ -196,7 +210,7 @@ button {
   }
 }
 
-i {
+.material-symbols-outlined {
   cursor: unset;
   pointer-events: none;
 }
@@ -335,12 +349,12 @@ header {
       border-right: 2px solid var(--main-bg-color);
       color: var(--sds-color-font);
 
-      i::before {
+      .material-symbols-outlined::before {
         content: "arrow_back";
       }
     }
 
-    i::before {
+    .material-symbols-outlined::before {
       content: "menu";
     }
   }
@@ -365,7 +379,7 @@ body.hidemenu{
     height: 100%;
     left: calc(-1 * max(20%, 200px) - 2%);
 
-    #menubutton.hover i::before {
+    #menubutton.hover .material-symbols-outlined::before {
       content: "arrow_forward";
     }
   }
@@ -749,14 +763,14 @@ body.hovermenu{
     margin-left: 0;
   }
 
-  .unlockbutton i::before,
-  .lockbutton:hover i::before {
+  .unlockbutton .material-symbols-outlined::before,
+  .lockbutton:hover .material-symbols-outlined::before {
     /* change material icon to locked */
     content: "lock";
   }
 
-  .unlockbutton:hover i::before,
-  .lockbutton i::before {
+  .unlockbutton:hover .material-symbols-outlined::before,
+  .lockbutton .material-symbols-outlined::before {
     /* cahnge material icon to unlocked */
     content: "lock_open";
   }

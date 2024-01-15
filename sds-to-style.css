@@ -81,6 +81,20 @@
   font-family: Open-Sans-Bold;
   src: url(../fonts/OpenSans-Bold.ttf);
 }
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px; /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
 /* #endregion */
 /* ------------------------- General ------------------------- */
 /* #region General */
@@ -197,7 +211,7 @@ button * {
   cursor: pointer;
 }
 
-i {
+.material-symbols-outlined {
   cursor: unset;
   pointer-events: none;
 }
@@ -324,10 +338,10 @@ header {
   border-right: 2px solid var(--main-bg-color);
   color: var(--sds-color-font);
 }
-#sidebar #menubutton.hover i::before {
+#sidebar #menubutton.hover .material-symbols-outlined::before {
   content: "arrow_back";
 }
-#sidebar #menubutton i::before {
+#sidebar #menubutton .material-symbols-outlined::before {
   content: "menu";
 }
 
@@ -349,7 +363,7 @@ body.hidemenu #sidebar {
   height: 100%;
   left: calc(-1 * max(20%, 200px) - 2%);
 }
-body.hidemenu #sidebar #menubutton.hover i::before {
+body.hidemenu #sidebar #menubutton.hover .material-symbols-outlined::before {
   content: "arrow_forward";
 }
 body.hidemenu header h1 {
@@ -682,13 +696,13 @@ body.hovermenu #main .button::after {
   width: 1.5em;
   margin-left: 0;
 }
-#headerbuttons .unlockbutton i::before,
-#headerbuttons .lockbutton:hover i::before {
+#headerbuttons .unlockbutton .material-symbols-outlined::before,
+#headerbuttons .lockbutton:hover .material-symbols-outlined::before {
   /* change material icon to locked */
   content: "lock";
 }
-#headerbuttons .unlockbutton:hover i::before,
-#headerbuttons .lockbutton i::before {
+#headerbuttons .unlockbutton:hover .material-symbols-outlined::before,
+#headerbuttons .lockbutton .material-symbols-outlined::before {
   /* cahnge material icon to unlocked */
   content: "lock_open";
 }
