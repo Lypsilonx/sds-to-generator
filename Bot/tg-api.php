@@ -12,11 +12,18 @@ class TelegramBotApi implements BotApi
         $this->token = $token;
     }
 
-    public function handle_callback($update): ?CallbackInfo
+    public function debug()
+    {
+        echo "Debug mode enabled\n";
+        $this->chat_id = "debug";
+        $this->message_id = "debug";
+    }
+
+    public function handle_callback($update): ?UserMessage
     {
         $callback_do = false;
 
-        $output = new CallbackInfo();
+        $output = new UserMessage();
 
         // Check if callback is set
         if (isset($update['callback_query'])) {
@@ -88,6 +95,11 @@ class TelegramBotApi implements BotApi
                 )
             )
         );
+
+        if ($this->chat_id == "debug") {
+            return $message;
+        }
+
         $message_id = $message['result']['message_id'];
 
         // log answer
@@ -173,13 +185,19 @@ class TelegramBotApi implements BotApi
         return $this->chat_id < 0;
     }
 
-    public function get_uid(): int
+    public function get_uid(): string
     {
         return $this->chat_id;
     }
 
     private function send_bot_api_request($method, $params = [])
     {
+        if ($this->chat_id == "debug") {
+            echo $method;
+            echo var_dump($params);
+            return $this->message_id;
+        }
+
         $unencoded = $params;
         foreach ($unencoded as $key => $value) {
             $params[$key] = urlencode($value);

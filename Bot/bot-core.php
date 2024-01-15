@@ -1,21 +1,27 @@
 <?php
 require_once "BotMessage.php";
-class CallbackInfo
+class UserMessage
 {
-    public $text = "";
-    public $username = null;
+    public function __construct($text = "", $username = null)
+    {
+        $this->text = $text;
+        $this->username = $username;
+    }
+
+    public $text;
+    public $username;
 }
 
 interface BotApi
 {
-    public function handle_callback($update): ?CallbackInfo;
+    public function handle_callback($update): ?UserMessage;
     public function send_message(BotMessage $response);
     public function delete_message($message_id);
     public function debug_log($message);
     public function react($message_id, $reaction);
     public function leave_group();
     public function in_group(): bool;
-    public function get_uid(): int;
+    public function get_uid(): string;
 }
 class Bot
 {
@@ -35,6 +41,12 @@ class Bot
         if ($callback_result == null) {
             return;
         }
+
+        $this->handle_message($callback_result);
+    }
+
+    public function handle_message(UserMessage $callback_result)
+    {
         $text = $callback_result->text;
         $username = $callback_result->username;
 
@@ -164,9 +176,11 @@ class Bot
                 if (in_array($this->api->get_uid(), $g['members'])) {
                     $found = true;
                     array_push($groups, $g['name']);
+                } else if ($this->api->get_uid() == "debug") {
+                    $found = true;
+                    array_push($groups, "debug");
                 }
             }
-            $group = $groups[0];
 
             if (!$found) {
                 if (count(explode(" ", $text)) > 1) {
@@ -177,6 +191,8 @@ class Bot
                     return;
                 }
             }
+
+            $group = $groups[0];
 
             // Get TO
             if (strpos(strtolower($text), "/getto") === 0) {
@@ -281,7 +297,9 @@ class Bot
 
                 // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
                 $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2|1}\.\d{2|1}\.\d{4}|\d{2|1}\.\d{2|1}\.\d{2|1}|\d{2|1}\.\d{2|1}\./", $text, $matches);
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.\d{4}|\d{1,2}\.\d{1,2}\.\d{1,2}|\d{1,2}\.\d{1,2}\./", $text, $matches);
+                echo $text;
+                echo var_dump($matches);
 
                 // if no date is found, set date to today
                 if (count($matches) == 0) {
@@ -292,11 +310,11 @@ class Bot
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
-                    if (preg_match("/\d{2|1}\.\d{2|1}\.\d{4}/", $date)) {
+                    if (preg_match("/\d{1,2}\.\d{1,2}\.\d{4}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.Y", $date);
-                    } else if (preg_match("/\d{2|1}\.\d{2|1}\.\d{2}/", $date)) {
+                    } else if (preg_match("/\d{1,2}\.\d{1,2}\.\d{2}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.y", $date);
-                    } else if (preg_match("/\d{2|1}\.\d{2|1}\./", $date)) {
+                    } else if (preg_match("/\d{1,2}\.\d{1,2}\./", $date)) {
                         $date = DateTime::createFromFormat("d.m.", $date);
                     }
 
@@ -327,7 +345,7 @@ class Bot
 
                 // get date from text using regex (yyyy-mm-dd or dd.mm.yyyy or dd.mm.yy or dd.mm.)
                 $matches = array();
-                preg_match("/\d{4}-\d{2}-\d{2}|\d{2|1}\.\d{2|1}\.\d{4}|\d{2|1}\.\d{2|1}\.\d{2|1}|\d{2|1}\.\d{2|1}\./", $content, $matches);
+                preg_match("/\d{4}-\d{2}-\d{2}|\d{1,2}\.\d{1,2}\.\d{4}|\d{1,2}\.\d{1,2}\.\d{1,2}|\d{1,2}\.\d{1,2}\./", $content, $matches);
 
                 // if no date is found, set date to today
                 if (count($matches) == 0) {
@@ -336,13 +354,13 @@ class Bot
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
-                    if (preg_match("/\d{2|1}\.\d{2|1}\.\d{4}/", $date)) {
+                    if (preg_match("/\d{1,2}\.\d{1,2}\.\d{4}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.Y", $date);
                         $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2|1}\.\d{2|1}\.\d{2|1}/", $date)) {
+                    } else if (preg_match("/\d{1,2}\.\d{1,2}\.\d{1,2}/", $date)) {
                         $date = DateTime::createFromFormat("d.m.y", $date);
                         $date = $date->format("Y-m-d");
-                    } else if (preg_match("/\d{2|1}\.\d{2|1}\./", $date)) {
+                    } else if (preg_match("/\d{1,2}\.\d{1,2}\./", $date)) {
                         $date = DateTime::createFromFormat("d.m.", $date);
                         $date = $date->format("Y-m-d");
                     }
@@ -746,6 +764,10 @@ function logToFile($message)
 
 function saveTOP($og, $title, $content)
 {
+    if ($og == "debug") {
+        return;
+    }
+
     // enter TOP into TOs/Ortsgruppe/Plenum_to.json
     $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
     // generate unique id
@@ -757,6 +779,10 @@ function saveTOP($og, $title, $content)
 
 function saveEvent($og, $title, $content, $date)
 {
+    if ($og == "debug") {
+        return;
+    }
+
     // enter TOP into TOs/Ortsgruppe/events.json
     $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
     // generate unique id
@@ -768,6 +794,10 @@ function saveEvent($og, $title, $content, $date)
 
 function deleteTOP($og, $title)
 {
+    if ($og == "debug") {
+        return;
+    }
+
     // load TOs/Ortsgruppe/Plenum_to.json
     $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
     // search for top with title
@@ -785,6 +815,10 @@ function deleteTOP($og, $title)
 
 function deleteEvent($og, $title)
 {
+    if ($og == "debug") {
+        return;
+    }
+
     // load TOs/Ortsgruppe/events.json
     $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
     // search for top with title
