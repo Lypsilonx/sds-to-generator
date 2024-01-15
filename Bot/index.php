@@ -1,4 +1,6 @@
 <?php
+require_once '../sds-to-functions.php';
+
 // load token from token.txt
 $token = file_get_contents("token.txt");
 $input = file_get_contents('php://input');
@@ -13,10 +15,14 @@ if (isset($update['callback_query'])) {
 
     // delete callback message
     $callback_message_id = $update['callback_query']['message']['message_id'];
-    send_bot_api_request($token, "deleteMessage", array(
-        "chat_id" => $chat_id,
-        "message_id" => $callback_message_id
-    ));
+    send_bot_api_request(
+        $token,
+        "deleteMessage",
+        array(
+            "chat_id" => $chat_id,
+            "message_id" => $callback_message_id
+        )
+    );
 
     if (strpos($callback_message, "say:") === 0) {
         $callback_message = substr($callback_message, 4);
@@ -230,13 +236,16 @@ else if (strpos(strtolower($text), "/help") === 0) {
 
     // Get TO
     if (strpos(strtolower($text), "/getto") === 0) {
-        getMessage("get to", [$domain . "Actions/downloadto.php?dir=" . $group . "&chatid=" . $chat_id])->send($token, $chat_id, deleteCmd: $message_id);
+        $result = renderMarkDown($group . "/Plenum");
+        download($result['markdown'], $result['filename'], $chat_id);
+        getMessage("get to")->send($token, $chat_id, deleteCmd: $message_id);
     }
     // Upload TO
     else if (strpos(strtolower($text), "/upto") === 0) {
         $mtoken = createToken($group);
-
-        getMessage("upload to", [$domain . "Actions/uploadto.php?dir=" . $group . "&token=" . $mtoken])->send($token, $chat_id, deleteCmd: $message_id);
+        $result = renderMarkDown($group . "/Plenum");
+        upload($result['markdown'], $result['filename'], $group . "/Plenum");
+        getMessage("upload to")->send($token, $chat_id, deleteCmd: $message_id);
     }
     // Look at TO
     else if (strpos(strtolower($text), "/seeto") === 0) {
@@ -558,10 +567,13 @@ class Response
 
         // if deleteAtMidnight is true, add to todelete.json
         if ($this->deleteAtMidnight) {
-            $url = build_bot_api_link($token, "deleteMessage", array(
-                "chat_id" => $chat_id,
-                "message_id" => $message_id
-            )
+            $url = build_bot_api_link(
+                $token,
+                "deleteMessage",
+                array(
+                    "chat_id" => $chat_id,
+                    "message_id" => $message_id
+                )
             );
             $todelete = json_decode(file_get_contents("todelete.json"), true);
             array_push($todelete, $url);
@@ -570,10 +582,13 @@ class Response
 
         // if deleteCmd is not null, delete command message
         if ($deleteCmd != null) {
-            send_bot_api_request($token, "deleteMessage", array(
-                "chat_id" => $chat_id,
-                "message_id" => $deleteCmd
-            )
+            send_bot_api_request(
+                $token,
+                "deleteMessage",
+                array(
+                    "chat_id" => $chat_id,
+                    "message_id" => $deleteCmd
+                )
             );
         }
 
@@ -581,15 +596,32 @@ class Response
         if ($this->deleteAnswer) {
             sleep($this->delTime);
             // ! Find a better way to do this
-            send_bot_api_request($token, "deleteMessage", array(
-                "chat_id" => $chat_id,
-                "message_id" => $message_id
-            )
+            send_bot_api_request(
+                $token,
+                "deleteMessage",
+                array(
+                    "chat_id" => $chat_id,
+                    "message_id" => $message_id
+                )
             );
         }
 
         return $message_id;
     }
+}
+
+function telegram_debug_log($token, $chat_id, $message)
+{
+    $message = send_bot_api_request(
+        $token,
+        "sendMessage",
+        array(
+            "chat_id" => $chat_id,
+            "text" => $message,
+            "disable_notification" => true,
+            "parse_mode" => "Markdown"
+        )
+    );
 }
 
 function getMessage($id, $args = [])
@@ -675,18 +707,12 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Wenn ihr eure Ortsgruppe löschen wollt, schreibt mir einfach eine Mail an support@politischdekoriert.de";
             break;
         case "get to":
-            $response->deleteAtMidnight = true;
-            $response->text = "Klicke hier um die TO zu erhalten.";
-            $response->buttons = [
-                ['text' => 'TO Herunterladen', 'url' => $args[0]]
-            ];
+            $response->deleteAnswer = true;
+            $response->text = "Hier ist die TO";
             break;
         case "upload to":
-            $response->deleteAtMidnight = true;
-            $response->text = "Klicke hier um die TO hochzuladen.";
-            $response->buttons = [
-                ['text' => 'TO Hochladen', 'url' => $args[0]]
-            ];
+            $response->deleteAnswer = true;
+            $response->text = "Die TO wurde erfolgreich hochgeladen.";
             break;
         case "see to":
             $response->deleteAtMidnight = true;

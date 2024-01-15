@@ -2,12 +2,16 @@
 // start session
 session_start();
 // prevent script injection
-if (!isset($_POST['title']) || !isset($_POST['content']) || !isset($_POST['dir'])) {
+if (!isset($_POST['title']) || !isset($_POST['dir'])) {
     header('Location: ../index.php');
     exit();
 }
 $_POST['title'] = htmlspecialchars($_POST['title']);
-$_POST['content'] = htmlspecialchars($_POST['content']);
+if (isset($_POST['content'])) {
+    $_POST['content'] = htmlspecialchars($_POST['content']);
+} else {
+    $_POST['content'] = "";
+}
 $_POST['dir'] = htmlspecialchars($_POST['dir']);
 
 // recieves form data from sds-to-generator/index.php

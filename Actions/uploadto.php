@@ -1,6 +1,7 @@
 <?php
 // start session
 session_start();
+require_once "../sds-to-functions.php";
 
 // check if user is signed in
 if (!isset($_GET['dir'])) {
@@ -8,12 +9,17 @@ if (!isset($_GET['dir'])) {
     exit();
 }
 $_GET['dir'] = htmlspecialchars($_GET['dir']);
-$_GET['token'] = htmlspecialchars($_GET['token']);
+if (isset($_GET['token'])) {
+    $_GET['token'] = htmlspecialchars($_GET['token']);
+    $token = $_GET['token'];
+} else {
+    $token = "";
+}
 $folder = $_GET['dir'];
+$group = explode("/", $folder)[0];
 $signedin = false;
 
-$token = "";
-if (isset($_GET['token'])) {
+if ($token != "") {
     $token = $_GET['token'];
 
     // check if token is set
@@ -24,11 +30,11 @@ if (isset($_GET['token'])) {
         $tokens = json_decode($json, true);
         // check if dir is in tokens.json as "group"
         for ($i = 0; $i < count($tokens); $i++) {
-            if ($tokens[$i]["group"] == $folder) {
+            if ($tokens[$i]["group"] == $group) {
                 // check if token is in tokens.json
                 if (in_array($_GET['token'], $tokens[$i]["tokens"])) {
                     // set session variable
-                    $_SESSION['signedin'] = $folder;
+                    $_SESSION['signedin'] = $group;
                     $signedin = true;
                 }
             }
@@ -39,57 +45,17 @@ if (isset($_GET['token'])) {
 // check if user is signed in
 if (isset($_SESSION['signedin'])) {
     // check if user is signed in to the right group
-    if ($_SESSION['signedin'] == $folder) {
+    if ($_SESSION['signedin'] == $group) {
         $signedin = true;
     }
 }
 
 // check if user is signed in
 if (!$signedin) {
-    header('Location: ../index.php?dir=' . $folder . '/Plenum');
+    header('Location: ../index.php?dir=' . $folder);
     exit();
 }
 
-$file = "../TOs/" . $folder . "/Plenum_to.json";
-$json = file_get_contents($file);
-
-// decode json to array
-$json_data = json_decode($json, true);
-
+$result = renderMarkDown($folder);
+upload($result['markdown'], $result['filename'], $folder);
 ?>
-
-<head>
-    <meta charset="UTF-8">
-    <title>Upload</title>
-    <link rel="stylesheet" href="../sds-to-style.css">
-</head>
-
-<body>
-    <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
-    <script src="../sds-to-functions.js"></script>
-    <script style="display: none;">
-        var dir = "<?php echo $folder; ?>";
-        renderMarkDown(dir + '/Plenum', upload, "../");
-
-        fetch("../Bot/chats.json").then(function (response) {
-            return response.json();
-        })
-            .then(function (chats) {
-                //go to index.php after 1 second
-                setTimeout(function () {
-                    //find chat where name is dir
-                    for (var i = 0; i < chats["groups"].length; i++) {
-                        if (chats["groups"][i]["name"] == dir) {
-                            dir = chats["groups"][i]["dir"];
-                            // html encode dir
-                            dir = encodeURIComponent(dir);
-                            console.log(dir);
-                            break;
-                        }
-                    }
-
-                    window.location.href = "https://cloud.linke-sds.org/apps/files/?dir=/" + dir;
-                }, 1000);
-            });
-    </script>
-</body>

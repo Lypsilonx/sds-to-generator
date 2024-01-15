@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* ------------------------ Variables ------------------------ */
 /* #region Variables */
 @media (prefers-color-scheme: dark) {
@@ -54,7 +55,6 @@ body {
   padding: 0;
   overflow: hidden;
 }
-
 body * {
   color: var(--sds-color-font);
   display: flex;
@@ -89,7 +89,7 @@ ul {
 }
 
 a,
-input[type="submit"] {
+input[type=submit] {
   text-decoration: none;
   background-color: var(--sds-accent-1);
   color: var(--sds-color-font);
@@ -103,8 +103,8 @@ input[type="submit"] {
 }
 
 a:hover,
-input[type="submit"]:hover,
-button[type="submit"]:hover {
+input[type=submit]:hover,
+button[type=submit]:hover {
   background-color: var(--sds-color-2);
 }
 
@@ -116,6 +116,7 @@ hr {
 .hidden {
   display: none;
 }
+
 /* #endregion */
 /*  ------------------------- Cursor ------------------------- */
 /* #region Cursor */
@@ -126,7 +127,6 @@ body * {
 a {
   cursor: pointer;
 }
-
 a * {
   cursor: pointer;
 }
@@ -134,7 +134,6 @@ a * {
 input {
   cursor: pointer;
 }
-
 input * {
   cursor: pointer;
 }
@@ -142,7 +141,6 @@ input * {
 button {
   cursor: pointer;
 }
-
 button * {
   cursor: pointer;
 }
@@ -152,10 +150,11 @@ i {
   pointer-events: none;
 }
 
-input[type="text"],
-input[type="password"] {
+input[type=text],
+input[type=password] {
   cursor: text;
 }
+
 /* #endregion */
 /* ------------------------- Layout -------------------------- */
 /* #region Layout */
@@ -180,6 +179,13 @@ header {
   width: 100%;
 }
 
+/* #endregion */
+/* ------------------------- Sidebar ------------------------- */
+/* #region Sidebar */
+.placeholder {
+  margin-top: 15%;
+}
+
 #sidebar {
   position: relative;
   width: 20%;
@@ -191,28 +197,15 @@ header {
   min-width: 200px;
   box-shadow: 0 0 5px var(--sds-color-shadow);
   z-index: 2;
-
   transition: left 0.5s ease-in-out;
 }
-/* #endregion */
-/* ------------------------- Sidebar ------------------------- */
-/* #region Sidebar */
-.placeholder {
-  margin-top: 15%;
-}
-
 #sidebar h2 {
   top: 0;
   left: 0;
   position: absolute;
   width: calc(98% - 1rem);
   padding: calc(1% + 0.5rem);
-  background-image: linear-gradient(
-    180deg,
-    var(--main-bg-color) 0%,
-    var(--main-bg-color) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
+  background-image: linear-gradient(180deg, var(--main-bg-color) 0%, var(--main-bg-color) 50%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
   height: 2em;
   font-size: 1.5em;
@@ -221,17 +214,14 @@ header {
   margin-block-end: 0;
   text-align: left;
 }
-
 #sidebar ul {
   height: 96%;
   width: 100%;
   overflow: scroll;
 }
-
 #sidebar li {
   width: unset;
 }
-
 #sidebar li a {
   display: inline-block;
   text-align: left;
@@ -241,7 +231,6 @@ header {
   overflow: hidden;
   white-space: nowrap;
 }
-
 #sidebar .button {
   background-color: var(--sds-accent-1);
   width: 1.5em;
@@ -250,33 +239,18 @@ header {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
-
-#actionbuttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 1em;
-  margin-bottom: 0;
-  position: fixed;
-  bottom: 1em;
-}
-
-#sidebar a.button:hover {
-  background-color: var(--sds-color-2);
-}
-
 #sidebar a {
   background-color: unset;
   justify-content: left;
   padding: 0.5em;
 }
-
+#sidebar a.button:hover {
+  background-color: var(--sds-color-2);
+}
 #sidebar a:hover {
   background-color: var(--sds-color-2);
   color: var(--main-bg-color);
 }
-
 #sidebar #menubutton {
   display: flex;
   position: absolute;
@@ -291,35 +265,42 @@ header {
   justify-content: center;
   background-color: var(--sds-accent-1);
 }
-
 #sidebar #menubutton.hover {
   background-color: var(--sds-accent-2);
   color: var(--sds-color-font);
 }
-
+#sidebar #menubutton.hover i::before {
+  content: "arrow_back";
+}
 #sidebar #menubutton i::before {
   content: "menu";
 }
 
-#sidebar #menubutton.hover i::before {
-  content: "arrow_back";
-}
-
-body.hidemenu #sidebar #menubutton.hover i::before {
-  content: "arrow_forward";
+#actionbuttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1em;
+  margin-bottom: 0;
+  position: fixed;
+  bottom: 1em;
 }
 
 body.hidemenu #sidebar {
-  left: calc(-1 * max(20%, 200px) - 2%);
-}
-
-body.hovermenu #sidebar {
   position: absolute;
   height: 100%;
+  left: calc(-1 * max(20%, 200px) - 2%);
 }
-
-body.hovermenu header h1 {
+body.hidemenu #sidebar #menubutton.hover i::before {
+  content: "arrow_forward";
+}
+body.hidemenu header h1 {
   font-size: 1em;
+}
+body.hidemenu:not(.hovermenu) #main {
+  width: 90%;
+  margin-left: calc(-1 * max(20%, 200px));
 }
 
 @media screen and (min-width: 800px) {
@@ -328,26 +309,22 @@ body.hovermenu header h1 {
   }
 }
 /* #endregion */
-/* -------------------------- Main --------------------------- */
-/* #region Main */
 #main {
   position: relative;
-  width: calc(min(78%, 98% - 200px));
+  width: min(78%, 98% - 200px);
   margin: 2%;
   padding: 3%;
   margin-bottom: 0;
   box-shadow: 0 0 2px var(--sds-color-shadow);
   background-color: var(--main-bg-color);
   overflow: scroll;
-
+  gap: 2em;
   transition: margin-left 0.5s ease-in-out;
 }
-
 #main * {
   justify-content: left;
   text-align: left;
 }
-
 #main h2 {
   display: table;
   font-size: 1.8em;
@@ -360,11 +337,6 @@ body.hovermenu header h1 {
   padding-left: 0.25em;
   padding-right: 0.25em;
 }
-
-#titleholder {
-  display: table;
-}
-
 #main a:has(h3) {
   display: table;
   margin-block-start: 0;
@@ -374,7 +346,9 @@ body.hovermenu header h1 {
   margin: 0;
   padding: 0;
 }
-
+#main a > h3:hover {
+  background-color: var(--sds-color-2);
+}
 #main h3 {
   display: table;
   font-size: 1.2em;
@@ -386,18 +360,12 @@ body.hovermenu header h1 {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
-
-#main a > h3:hover {
-  background-color: var(--sds-color-2);
-}
-
 #main h4 {
   font-size: 1.2em;
   font-family: "Bitter";
   margin-block-start: 0;
   margin-block-end: 0;
 }
-
 #main .button {
   position: relative;
   width: 8em;
@@ -412,127 +380,107 @@ body.hovermenu header h1 {
   justify-content: space-between;
   text-align: center;
 }
-
 #main .addtopb::after {
   content: "Neuer TOP";
 }
-
 #main .addeventb {
   content: "Neues Event";
 }
-
-body.hidemenu:not(.hovermenu) #main {
-  width: 90%;
-  margin-left: calc(-1 * max(20%, 200px));
+#main .eventdate {
+  display: table;
+}
+#main .eventdate > a {
+  display: table;
+}
+#main #titleholder {
+  display: table;
+}
+#main .catrow {
+  display: table;
+  margin-top: 2em;
+  flex-direction: column;
+  align-items: left;
+  padding: 0;
+}
+#main .toprow {
+  margin-top: 2em;
+  margin-left: 2em;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  width: calc(100% - 2em);
+  padding: 0;
+}
+#main .toprow .editbutton {
+  background-color: var(--sds-accent-1);
+  color: var(--sds-color-font);
+  height: 2.5em;
+  width: 1.5em;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1em;
+}
+#main .toprow .top {
+  /* space between p's */
+}
+#main .toprow .top > *:not(h4, h5, a:has(h5, h4), .eventdate) {
+  margin-left: 1em;
+  display: inline;
+}
+#main .toprow .top *:not(:first-child, h4, h5, a:has(h5, h4), .eventdate) {
+  margin-top: 0.8em;
+}
+#main .toprow .top p:last-child:empty {
+  margin-top: 0;
+}
+#main .toprow .top ul li {
+  display: block;
+  margin-left: 1em;
+}
+#main .toprow .top ul li::before {
+  content: "•";
+  margin-right: 0.5em;
+}
+#main .toprow .top ol {
+  counter-reset: li;
+}
+#main .toprow .top ol li {
+  display: block;
+}
+#main .toprow .top ol li::before {
+  counter-increment: li;
+  content: counter(li) ".";
+  margin-right: 0.5em;
+}
+#main .toprow .top ul,
+#main .toprow .top ol {
+  margin-left: 1em;
+  margin-top: 0.8em;
 }
 
 body.hovermenu #main {
   width: auto;
 }
-
 body.hovermenu #main .button {
   width: 1.5em;
   left: calc(50% - 1.75em);
 }
-
 body.hovermenu #main .button::after {
   content: "";
 }
 
 @media screen and (min-width: 800px) {
   #main {
-    width: calc(min(78%, 98% - 200px));
+    width: min(78%, 98% - 200px);
     margin-left: 2%;
   }
-
   #main .addtopb::after {
     content: "Neuer TOP";
   }
-
   #main .addeventb::after {
     content: "Neues Event";
   }
-}
-
-#main .toprow {
-  margin-top: 2em;
-  margin-left: 2em;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: calc(100% - 2em);
-  padding: 0;
-}
-
-#main .eventdate {
-  display: table;
-}
-
-#main .eventdate > a {
-  display: table;
-}
-
-.top > *:not(h4, h5, a:has(h5, h4), .eventdate) {
-  margin-left: 1em;
-  display: inline;
-}
-
-/* space between p's */
-.top *:not(:first-child, h4, h5, a:has(h5, h4), .eventdate) {
-  margin-top: 0.8em;
-}
-
-.top p:last-child:empty {
-  margin-top: 0;
-}
-
-.top ul li {
-  display: block;
-  margin-left: 1em;
-}
-
-.top ul li::before {
-  content: "•";
-  margin-right: 0.5em;
-}
-
-.top ol li {
-  display: block;
-}
-
-.top ol {
-  counter-reset: li;
-}
-
-.top ul,
-.top ol {
-  margin-left: 1em;
-  margin-top: 0.8em;
-}
-
-.top ol li::before {
-  counter-increment: li;
-  content: counter(li) ".";
-  margin-right: 0.5em;
-}
-
-#main .catrow {
-  display: table;
-  margin-top: 4em;
-  flex-direction: column;
-  align-items: left;
-
-  padding: 0;
-}
-
-.editbutton {
-  background-color: var(--sds-accent-1);
-  color: var(--sds-color-font);
-  height: 2.5em;
-  width: 1.5em;
-  align-items: center;
-  justify-content: center;
-  margin-left: 1em;
 }
 /* #endregion */
 /* -------------------------- Menus -------------------------- */
@@ -548,7 +496,6 @@ body.hovermenu #main .button::after {
   justify-content: center;
   align-items: center;
 }
-
 .menu form {
   background-color: var(--main-bg-color);
   width: 50%;
@@ -558,21 +505,19 @@ body.hovermenu #main .button::after {
   flex-direction: column;
   gap: 1em;
 }
-
-.addtop form,
-.addevent form {
-  height: 80%;
-}
-
-.addto form {
-  height: 50%;
-}
-
 .menu form * {
   text-align: left;
   border: none;
 }
-
+.menu form #contentfield {
+  padding: 0.5em;
+  height: 70%;
+  width: 100%;
+  border: 1px solid var(--sds-color-font);
+  background-color: var(--main-bg-color);
+  font-size: 1em;
+  overflow: scroll;
+}
 .menu h2 {
   text-align: left;
   border: none;
@@ -585,7 +530,6 @@ body.hovermenu #main .button::after {
   padding-right: 0.25em;
   margin-bottom: 1em;
 }
-
 .menu #pfield {
   flex-direction: row;
   justify-content: space-around;
@@ -597,6 +541,15 @@ body.hovermenu #main .button::after {
   width: 14em;
 }
 
+.addtop form,
+.addevent form {
+  height: 80%;
+}
+
+.addto form {
+  height: 50%;
+}
+
 .atmbuttons {
   height: 2.5em;
   width: 80%;
@@ -604,13 +557,6 @@ body.hovermenu #main .button::after {
   align-items: center;
   flex-direction: row;
 }
-
-@media (max-width: 1200px) {
-  .atmbuttons {
-    width: 80%;
-  }
-}
-
 .atmbuttons * {
   width: 30%;
   gap: 1em;
@@ -622,8 +568,13 @@ body.hovermenu #main .button::after {
   justify-content: center;
 }
 
-.menu form input[type="text"],
-.menu form input[type="date"] {
+@media (max-width: 1200px) {
+  .atmbuttons {
+    width: 80%;
+  }
+}
+.menu form input[type=text],
+.menu form input[type=date] {
   height: 2em;
   width: 100%;
   padding: 0.5em;
@@ -632,16 +583,6 @@ body.hovermenu #main .button::after {
   background-color: var(--main-bg-color);
   font-family: "Bitter";
   font-size: 1.2em;
-}
-
-.menu form #contentfield {
-  padding: 0.5em;
-  height: 70%;
-  width: 100%;
-  border: 1px solid var(--sds-color-font);
-  background-color: var(--main-bg-color);
-  font-size: 1em;
-  overflow: scroll;
 }
 
 #headerbuttons {
@@ -653,13 +594,11 @@ body.hovermenu #main .button::after {
   justify-content: center;
   width: max(50%, 20em);
 }
-
 #headerbuttons form {
   flex-direction: row;
 }
-
-#headerbuttons input[type="text"],
-#headerbuttons input[type="password"] {
+#headerbuttons input[type=text],
+#headerbuttons input[type=password] {
   padding: 0.5em;
   font-size: 1em;
   background-color: var(--sds-color-font);
@@ -669,7 +608,6 @@ body.hovermenu #main .button::after {
   width: calc(100% - 2.5em);
   min-width: 5em;
 }
-
 #headerbuttons .editbutton,
 #headerbuttons .searchbutton,
 #headerbuttons .unlockbutton,
@@ -678,16 +616,15 @@ body.hovermenu #main .button::after {
   width: 1.5em;
   margin-left: 0;
 }
-
 #headerbuttons .unlockbutton i::before,
 #headerbuttons .lockbutton:hover i::before {
   /* change material icon to locked */
   content: "lock";
 }
-
 #headerbuttons .unlockbutton:hover i::before,
 #headerbuttons .lockbutton i::before {
   /* cahnge material icon to unlocked */
   content: "lock_open";
 }
-/* #endregion */
+
+/* #endregion *//*# sourceMappingURL=sds-to-style.css.map */

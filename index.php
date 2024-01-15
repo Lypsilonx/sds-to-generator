@@ -13,7 +13,6 @@ session_start();
 </head>
 
 <body>
-    <script src=//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.10/seedrandom.min.js></script>
     <?php
     // load json file from directory in url
     $addto = false;
@@ -402,7 +401,7 @@ session_start();
             <input type="hidden" name="edit" value="" id="editfield">
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="Titel" id="titlefield" value="" required>
-            <textarea name="content" placeholder="Bechreibung" id="contentfield" required></textarea>
+            <textarea name="content" placeholder="Bechreibung" id="contentfield"></textarea>
             <div class="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
@@ -453,7 +452,7 @@ session_start();
             <input type="hidden" name="delete" value="false" id="deletefield">
             <input type="text" name="title" placeholder="Event Title" id="titlefield" value="" required>
             <input type="date" name="date" placeholder="Event Date" id="datefield" value="" required>
-            <textarea name="content" placeholder="Event Description" id="contentfield" required></textarea>
+            <textarea name="content" placeholder="Event Description" id="contentfield"></textarea>
             <div class="atmbuttons">
                 <a class="cancelbutton">Cancel</a>
                 <a class="deletebutton hidden">Delete</a>
@@ -462,7 +461,6 @@ session_start();
         </form>
     </div>
 
-    <script src="sds-to-functions.js"></script>
     <script src="sds-to-main.js"></script>
 
     <?php

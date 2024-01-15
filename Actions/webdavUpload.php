@@ -17,7 +17,7 @@ $context = stream_context_create(
         'http' => array(
             'method' => 'PUT',
             'header' => 'Authorization: Basic ' . base64_encode($user . ':' . $password) . "\r\n" .
-            'Content-Type: text/markdown',
+                'Content-Type: text/markdown',
             'content' => $markdown
         )
     )
@@ -25,8 +25,4 @@ $context = stream_context_create(
 
 // Upload the file
 $result = file_get_contents($url, false, $context);
-
-// Return the result
-echo $result;
-
 ?>

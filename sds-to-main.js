@@ -1,3 +1,11 @@
+function resize() {
+  if (window.innerWidth < 800) {
+    document.querySelector("body").classList.add("hovermenu");
+  } else {
+    document.querySelector("body").classList.remove("hovermenu");
+  }
+}
+
 resize();
 
 // when the window is thin enough, hide the menu
@@ -183,13 +191,13 @@ document.querySelector("#menubutton").addEventListener("click", function () {
   }, 500);
 });
 
-// upon pressing .downloadb, download the TO using the renderMarkDown function
 document.querySelectorAll(".downloadb").forEach(function (button) {
   button.addEventListener("click", function () {
     var args = window.location.href.split("?")[1];
     // use regex to get the dir from the url
     var dir = args.match(/dir=([^&#]*)/)[1];
-    renderMarkDown(dir, download);
+
+    window.location.href = "Actions/downloadto.php?dir=" + dir;
 
     // cahnge icon to tick for 3 seconds
     document.querySelectorAll(".downloadb").forEach(function (button) {
@@ -201,13 +209,15 @@ document.querySelectorAll(".downloadb").forEach(function (button) {
   });
 });
 
-// upon pressing .uploadb, upload the TO using the renderMarkDown function
 document.querySelectorAll(".uploadb").forEach(function (button) {
   button.addEventListener("click", function () {
     var args = window.location.href.split("?")[1];
     // use regex to get the dir from the url
     var dir = args.match(/dir=([^&#]*)/)[1];
-    renderMarkDown(dir, upload);
+
+    fetch("Actions/uploadto.php?dir=" + dir, {
+      method: "POST",
+    });
 
     // cahnge icon to tick for 3 seconds
     document.querySelectorAll(".uploadb").forEach(function (button) {
