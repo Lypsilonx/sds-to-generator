@@ -202,7 +202,6 @@ class Bot
             }
             // Upload TO
             else if (strpos(strtolower($text), "/upto") === 0) {
-                $mtoken = createToken($group);
                 $result = renderMarkDown($group . "/Plenum");
                 upload($result['markdown'], $result['filename'], $group . "/Plenum");
                 $this->api->send_message(getMessage("upload to"));
@@ -210,7 +209,6 @@ class Bot
             // Look at TO
             else if (strpos(strtolower($text), "/seeto") === 0) {
                 $mtoken = createToken($group);
-
                 $this->api->send_message(getMessage("see to", ["https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken]));
             }
             // Change Password
@@ -412,22 +410,32 @@ class Bot
             }
             // Leave Group
             else if (strpos(strtolower($text), "/leave") === 0) {
+                $rest = array();
                 if (strlen($text) > 7) {
                     $rest = explode(" ", substr($text, 7));
-                    $group = $rest[0];
-
-                    if (count($rest) > 1 && $rest[1] === "confirm") {
-                        // remove chat_id from group members of group in chats.jsons groups array
-                        foreach ($chats['groups'] as &$g) {
-                            if ($g['name'] == $group) {
-                                $g['members'] = array_values(array_diff($g['members'], array($this->api->get_uid())));
-                            }
-                        }
-                        file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
-                        $this->api->send_message(getMessage("left group", [$group]));
-                        return;
-                    }
                 }
+
+                $confirm = "";
+                if (count($rest) > 1) {
+                    $group = $rest[0];
+                    $confirm = $rest[1];
+                } else if (count($rest) > 0) {
+                    $group = $rest[0];
+                }
+
+
+                if ($confirm === "confirm") {
+                    // remove chat_id from group members of group in chats.jsons groups array
+                    foreach ($chats['groups'] as &$g) {
+                        if ($g['name'] == $group) {
+                            $g['members'] = array_values(array_diff($g['members'], array($this->api->get_uid())));
+                        }
+                    }
+                    file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
+                    $this->api->send_message(getMessage("left group", [$group]));
+                    return;
+                }
+
                 // if group name in groups
                 if (in_array($group, $groups)) {
                     // send response
@@ -526,7 +534,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Löscht einen TOP und/oder Termin"
                 . PHP_EOL
                 . PHP_EOL . "/getto"
-                . PHP_EOL . "Liefert einen Link zum Download der TO"
+                . PHP_EOL . "Schickt dir die TO als .md Datei"
                 . PHP_EOL
                 . PHP_EOL . "/upto"
                 . PHP_EOL . "Lädt die TO auf den SDS Server hoch"
@@ -584,8 +592,10 @@ function getMessage($id, $args = [])
             $response->deleteCommand = false;
             $response->text = "Termin am " . $args[0] . " erkannt. Hinzufügen?";
             $response->buttons = [
-                ["text" => "Ja", "callback_data" => "do:/termin " . $args[1]],
-                ["text" => "Nein", "callback_data" => "say:event recognized/no"]
+                array(
+                    ["text" => "Ja", "callback_data" => "do:/termin " . $args[1]],
+                    ["text" => "Nein", "callback_data" => "say:event recognized/no"]
+                )
             ];
             break;
         case "event recognized/no":
@@ -598,10 +608,12 @@ function getMessage($id, $args = [])
             $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
         case "find top or event":
-            if (count($args) > 1) {
-                $response->text = "Ich habe keinen TOP oder Termin mit dem Titel \"" . $args[0] . "\" gefunden."
-                    . PHP_EOL . "Hier ist eine Liste aller TOPs und Termine. Klick auf einen um ihn zu löschen.";
+            if ($args[0] != "") {
+                $response->text = "Ich habe keinen TOP oder Termin mit dem Titel \"" . $args[0] . "\" gefunden.";
+            }
 
+            if (count($args) > 1) {
+                $response->text = join(PHP_EOL, [$response->text, "Hier ist eine Liste aller TOPs und Termine. Klick auf einen um ihn zu löschen."]);
                 $response->buttons = $args[1];
             } else {
                 $response->text = "Es gibt keinen TOP oder Termin auf eurer aktullen TO";
@@ -622,8 +634,10 @@ function getMessage($id, $args = [])
         case "leave group":
             $response->text = "Willst du die Ortsgruppe " . $args[0] . " wirklich verlassen?";
             $response->buttons = [
-                ["text" => "Ja", "callback_data" => "do:/leave " . $args[0] . " confirm"],
-                ["text" => "Nein", "callback_data" => "none"]
+                array(
+                    ["text" => "Ja", "callback_data" => "do:/leave " . $args[0] . " confirm"],
+                    ["text" => "Nein", "callback_data" => "none"]
+                )
             ];
             break;
         case "left group":
