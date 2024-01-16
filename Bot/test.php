@@ -8,4 +8,3 @@ $debugapi->debug();
 // load token from token.txt
 $bot = new Bot($debugapi);
 $bot->handle_message(new UserMessage("__"));
-?>

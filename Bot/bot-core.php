@@ -203,8 +203,9 @@ class Bot
             // Upload TO
             else if (strpos(strtolower($text), "/upto") === 0) {
                 $result = renderMarkDown($group . "/Plenum");
-                upload($result['markdown'], $result['filename'], $group . "/Plenum");
-                $this->api->send_message(getMessage("upload to"));
+                $link_to_file = upload($result['markdown'], $result['filename'], $group . "/Plenum");
+                $this->api->send_message(getMessage("upload to", [$link_to_file]));
+                $this->api->debug_log(var_dump($link_to_file));
             }
             // Look at TO
             else if (strpos(strtolower($text), "/seeto") === 0) {
@@ -488,7 +489,7 @@ function getMessage($id, $args = [])
 
     switch ($id) {
         case "start":
-            $response->deleteAnswer = false;
+            $response->deleteAnswer = DeleteAnswerOptions::NO;
             $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Du kannst deiner Ortsgruppe beitreten indem du /init <Ort> <Passwort> eingibst."
@@ -504,7 +505,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "start group":
-            $response->deleteAnswer = false;
+            $response->deleteAnswer = DeleteAnswerOptions::NO;
             $response->text = "Hallo, ich bin der neue SDS Telegram Bot. Ich werde in Zukunft eure TOPs verwalten. Ich bin noch in der Entwicklung und deshalb manchmal etwas buggy."
                 . PHP_EOL
                 . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst."
@@ -518,7 +519,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Falls du Hilfe brauchst, gib einfach /help ein.";
             break;
         case "help":
-            $response->deleteAnswer = false;
+            $response->deleteAnswer = DeleteAnswerOptions::NO;
             $response->text = "Hier ist eine Liste aller Befehle:"
                 . PHP_EOL
                 . PHP_EOL . "/top <Titel>"
@@ -572,12 +573,16 @@ function getMessage($id, $args = [])
             break;
         case "upload to":
             $response->text = "Die TO wurde erfolgreich hochgeladen.";
+            $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
+            $response->buttons = [
+                array(["text" => "In Cloud öffnen", "url" => $args[0]])
+            ];
             break;
         case "see to":
-            $response->deleteAtMidnight = true;
+            $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
             $response->text = "Hier ist der Link zur TO";
             $response->buttons = [
-                ["text" => "TO Anschauen", "url" => $args[0]]
+                array(["text" => "TO Anschauen", "url" => $args[0]])
             ];
             break;
         case "top saved":
@@ -908,4 +913,3 @@ function deleteEvent($og, $title)
     }
     return false;
 }
-?>

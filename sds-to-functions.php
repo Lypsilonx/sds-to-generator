@@ -341,7 +341,9 @@ function upload($markdown, $filename, $dir)
   );
 
   curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-  curl_exec($curl);
+  $result = curl_exec($curl);
+
+  return $result;
 }
 
 function getWeekday($date)

@@ -94,17 +94,16 @@ class TelegramBotApi implements BotApi
             )
         );
 
-        if ($this->chat_id == "debug") {
-            return $message;
+        if ($this->chat_id != "debug") {
+            $message_id = $message['result']['message_id'];
+
+            // log answer
+            logToFile("Answer: " . $response->text);
+        } else {
+            $message_id = "debug";
         }
 
-        $message_id = $message['result']['message_id'];
-
-        // log answer
-        logToFile("Answer: " . $response->text);
-
-        // if deleteAtMidnight is true, add to todelete.json
-        if ($response->deleteAtMidnight) {
+        if ($response->deleteAnswer == DeleteAnswerOptions::AT_MIDNIGHT) {
             $url = $this->build_bot_api_link(
                 "deleteMessage",
                 array(
@@ -129,7 +128,7 @@ class TelegramBotApi implements BotApi
         }
 
         // if deleteAnswer is true, delete answer message
-        if ($response->deleteAnswer && $response->buttons == []) {
+        if (($response->deleteAnswer == DeleteAnswerOptions::YES && $response->buttons == array([])) || $response->deleteAnswer == DeleteAnswerOptions::FORCE) {
             sleep($response->delTime);
             // ! Find a better way to do this
             $this->send_bot_api_request(
@@ -214,4 +213,3 @@ class TelegramBotApi implements BotApi
         return $url;
     }
 }
-?>
