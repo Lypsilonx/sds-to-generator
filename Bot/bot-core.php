@@ -624,15 +624,23 @@ function getMessage($id, $args = [])
             break;
         case "has to be weekday":
             $response->text = "Der Tag muss ein Wochentag sein.";
-            $response->buttons = [
-                ["text" => "Montag", "callback_data" => "do:/plenum monday"],
-                ["text" => "Dienstag", "callback_data" => "do:/plenum tuesday"],
-                ["text" => "Mittwoch", "callback_data" => "do:/plenum wednesday"],
-                ["text" => "Donnerstag", "callback_data" => "do:/plenum thursday"],
-                ["text" => "Freitag", "callback_data" => "do:/plenum friday"],
-                ["text" => "Samstag", "callback_data" => "do:/plenum saturday"],
-                ["text" => "Sonntag", "callback_data" => "do:/plenum sunday"]
-            ];
+            $response->buttons = array(
+                array(
+                    ["text" => "Montag", "callback_data" => "do:/plenum monday"],
+                    ["text" => "Dienstag", "callback_data" => "do:/plenum tuesday"],
+                ),
+                array(
+                    ["text" => "Mittwoch", "callback_data" => "do:/plenum wednesday"],
+                    ["text" => "Donnerstag", "callback_data" => "do:/plenum thursday"],
+                ),
+                array(
+                    ["text" => "Freitag", "callback_data" => "do:/plenum friday"],
+                    ["text" => "Samstag", "callback_data" => "do:/plenum saturday"],
+                ),
+                array(
+                    ["text" => "Sonntag", "callback_data" => "do:/plenum sunday"]
+                )
+            );
             break;
         case "not correct init":
             $response->deleteCommand = false;

@@ -9,10 +9,6 @@ class BotMessage
         $this->deleteCommand = $deleteCommand;
         $this->deleteAtMidnight = $deleteAtMidnight;
         $this->buttons = $buttons;
-
-        if ($this->buttons != []) {
-            $this->deleteAnswer = false;
-        }
     }
 
     public $text;

@@ -88,9 +88,7 @@ class TelegramBotApi implements BotApi
                 "parse_mode" => "Markdown",
                 "reply_markup" => json_encode(
                     [
-                        'inline_keyboard' => [
-                            $response->buttons
-                        ]
+                        'inline_keyboard' => $response->buttons
                     ]
                 )
             )
@@ -131,7 +129,7 @@ class TelegramBotApi implements BotApi
         }
 
         // if deleteAnswer is true, delete answer message
-        if ($response->deleteAnswer) {
+        if ($response->deleteAnswer && $response->buttons == []) {
             sleep($response->delTime);
             // ! Find a better way to do this
             $this->send_bot_api_request(
