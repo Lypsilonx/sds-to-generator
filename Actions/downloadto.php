@@ -12,4 +12,3 @@ $folder = $_GET['dir'];
 
 $result = renderMarkDown($folder);
 download($result['markdown'], $result['filename']);
-?>

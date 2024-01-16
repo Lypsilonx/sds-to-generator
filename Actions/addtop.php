@@ -72,4 +72,3 @@ file_put_contents($file, json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
 header('Location: ../index.php?dir=' . $dir);
-?>

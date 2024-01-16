@@ -59,4 +59,3 @@ function getTos($dir)
 
 header('Content-Type: application/json');
 echo json_encode(getTos("TOs"));
-?>

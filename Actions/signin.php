@@ -38,4 +38,3 @@ if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256",
     header('Location: ../index.php?dir=' . $dir);
     exit();
 }
-?>

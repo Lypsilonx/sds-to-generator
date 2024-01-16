@@ -78,4 +78,3 @@ function ICS($start, $end, $name, $description, $location)
     Header('Connection: close');
     echo $data;
 }
-?>

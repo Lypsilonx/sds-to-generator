@@ -16,6 +16,7 @@ interface BotApi
 {
     public function handle_callback($update): ?UserMessage;
     public function send_message(BotMessage $response);
+    public function send_file($path);
     public function delete_message($message_id);
     public function debug_log($message);
     public function react($message_id, $reaction);
@@ -197,7 +198,15 @@ class Bot
             // Get TO
             if (strpos(strtolower($text), "/getto") === 0) {
                 $result = renderMarkDown($group . "/Plenum");
-                download($result['markdown'], $result['filename'], $this->api->get_uid());
+                // add .md
+                $path = "Files/" . $result['filename'] . ".md";
+
+                // create new .md file and save url
+                $myfile = fopen($path, "w") or die("Unable to open file!");
+                fwrite($myfile, $result['markdown']);
+                fclose($myfile);
+
+                $this->api->send_file($path);
                 $this->api->send_message(getMessage("get to"));
             }
             // Upload TO

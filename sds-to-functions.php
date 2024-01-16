@@ -1,4 +1,5 @@
 <?php
+require_once 'webdav-api.php';
 function renderMarkDown($dir)
 {
   // get the JSON from the directory and render it as markdown
@@ -207,8 +208,8 @@ function renderMarkDown($dir)
 
   // replace all occurences of %nn% in mask.md with numbers counting up from j
   while (strpos($mask, "%nn%") != "") {
-
-    $mask = str_replace("%nn%", $j, $mask);
+    // replace the first occurence of %nn% with j
+    $mask = preg_replace("/%nn%/", $j, $mask, 1);
     $j++;
   }
 
@@ -261,42 +262,12 @@ function renderMarkDown($dir)
   ];
 }
 
-function download($markdown, $filename, $cid = "")
+function download($content, $filename)
 {
-  // add .md
-  $filename = $filename . ".md";
-
-  // when cid is a number
-  if ($cid != "" && is_numeric($cid)) {
-
-    $url = "https://www.politischdekoriert.de/sds-to-generator/Actions/botDownload.php";
-
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-    $headers = array(
-      "Content-Type: application/x-www-form-urlencoded",
-    );
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-    $data = http_build_query(
-      array(
-        'markdown' => $markdown,
-        'filename' => $filename,
-        'chatid' => $cid,
-      )
-    );
-
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-    return curl_exec($curl);
-  } else {
-    // download the rendered markdown as a .md file
-    header("Content-type: text/markdown");
-    header("Content-Disposition: attachment; filename=" . $filename);
-    echo $markdown;
-  }
+  // download the rendered markdown as a .md file
+  header("Content-type: text/markdown");
+  header("Content-Disposition: attachment; filename=" . $filename);
+  echo $content;
 }
 
 function upload($markdown, $filename, $dir)
@@ -304,8 +275,6 @@ function upload($markdown, $filename, $dir)
   $filename = $filename . "-Tagesordnung.md";
 
   $group = explode("/", $dir)[0];
-  // load webdavuser.config from the same directory as this script
-  $webdavuser = json_decode(file_get_contents("../webdavuser.config"), true);
 
   // load Bot/chats.json
   $chats = json_decode(file_get_contents("../Bot/chats.json"), true);
@@ -318,32 +287,8 @@ function upload($markdown, $filename, $dir)
     }
   }
 
-  $url = "https://www.politischdekoriert.de/sds-to-generator/Actions/webdavUpload.php";
-
-  $curl = curl_init($url);
-  curl_setopt($curl, CURLOPT_URL, $url);
-  curl_setopt($curl, CURLOPT_POST, true);
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-
-  $headers = array(
-    "Content-Type: application/x-www-form-urlencoded",
-  );
-  curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-  $data = http_build_query(
-    array(
-      'markdown' => $markdown,
-      'filename' => $filename,
-      'dir' => $dir,
-      'user' => $webdavuser["user"],
-      'password' => $webdavuser["password"],
-    )
-  );
-
-  curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
-  $result = curl_exec($curl);
-
-  return $result;
+  $sdsCloud = new WebdavApi("https://cloud.linke-sds.org/", "../webdavuser.config");
+  return $sdsCloud->uploadFile($filename, $markdown, $dir);
 }
 
 function getWeekday($date)

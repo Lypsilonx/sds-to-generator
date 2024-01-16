@@ -47,4 +47,3 @@ file_put_contents("../TOs/" . $dir . '_to.json', json_encode($json_data, JSON_PR
 
 // redirect to index.php
 header('Location: ../index.php?dir=' . $dir);
-?>

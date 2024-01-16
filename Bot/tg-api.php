@@ -143,6 +143,37 @@ class TelegramBotApi implements BotApi
         return $message_id;
     }
 
+    public function send_file($path, $caption = "")
+    {
+        // Send the file via Telegram bot
+        $curl = curl_init();
+
+        curl_setopt_array(
+            $curl,
+            array(
+                CURLOPT_URL => $this->build_bot_api_link(
+                    "sendDocument",
+                    array(
+                        "chat_id" => $this->chat_id,
+                        "caption" => $caption,
+                        "parse_mode" => "Markdown"
+                    )
+                ),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => array('document' => new CURLFILE($path)),
+            )
+        );
+
+        curl_exec($curl);
+        curl_close($curl);
+    }
+
     public function delete_message($message_id)
     {
         $this->send_bot_api_request(

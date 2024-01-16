@@ -9,4 +9,3 @@ unset($_SESSION['signedin']);
 // redirect to index.php
 header('Location: ../index.php?dir=' . $dir);
 exit();
-?>
