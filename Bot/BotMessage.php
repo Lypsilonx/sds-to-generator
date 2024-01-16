@@ -1,7 +1,7 @@
 <?php
 class BotMessage
 {
-    function __construct($text = "", $delTime = 5, $deleteAnswer = true, $deleteCommand = true, $deleteAtMidnight = false, $buttons = [])
+    function __construct($text = "", $delTime = 3, $deleteAnswer = true, $deleteCommand = true, $deleteAtMidnight = false, $buttons = [])
     {
         $this->text = $text;
         $this->delTime = $delTime;

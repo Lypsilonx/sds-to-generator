@@ -382,20 +382,32 @@ class Bot
                 // first line without first 4 characters
                 $title = substr($lines[0], 5);
 
+                $found_top = false;
+
                 // delete top
                 if (deleteTOP($group, $title)) {
                     // send response
                     $this->api->send_message(getMessage("top deleted", [$title]));
-                } else {
-                    $this->api->send_message(getMessage("top not found", [$title]));
+                    $found_top = true;
                 }
-
                 // delete event
                 if (deleteEvent($group, $title)) {
                     // send response
                     $this->api->send_message(getMessage("event deleted", [$title]));
-                } else {
-                    $this->api->send_message(getMessage("event not found", [$title]));
+                    $found_top = true;
+                }
+
+                if (!$found_top) {
+                    $buttons = array();
+
+                    foreach (getTopsAndEvents($group) as $top) {
+                        array_push($buttons, array(["text" => $top, "callback_data" => "do:/del " . $top]));
+                    }
+
+                    array_push($buttons, array(["text" => "Abbrechen", "callback_data" => "none"]));
+
+                    // react to message with tick
+                    $this->api->send_message(getMessage("find top or event", [$title, $buttons]));
                 }
             }
             // Leave Group
@@ -585,11 +597,15 @@ function getMessage($id, $args = [])
         case "event deleted":
             $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich gelöscht.";
             break;
-        case "top not found":
-            $response->text = "TOP \"" . $args[0] . "\" wurde nicht gefunden.";
-            break;
-        case "event not found":
-            $response->text = "Termin \"" . $args[0] . "\" wurde nicht gefunden.";
+        case "find top or event":
+            if (count($args) > 1) {
+                $response->text = "Ich habe keinen TOP oder Termin mit dem Titel \"" . $args[0] . "\" gefunden."
+                    . PHP_EOL . "Hier ist eine Liste aller TOPs und Termine. Klick auf einen um ihn zu löschen.";
+
+                $response->buttons = $args[1];
+            } else {
+                $response->text = "Es gibt keinen TOP oder Termin auf eurer aktullen TO";
+            }
             break;
         case "init":
             $response->text = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt.";
@@ -798,6 +814,43 @@ function saveEvent($og, $title, $content, $date)
     // add event to events array
     array_push($events['events'], array("id" => $id, "title" => $title, "content" => $content, "date" => $date));
     file_put_contents("../TOs/" . $og . "/events.json", json_encode($events, JSON_PRETTY_PRINT));
+}
+
+function getTopsAndEvents($og)
+{
+    if ($og == "debug") {
+        return;
+    }
+
+    // load TOs/Ortsgruppe/Plenum_to.json
+    $to = json_decode(file_get_contents("../TOs/" . $og . "/Plenum_to.json"), true);
+    // load TOs/Ortsgruppe/events.json
+    $events = json_decode(file_get_contents("../TOs/" . $og . "/events.json"), true);
+
+    $names = array();
+
+    // add tops to buttons array
+    foreach ($to['tops'] as $top) {
+        array_push($names, $top['title']);
+
+        echo $top['title'];
+    }
+
+    // add events to buttons array
+    foreach ($events['events'] as $event) {
+        // check if the event is within the next or last 7 days
+        $date = DateTime::createFromFormat("Y-m-d", $event['date']);
+        $now = new DateTime();
+
+        $diff = $date->diff($now)->format("%a");
+        if ($diff > 7 || $diff < -7) {
+            continue;
+        }
+
+        array_push($names, $event['title']);
+    }
+
+    return $names;
 }
 
 function deleteTOP($og, $title)
