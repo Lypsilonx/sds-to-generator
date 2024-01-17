@@ -982,3 +982,157 @@ function deleteEvent($og, $title)
     }
     return false;
 }
+
+function getGroup(string $group): ?string
+{
+    $chats = json_decode(file_get_contents("chats.json"), true);
+
+    foreach ($chats['groups'] as $g) {
+        if ($g['name'] == $group) {
+            return $g;
+        }
+    }
+
+    return null;
+}
+
+function convertDir(string $dir, int $timestamp = null): string
+{
+    if ($timestamp == null) {
+        $timestamp = time();
+    }
+
+    $yearOffset = 0;
+    // replace %Semy% or %Sem% or %SemY% with semester
+    $dir = preg_replace_callback("/%Sem%/", function ($matches) use ($timestamp, &$yearOffset) {
+        // WiSe or SoSe
+        $semester = date("m", $timestamp) < 4 || date("m", $timestamp) > 9 ? "WiSe" : "SoSe";
+
+        if (date("m", $timestamp) < 4) {
+            $yearOffset = -1;
+        }
+
+        return $semester;
+    }, $dir);
+
+    if ($yearOffset == -1) {
+        $timestamp = strtotime("-1 year", $timestamp);
+    }
+
+    // replace %<date format>% with date
+    $dir = preg_replace_callback("/%.*%/", function ($matches) use ($timestamp) {
+        $replacement = date(substr($matches[0], 1, -1), $timestamp);
+
+        // translate month January to Januar etc.
+        $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+            switch ($matches[0]) {
+                case "January":
+                    return "Januar";
+                case "February":
+                    return "Februar";
+                case "March":
+                    return "März";
+                case "April":
+                    return "April";
+                case "May":
+                    return "Mai";
+                case "June":
+                    return "Juni";
+                case "July":
+                    return "Juli";
+                case "August":
+                    return "August";
+                case "September":
+                    return "September";
+                case "October":
+                    return "Oktober";
+                case "November":
+                    return "November";
+                case "December":
+                    return "Dezember";
+                default:
+                    return $matches[0];
+            }
+        }, $replacement);
+
+        // translate weekday Monday to Montag etc.
+        $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+            switch ($matches[0]) {
+                case "Monday":
+                    return "Montag";
+                case "Tuesday":
+                    return "Dienstag";
+                case "Wednesday":
+                    return "Mittwoch";
+                case "Thursday":
+                    return "Donnerstag";
+                case "Friday":
+                    return "Freitag";
+                case "Saturday":
+                    return "Samstag";
+                case "Sunday":
+                    return "Sonntag";
+                default:
+                    return $matches[0];
+            }
+        }, $replacement);
+
+        // translate weekday Mon to Mo etc.
+        $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+            switch ($matches[0]) {
+                case "Mon":
+                    return "Mo";
+                case "Tue":
+                    return "Di";
+                case "Wed":
+                    return "Mi";
+                case "Thu":
+                    return "Do";
+                case "Fri":
+                    return "Fr";
+                case "Sat":
+                    return "Sa";
+                case "Sun":
+                    return "So";
+                default:
+                    return $matches[0];
+            }
+        }, $replacement);
+
+        // translate month Jan to Jan etc.
+        $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+            switch ($matches[0]) {
+                case "Jan":
+                    return "Jan";
+                case "Feb":
+                    return "Feb";
+                case "Mar":
+                    return "Mär";
+                case "Apr":
+                    return "Apr";
+                case "May":
+                    return "Mai";
+                case "Jun":
+                    return "Jun";
+                case "Jul":
+                    return "Jul";
+                case "Aug":
+                    return "Aug";
+                case "Sep":
+                    return "Sep";
+                case "Oct":
+                    return "Okt";
+                case "Nov":
+                    return "Nov";
+                case "Dec":
+                    return "Dez";
+                default:
+                    return $matches[0];
+            }
+        }, $replacement);
+
+        return $replacement;
+    }, $dir);
+
+    return $dir;
+}

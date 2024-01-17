@@ -286,7 +286,7 @@ function upload($markdown, $filename, $dir, bool $bot = false, bool $force = fal
   //find chat where name is dir
   for ($i = 0; $i < count($chats["groups"]); $i++) {
     if ($chats["groups"][$i]["name"] == $group) {
-      $dir = $chats["groups"][$i]["dir"];
+      $dir = convertDir($chats["groups"][$i]["dir"]);
       break;
     }
   }

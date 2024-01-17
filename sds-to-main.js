@@ -221,6 +221,10 @@ document.querySelectorAll(".uploadb").forEach(function (button) {
     // cahnge icon to tick for 3 seconds
     document.querySelectorAll(".uploadb").forEach(function (button) {
       button.querySelector(".material-symbols-outlined").innerText = "check";
+      setTimeout(function () {
+        button.querySelector(".material-symbols-outlined").innerText =
+          "cloud_upload";
+      }, 3000);
     });
   });
 });

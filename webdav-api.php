@@ -18,6 +18,10 @@ class WebdavApi
 
     public function uploadFile($filename, $content, $dir = "", $contentType = "text/markdown")
     {
+        if (!$this->folderExists($dir)) {
+            $this->createFolder($dir);
+        }
+
         $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir . $filename;
 
         $context = stream_context_create(
@@ -59,8 +63,6 @@ class WebdavApi
 
         $fileid = substr($result, strpos($result, '<oc:fileid>') + 11, strpos($result, '</oc:fileid>') - strpos($result, '<oc:fileid>') - 11);
 
-        echo $fileid;
-
         return $fileid;
     }
 
@@ -90,7 +92,49 @@ class WebdavApi
         return true;
     }
 
-    public function getFileLink($filename, $dir = "")
+    private function folderExists($dir)
+    {
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir;
+
+        $context = stream_context_create(
+            array(
+                'http' => array(
+                    'method' => 'PROPFIND',
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password),
+                    'content' => '<?xml version="1.0"?>
+                                <propfind xmlns="DAV:">
+                                    <prop>
+                                        <resourcetype />
+                                    </prop>
+                                </propfind>'
+                )
+            )
+        );
+
+        $result = file_get_contents($url, false, $context);
+        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
+            return false;
+        }
+        return true;
+    }
+
+    private function createFolder($dir)
+    {
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir;
+
+        $context = stream_context_create(
+            array(
+                'http' => array(
+                    'method' => 'MKCOL',
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password)
+                )
+            )
+        );
+
+        $result = file_get_contents($url, false, $context);
+    }
+
+    private function getFileLink($filename, $dir = "")
     {
         $fileid = $this->getFileID($filename, $dir);
 
