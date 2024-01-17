@@ -272,6 +272,7 @@ function download($content, $filename)
 
 function upload($markdown, $filename, $dir, bool $bot = false, bool $force = false)
 {
+  $date = new DateTime($filename);
   if ($bot) {
     $filename = $filename . ".md";
   } else {
@@ -286,7 +287,7 @@ function upload($markdown, $filename, $dir, bool $bot = false, bool $force = fal
   //find chat where name is dir
   for ($i = 0; $i < count($chats["groups"]); $i++) {
     if ($chats["groups"][$i]["name"] == $group) {
-      $dir = convertDir($chats["groups"][$i]["dir"]);
+      $dir = convertDir($chats["groups"][$i]["dir"], $date->getTimestamp());
       break;
     }
   }
@@ -355,7 +356,6 @@ function generateQuestion()
     case 1:
       $things = [
         "Clowns",
-        "Oliver Pocher",
         "Holzöfen",
         "England",
         "Kaffee",
