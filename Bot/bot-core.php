@@ -15,13 +15,13 @@ class UserMessage
 interface BotApi
 {
     public function handle_callback($update): ?UserMessage;
-    public function send_message(BotMessage $response);
+    public function send_message(BotMessage $response, string $chat_id = null);
     public function send_file($path);
     public function delete_message($message_id);
     public function debug_log($message);
     public function react($message_id, $reaction);
     public function leave_group();
-    public function in_group(): bool;
+    public function in_group(string $chat_id = null): bool;
     public function get_uid(): string;
 }
 class Bot
@@ -211,10 +211,47 @@ class Bot
             }
             // Upload TO
             else if (strpos(strtolower($text), "/upto") === 0) {
+                $rest = array();
+
+                if (strlen($text) > 6) {
+                    $rest = explode(" ", substr($text, 6));
+                }
+
+                $force = false;
+
+                if (count($rest) > 0) {
+                    $force = $rest[0] == "force";
+                }
+
                 $result = renderMarkDown($group . "/Plenum");
-                $link_to_file = upload($result['markdown'], $result['filename'], $group . "/Plenum");
-                $this->api->send_message(getMessage("upload to", [$link_to_file]));
-                $this->api->debug_log(var_dump($link_to_file));
+                $link_to_file = upload($result['markdown'], $result['filename'], $group . "/Plenum", true, $force);
+
+                if ($link_to_file == false) {
+                    $this->api->send_message(getMessage("file already exists"));
+                    return;
+                }
+
+                $this->api->send_message(getMessage("upload to" . ($force ? " force" : ""), [$link_to_file]));
+
+                if (!$this->api->in_group()) {
+                    // get group chat id
+                    $chat_id = "";
+                    foreach ($chats['groups'] as $g) {
+                        if ($g['name'] == $group) {
+                            foreach ($g['members'] as $member) {
+                                if ($this->api->in_group($member)) {
+                                    $chat_id = $member;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if ($chat_id != "") {
+                        $this->api->send_message(getMessage("upload to group", [$link_to_file]), $chat_id);
+                    }
+                }
             }
             // Look at TO
             else if (strpos(strtolower($text), "/seeto") === 0) {
@@ -580,8 +617,31 @@ function getMessage($id, $args = [])
         case "get to":
             $response->text = "Hier ist die TO";
             break;
+        case "file already exists":
+            $response->text = "Die TO existiert bereits. Willst du sie überschreiben?";
+            $response->buttons = [
+                array(
+                    ["text" => "Ja", "callback_data" => "do:/upto force"],
+                    ["text" => "Nein", "callback_data" => "none"]
+                )
+            ];
+            break;
         case "upload to":
             $response->text = "Die TO wurde erfolgreich hochgeladen.";
+            $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
+            $response->buttons = [
+                array(["text" => "In Cloud öffnen", "url" => $args[0]])
+            ];
+            break;
+        case "upload to force":
+            $response->text = "Die TO wurde erfolgreich überschrieben.";
+            $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
+            $response->buttons = [
+                array(["text" => "In Cloud öffnen", "url" => $args[0]])
+            ];
+            break;
+        case "upload to group":
+            $response->text = "Hier ist die TO für heute";
             $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
             $response->buttons = [
                 array(["text" => "In Cloud öffnen", "url" => $args[0]])
@@ -715,7 +775,7 @@ function getMessage($id, $args = [])
             break;
         default:
             $response->deleteCommand = false;
-            $response->text = "Fehler: Nachricht nicht gefunden.";
+            $response->text = "Fehler: Nachricht \"" . $id . "\" nicht gefunden.";
             break;
     }
 

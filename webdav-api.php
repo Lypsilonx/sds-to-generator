@@ -64,6 +64,32 @@ class WebdavApi
         return $fileid;
     }
 
+    public function fileExists($filename, $dir = "")
+    {
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir . $filename;
+
+        $context = stream_context_create(
+            array(
+                'http' => array(
+                    'method' => 'PROPFIND',
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password),
+                    'content' => '<?xml version="1.0"?>
+                                <propfind xmlns="DAV:">
+                                    <prop>
+                                        <resourcetype />
+                                    </prop>
+                                </propfind>'
+                )
+            )
+        );
+
+        $result = file_get_contents($url, false, $context);
+        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
+            return false;
+        }
+        return true;
+    }
+
     public function getFileLink($filename, $dir = "")
     {
         $fileid = $this->getFileID($filename, $dir);

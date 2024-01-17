@@ -77,12 +77,12 @@ class TelegramBotApi implements BotApi
         return $output;
     }
 
-    public function send_message(BotMessage $response)
+    public function send_message(BotMessage $response, string $chat_id = null)
     {
         $message = $this->send_bot_api_request(
             "sendMessage",
             array(
-                "chat_id" => $this->chat_id,
+                "chat_id" => $chat_id ?? $this->chat_id,
                 "text" => $response->text,
                 "disable_notification" => true,
                 "parse_mode" => "Markdown",
@@ -208,9 +208,9 @@ class TelegramBotApi implements BotApi
         $this->send_bot_api_request("leaveChat", array("chat_id" => $this->chat_id));
     }
 
-    public function in_group(): bool
+    public function in_group(string $chat_id = null): bool
     {
-        return $this->chat_id < 0;
+        return $chat_id ?? $this->chat_id < 0;
     }
 
     public function get_uid(): string

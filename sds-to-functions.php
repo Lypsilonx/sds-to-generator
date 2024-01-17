@@ -270,9 +270,13 @@ function download($content, $filename)
   echo $content;
 }
 
-function upload($markdown, $filename, $dir)
+function upload($markdown, $filename, $dir, bool $bot = false, bool $force = false)
 {
-  $filename = $filename . "-Tagesordnung.md";
+  if ($bot) {
+    $filename = $filename . ".md";
+  } else {
+    $filename = $filename . "-Tagesordnung.md";
+  }
 
   $group = explode("/", $dir)[0];
 
@@ -288,6 +292,13 @@ function upload($markdown, $filename, $dir)
   }
 
   $sdsCloud = new WebdavApi("https://cloud.linke-sds.org/", "../webdavuser.config");
+
+  if ($bot && !$force) {
+    if ($sdsCloud->fileExists($filename, $dir)) {
+      return false;
+    }
+  }
+
   return $sdsCloud->uploadFile($filename, $markdown, $dir);
 }
 
