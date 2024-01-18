@@ -18,8 +18,8 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 
 // recieves form data from sds-to-generator/index.php
 // load the json from dir (in form data)
-$dir = $_POST['dir'];
-$folder = explode('/', $dir)[0];
+$serverPath = $_POST['dir'];
+$folder = explode('/', $serverPath)[0];
 
 // check if user is signed in
 if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
@@ -71,4 +71,4 @@ if ($_POST["edit"] == "") {
 file_put_contents($file, json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
-header('Location: ../index.php?dir=' . $dir);
+header('Location: ../index.php?dir=' . $serverPath);

@@ -11,8 +11,8 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 $_POST['password'] = htmlspecialchars($_POST['password']);
 
 // checks $_POST['dir'] and $_POST['password']
-$dir = $_POST['dir'];
-$folder = explode('/', $dir)[0];
+$serverPath = $_POST['dir'];
+$folder = explode('/', $serverPath)[0];
 
 // load chats.json from ../Bot
 $json = file_get_contents("../Bot/chats.json");
@@ -31,10 +31,10 @@ if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256",
     // set session variable
     $_SESSION['signedin'] = $folder;
     // redirect to index.php
-    header('Location: ../index.php?dir=' . $dir);
+    header('Location: ../index.php?dir=' . $serverPath);
     exit();
 } else {
     // redirect to index.php
-    header('Location: ../index.php?dir=' . $dir);
+    header('Location: ../index.php?dir=' . $serverPath);
     exit();
 }

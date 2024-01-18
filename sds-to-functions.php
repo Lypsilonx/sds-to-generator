@@ -1,14 +1,14 @@
 <?php
 require_once 'webdav-api.php';
-function renderMarkDown($dir)
+function renderMarkDown($serverPath)
 {
   // get the JSON from the directory and render it as markdown
-  $data = json_decode(file_get_contents("../TOs/" . $dir . "_to.json"), true);
-  $dir2 = explode("/", $dir)[0];
+  $data = json_decode(file_get_contents("../TOs/" . $serverPath . "_to.json"), true);
+  $group = explode("/", $serverPath)[0];
   // get the perms from the directory
-  $permanent = json_decode(file_get_contents("../TOs/" . $dir2 . "/permanent.json"), true);
+  $permanent = json_decode(file_get_contents("../TOs/" . $group . "/permanent.json"), true);
   // get the events from the directory
-  $events = json_decode(file_get_contents("../TOs/" . $dir2 . "/events.json"), true);
+  $events = json_decode(file_get_contents("../TOs/" . $group . "/events.json"), true);
   // load Markdown/top-format.md
   $topFormat = file_get_contents("../Markdown/top-format.md");
   $topFormatOriginal = $topFormat;
@@ -243,7 +243,7 @@ function renderMarkDown($dir)
   $mask = str_replace("\\[book-list:(.*)\\]", "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)", $mask);
 
   // replace \r\n not followed by ' ' or '\' with \r\n\\
-  if (strpos($_SERVER["HTTP_USER_AGENT"], "Safari") != -1) {
+  if (isset($_SERVER["HTTP_USER_AGENT"]) && strpos($_SERVER["HTTP_USER_AGENT"], "Safari") != -1) {
     // replace \r\n\r\n with \r\r\r\r
     $mask = str_replace("\r\n\r\n", "\r\r\r\r", $mask);
 
@@ -270,16 +270,9 @@ function download($content, $filename)
   echo $content;
 }
 
-function upload($markdown, $filename, $dir, bool $bot = false, bool $force = false)
+function getCloudPath($serverPath, $date)
 {
-  $date = new DateTime($filename);
-  if ($bot) {
-    $filename = $filename . ".md";
-  } else {
-    $filename = $filename . "-Tagesordnung.md";
-  }
-
-  $group = explode("/", $dir)[0];
+  $group = explode("/", $serverPath)[0];
 
   // load Bot/chats.json
   $chats = json_decode(file_get_contents("../Bot/chats.json"), true);
@@ -287,20 +280,174 @@ function upload($markdown, $filename, $dir, bool $bot = false, bool $force = fal
   //find chat where name is dir
   for ($i = 0; $i < count($chats["groups"]); $i++) {
     if ($chats["groups"][$i]["name"] == $group) {
-      $dir = convertDir($chats["groups"][$i]["dir"], $date->getTimestamp());
+      $cloudPath = convertCloudPath($chats["groups"][$i]["dir"], $date);
       break;
     }
+  }
+
+  return $cloudPath;
+}
+
+function convertCloudPath(string $cloudPath, int $timestamp = null): string
+{
+  if ($timestamp == null) {
+    $timestamp = time();
+  }
+
+  $yearOffset = 0;
+  // replace %Semy% or %Sem% or %SemY% with semester
+  $cloudPath = preg_replace_callback("/%Sem%/", function ($matches) use ($timestamp, &$yearOffset) {
+    // WiSe or SoSe
+    $semester = date("m", $timestamp) < 4 || date("m", $timestamp) > 9 ? "WiSe" : "SoSe";
+
+    if (date("m", $timestamp) < 4) {
+      $yearOffset = -1;
+    }
+
+    return $semester;
+  }, $cloudPath);
+
+  if ($yearOffset == -1) {
+    $timestamp = strtotime("-1 year", $timestamp);
+  }
+
+  // replace %<date format>% with date
+  $cloudPath = preg_replace_callback("/%.*%/", function ($matches) use ($timestamp) {
+    $replacement = date(substr($matches[0], 1, -1), $timestamp);
+
+    // translate month January to Januar etc.
+    $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+      switch ($matches[0]) {
+        case "January":
+          return "Januar";
+        case "February":
+          return "Februar";
+        case "March":
+          return "März";
+        case "April":
+          return "April";
+        case "May":
+          return "Mai";
+        case "June":
+          return "Juni";
+        case "July":
+          return "Juli";
+        case "August":
+          return "August";
+        case "September":
+          return "September";
+        case "October":
+          return "Oktober";
+        case "November":
+          return "November";
+        case "December":
+          return "Dezember";
+        default:
+          return $matches[0];
+      }
+    }, $replacement);
+
+    // translate weekday Monday to Montag etc.
+    $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+      switch ($matches[0]) {
+        case "Monday":
+          return "Montag";
+        case "Tuesday":
+          return "Dienstag";
+        case "Wednesday":
+          return "Mittwoch";
+        case "Thursday":
+          return "Donnerstag";
+        case "Friday":
+          return "Freitag";
+        case "Saturday":
+          return "Samstag";
+        case "Sunday":
+          return "Sonntag";
+        default:
+          return $matches[0];
+      }
+    }, $replacement);
+
+    // translate weekday Mon to Mo etc.
+    $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+      switch ($matches[0]) {
+        case "Mon":
+          return "Mo";
+        case "Tue":
+          return "Di";
+        case "Wed":
+          return "Mi";
+        case "Thu":
+          return "Do";
+        case "Fri":
+          return "Fr";
+        case "Sat":
+          return "Sa";
+        case "Sun":
+          return "So";
+        default:
+          return $matches[0];
+      }
+    }, $replacement);
+
+    // translate month Jan to Jan etc.
+    $replacement = preg_replace_callback("/[a-zA-Z]+/", function ($matches) {
+      switch ($matches[0]) {
+        case "Jan":
+          return "Jan";
+        case "Feb":
+          return "Feb";
+        case "Mar":
+          return "Mär";
+        case "Apr":
+          return "Apr";
+        case "May":
+          return "Mai";
+        case "Jun":
+          return "Jun";
+        case "Jul":
+          return "Jul";
+        case "Aug":
+          return "Aug";
+        case "Sep":
+          return "Sep";
+        case "Oct":
+          return "Okt";
+        case "Nov":
+          return "Nov";
+        case "Dec":
+          return "Dez";
+        default:
+          return $matches[0];
+      }
+    }, $replacement);
+
+    return $replacement;
+  }, $cloudPath);
+
+  return $cloudPath;
+}
+
+function upload($markdown, $filename, $serverPath, bool $bot = false, bool $force = false)
+{
+  $date = new DateTime(str_replace("_", "-", $filename));
+  $cloudPath = getCloudPath($serverPath, $date->getTimestamp());
+  if ($bot) {
+    $filename = $filename . ".md";
+  } else {
+    $filename = $filename . "-Tagesordnung.md";
   }
 
   $sdsCloud = new WebdavApi("https://cloud.linke-sds.org/", "../webdavuser.config");
 
   if ($bot && !$force) {
-    if ($sdsCloud->fileExists($filename, $dir)) {
+    if ($sdsCloud->fileExists($filename, $cloudPath)) {
       return false;
     }
   }
 
-  return $sdsCloud->uploadFile($filename, $markdown, $dir);
+  return $sdsCloud->uploadFile($filename, $markdown, $cloudPath);
 }
 
 function getWeekday($date)

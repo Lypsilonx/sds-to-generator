@@ -18,23 +18,23 @@ session_start();
     <?php
     // load json file from directory in url
     $addto = false;
-    $dir;
+    $serverPath;
     if (!isset($_GET['dir'])) {
-        $dir = 'fallback';
+        $serverPath = 'fallback';
     } else {
         // sanitize input
-        $dir = preg_replace('/[^a-zA-Z0-9äüöß\/_-]/', '', $_GET['dir']);
+        $serverPath = preg_replace('/[^a-zA-Z0-9äüöß\/_-]/', '', $_GET['dir']);
 
         // check if directory is valid (exactly one folder deep) and at least one character long (before and after /)
-        if (preg_match('/^[a-zA-Z0-9äüöß_-]{1,}\/[a-zA-Z0-9äüöß_-]{1,}$/', $dir) == 0) {
-            $dir = 'fallback';
+        if (preg_match('/^[a-zA-Z0-9äüöß_-]{1,}\/[a-zA-Z0-9äüöß_-]{1,}$/', $serverPath) == 0) {
+            $serverPath = 'fallback';
         }
     }
 
     $json;
     // try getting json file
-    if (file_exists('TOs/' . $dir . '_to.json')) {
-        $json = file_get_contents("TOs/" . $dir . "_to.json");
+    if (file_exists('TOs/' . $serverPath . '_to.json')) {
+        $json = file_get_contents("TOs/" . $serverPath . "_to.json");
     } else {
         $addto = true;
         $json = file_get_contents("TOs/fallback_to.json");
@@ -50,10 +50,10 @@ session_start();
     $signedin = false;
     $signedin_somewhere = false;
 
-    if ($dir != "fallback") {
+    if ($serverPath != "fallback") {
         // try getting json file (permanent)
         $jsonP;
-        $folder = explode('/', $dir)[0];
+        $folder = explode('/', $serverPath)[0];
         if (file_exists("TOs/" . $folder . "/permanent.json")) {
             $jsonP = file_get_contents("TOs/" . $folder . "/permanent.json");
         } else {
@@ -140,22 +140,22 @@ session_start();
             <?php
             if (!$signedin) {
                 echo '<form action="Actions/signin.php" method="post">';
-                echo '<input type="hidden" name="dir" value="' . $dir . '">';
+                echo '<input type="hidden" name="dir" value="' . $serverPath . '">';
                 echo '<input type="password" name="password" placeholder="Passwort" id="passwordfield" title="Das Passwort, dass deine Gruppe festgelegt hat." required>';
                 echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
                 echo '</form>';
             }
             if ($signedin_somewhere) {
                 echo '<form action="Actions/signout.php" method="post">';
-                echo '<input type="hidden" name="dir" value="' . $dir . '">';
+                echo '<input type="hidden" name="dir" value="' . $serverPath . '">';
                 echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
                 echo '</form>';
             }
             ?>
             <div class="autocomplete">
                 <input type="text" name="dir" placeholder="Ortsgruppe/Plenum" value="<?php
-                if ($dir != "fallback") {
-                    echo $dir;
+                if ($serverPath != "fallback") {
+                    echo $serverPath;
                 } ?>" id="searchfield">
             </div>
             <a class="searchbutton">
@@ -185,7 +185,7 @@ session_start();
             <ul>
                 <div class="placeholder"></div>
                 <?php
-                if ($dir != "fallback" && $addto == false) {
+                if ($serverPath != "fallback" && $addto == false) {
                     echo '<li><a href="#wrb">Wochenrückblick</a></li>';
                     echo '<li><a href="#wfs">Wochenvorschau</a></li>';
 
@@ -218,13 +218,13 @@ session_start();
                 <div class="placeholder"></div>
                 <div id=actionbuttons>
                     <?php
-                    if ($dir != "fallback" && $addto == false) {
-                        echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $dir . '">';
+                    if ($serverPath != "fallback" && $addto == false) {
+                        echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $serverPath . '">';
                         echo '<span class="material-symbols-outlined">file_download</span>';
                         echo '</a>';
 
                         if ($signedin) {
-                            echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $dir . '">';
+                            echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $serverPath . '">';
                             echo '<span class="material-symbols-outlined">cloud_upload</span>';
                             echo '</a>';
                         }
@@ -247,7 +247,7 @@ session_start();
                     <?php echo $title; ?>
                 </h2>
                 <?php
-                if ($dir != "fallback" && $addto == false) {
+                if ($serverPath != "fallback" && $addto == false) {
                     echo '<a href="Actions/ics.php?date=' . $date . '&time=18Uhr&title=' . $title . '">';
                     echo "<h3>";
                     echo format_date($date);
@@ -259,7 +259,7 @@ session_start();
             </div>
             <?php
 
-            if ($dir != "fallback" && $addto == false) {
+            if ($serverPath != "fallback" && $addto == false) {
                 echo '<div class="catrow" id="wrb">';
                 echo '<hr>';
                 echo '<h3>Wochenrückblick</h3>';
@@ -402,8 +402,8 @@ session_start();
             <h2>TOP hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
-            $dir = str_replace('"', '&quot;', $dir);
-            echo $dir;
+            $serverPath = str_replace('"', '&quot;', $serverPath);
+            echo $serverPath;
             ?>">
             <input type="hidden" name="id" value="<?php
             // generate random id
@@ -432,8 +432,8 @@ session_start();
             <h2>TO hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
-            $dir = str_replace('"', '&quot;', $dir);
-            echo $dir;
+            $serverPath = str_replace('"', '&quot;', $serverPath);
+            echo $serverPath;
             ?>">
             <input type="hidden" name="edit" value="" id="editfield">
             <input type="hidden" name="delete" value="false" id="deletefield">
@@ -452,8 +452,8 @@ session_start();
             <h2>Event hinzufügen</h2>
             <input type="hidden" name="dir" value="<?php
             // prevent script injection
-            $dir = str_replace('"', '&quot;', $dir);
-            echo $dir;
+            $serverPath = str_replace('"', '&quot;', $serverPath);
+            echo $serverPath;
             ?>">
             <input type="hidden" name="id" value="<?php
             // generate random id

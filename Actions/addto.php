@@ -11,8 +11,8 @@ $_POST['date'] = htmlspecialchars($_POST['date']);
 $_POST['dir'] = htmlspecialchars($_POST['dir']);
 
 // recieves form data from sds-to-generator/index.php
-$dir = $_POST['dir'];
-$folder = explode('/', $dir)[0];
+$serverPath = $_POST['dir'];
+$folder = explode('/', $serverPath)[0];
 
 // check if user is signed in
 if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
@@ -34,7 +34,7 @@ if ($_POST["edit"] == "") {
     // if the delete button was pressed
     if ($_POST["delete"] == "true") {
         // delete to file
-        unlink("../TOs/" . $dir . '_to.json');
+        unlink("../TOs/" . $serverPath . '_to.json');
     } else {
         // edit to file
         $json_data['title'] = $_POST['title'];
@@ -43,7 +43,7 @@ if ($_POST["edit"] == "") {
 }
 
 // encode array to json and save to file
-file_put_contents("../TOs/" . $dir . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
+file_put_contents("../TOs/" . $serverPath . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
-header('Location: ../index.php?dir=' . $dir);
+header('Location: ../index.php?dir=' . $serverPath);

@@ -16,13 +16,13 @@ class WebdavApi
         $this->url = $url;
     }
 
-    public function uploadFile($filename, $content, $dir = "", $contentType = "text/markdown")
+    public function uploadFile($filename, $content, $cloudPath = "", $contentType = "text/markdown")
     {
-        if (!$this->folderExists($dir)) {
-            $this->createFolder($dir);
+        if (!$this->folderExists($cloudPath)) {
+            $this->createFolder($cloudPath);
         }
 
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir . $filename;
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -37,12 +37,12 @@ class WebdavApi
 
         $result = file_get_contents($url, false, $context);
 
-        return $this->getFileLink($filename, $dir);
+        return $this->getFileLink($filename, $cloudPath);
     }
 
-    private function getFileID($filename, $dir = "")
+    private function getFileID($filename, $cloudPath = "")
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir . $filename;
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -66,9 +66,36 @@ class WebdavApi
         return $fileid;
     }
 
-    public function fileExists($filename, $dir = "")
+    public function fileExists($filename, $cloudPath = "")
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir . $filename;
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+
+        $context = stream_context_create(
+            array(
+                'http' => array(
+                    'method' => 'PROPFIND',
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
+                        'Content-Type: text/xml',
+                    'content' => '<?xml version="1.0"?>
+                                <propfind xmlns="DAV:">
+                                    <prop>
+                                        <resourcetype />
+                                    </prop>
+                                </propfind>'
+                )
+            )
+        );
+
+        $result = file_get_contents($url, false, $context);
+        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
+            return false;
+        }
+        return true;
+    }
+
+    private function folderExists($cloudPath)
+    {
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(
@@ -92,35 +119,9 @@ class WebdavApi
         return true;
     }
 
-    private function folderExists($dir)
+    private function createFolder($cloudPath)
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir;
-
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password),
-                    'content' => '<?xml version="1.0"?>
-                                <propfind xmlns="DAV:">
-                                    <prop>
-                                        <resourcetype />
-                                    </prop>
-                                </propfind>'
-                )
-            )
-        );
-
-        $result = file_get_contents($url, false, $context);
-        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
-            return false;
-        }
-        return true;
-    }
-
-    private function createFolder($dir)
-    {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $dir;
+        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(
@@ -134,9 +135,9 @@ class WebdavApi
         $result = file_get_contents($url, false, $context);
     }
 
-    private function getFileLink($filename, $dir = "")
+    public function getFileLink($filename, $cloudPath = "")
     {
-        $fileid = $this->getFileID($filename, $dir);
+        $fileid = $this->getFileID($filename, $cloudPath);
 
         return $this->url . "/index.php/f/" . $fileid;
     }

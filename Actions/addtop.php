@@ -16,13 +16,13 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 
 // recieves form data from sds-to-generator/index.php
 // load the json from dir (in form data)
-$dir = $_POST['dir'];
+$serverPath = $_POST['dir'];
 $file;
-$folder = explode('/', $dir)[0];
+$folder = explode('/', $serverPath)[0];
 if ($_POST['permanent'] == "on") {
     $file = "../TOs/" . $folder . "/permanent.json";
 } else {
-    $file = "../TOs/" . $dir . '_to.json';
+    $file = "../TOs/" . $serverPath . '_to.json';
 }
 $json = file_get_contents($file);
 
@@ -71,4 +71,4 @@ if ($_POST["edit"] == "") {
 file_put_contents($file, json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
-header('Location: ../index.php?dir=' . $dir);
+header('Location: ../index.php?dir=' . $serverPath);
