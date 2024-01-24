@@ -383,7 +383,7 @@ class Bot
 
                     // send response
                     $this->api->send_message($message_id = getMessage("top saved", [$title]));
-                    $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . $content]));
+                    $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . "(Siehe TOP)"]));
                 }
 
                 // react to message with tick

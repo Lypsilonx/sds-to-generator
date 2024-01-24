@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'sds-to-functions.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -272,9 +273,6 @@ session_start();
                         // prevent script injection
                         $event['title'] = str_replace('"', '&quot;', $event['title']);
                         $event['content'] = str_replace('"', '&quot;', $event['content']);
-                        if ($event['content'] == "(Siehe TOP)") {
-                            $event['content'] = "";
-                        }
                         $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';
@@ -282,7 +280,7 @@ session_start();
                         echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
-                        echo formatMD($event['content']);
+                        echo formatMD($event['content'] == "(Siehe TOP)" ? "" : $event['content']);
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -314,7 +312,7 @@ session_start();
                         echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
-                        echo formatMD($event['content']);
+                        echo formatMD(linkEventContent($event, $tops));
                         echo '</div>';
                         if ($signedin) {
                             echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
@@ -476,6 +474,25 @@ session_start();
 
     <?php
 
+    function linkEventContent($event, array $tops)
+    {
+        // check if "content" is "(Siehe TOP)" or "siehe TOP" or "s. TOP" ("(" opional, has to contain "s" and "TOP")
+        if (preg_match('/^\(?s(\.|iehe) TOP\)?$/i', $event['content']) == 1) {
+            $topId = getTopId($event['title'], $tops);
+
+            if ($topId == "") {
+                return $event['content'];
+            } else {
+                $topTitle = getTopTitle($topId, $tops);
+                $eventContent = "[" . $topTitle . "](#" . $topId . ")";
+            }
+        } else {
+            $eventContent = $event['content'];
+        }
+
+        return $eventContent;
+    }
+
     function formatMD($text)
     {
         $out = $text;
@@ -515,11 +532,11 @@ session_start();
         // replace <= with arrow
         $out = str_replace('&lt;=', '⇐', $out);
 
-        // replace [book-list:...] with book list iframe
-        $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
-
         // replace [book-list:single:<type>|<title>] with book list iframe
         $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/single-view.php?type=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
+
+        // replace [book-list:...] with book list iframe
+        $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
 
         return $out;
     }

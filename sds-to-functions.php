@@ -148,7 +148,7 @@ function renderMarkDown($serverPath)
       foreach ($wrb as $key2 => $value) {
         if ($wrb[$key2]["date"] == $day) {
           $eventFormat = str_replace("%title%", $wrb[$key2]["title"], $eventFormat);
-          if ($wrb[$key2]["content"] == "" || $wrb[$key2]["content"] == " " || $wrb[$key2]["content"] == "(Siehe TOP)") {
+          if ($wrb[$key2]["content"] == "" || $wrb[$key2]["content"] == " " || preg_match('/^\(?s(\.|iehe) TOP\)?$/i', $wrb[$key2]["content"])) {
             $eventFormat = str_replace("%content%", "", $eventFormat);
           } else {
             $eventFormat = str_replace("%content%", "\r\n      * " . $wrb[$key2]["content"], $eventFormat);
@@ -189,7 +189,31 @@ function renderMarkDown($serverPath)
       foreach ($wvs as $key2 => $value) {
         if ($wvs[$key2]["date"] == $day) {
           $eventFormat = str_replace("%title%", $wvs[$key2]["title"], $eventFormat);
-          $eventFormat = str_replace("%content%", $wvs[$key2]["content"], $eventFormat);
+          if ($wvs[$key2]["content"] == "" || $wvs[$key2]["content"] == " ") {
+            $eventFormat = str_replace("%content%", "", $eventFormat);
+          } else if (preg_match('/^\(?s(\.|iehe) TOP\)?$/i', $wvs[$key2]["content"])) {
+            $content = $wvs[$key2]["content"];
+            $topId = getTopId($wvs[$key2]["top"], $data["tops"]);
+            if ($topId != "") {
+              $topTitle = getTopTitle($topId, $data["tops"]);
+
+              // get the number of the top
+              $topNumber = 0;
+              foreach ($data["tops"] as $key3 => $value) {
+                if ($data["tops"][$key3]["id"] == $topId) {
+                  $topNumber = $key3;
+                  break;
+                }
+              }
+
+              // uncomment when nextcloud is on version 25
+              //$content = "Siehe [" . $topTitle . "](#" . ($topNumber + 5) . ".-" . str_replace(" ", "-", $topTitle) . ")";
+            }
+
+            $eventFormat = str_replace("%content%", "\r\n      * " . $content, $eventFormat);
+          } else {
+            $eventFormat = str_replace("%content%", "\r\n      * " . $wvs[$key2]["content"], $eventFormat);
+          }
           array_push($allEvents, $eventFormat);
           $eventFormat = $eventFormatOriginal;
         }
@@ -237,10 +261,10 @@ function renderMarkDown($serverPath)
   $mask = str_replace("&gt;", ">", $mask);
 
   // replace [book-list:single:<type>|<title>] with link to book-list
-  $mask = str_replace("\\[book-list:single:(.*)\\|(.*?)\\]", "$2", $mask);
+  $mask = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', "[$2](https://www.politischdekoriert.de/book-list/actions/single-view.php?type=$1&title=$2)", $mask);
 
   // replace [book-list:...] with link to book-list
-  $mask = str_replace("\\[book-list:(.*)\\]", "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)", $mask);
+  $mask = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', "[book-list](https://www.politischdekoriert.de/book-list?dir=$1)", $mask);
 
   // replace \r\n not followed by ' ' or '\' with \r\n\\
   if (isset($_SERVER["HTTP_USER_AGENT"]) && strpos($_SERVER["HTTP_USER_AGENT"], "Safari") != -1) {
@@ -268,6 +292,43 @@ function download($content, $filename)
   header("Content-type: text/markdown");
   header("Content-Disposition: attachment; filename=" . $filename);
   echo $content;
+}
+function getTopId($name, array $tops, $maxDistance = 100)
+{
+  $topId = "";
+  $distance = 100000;
+  $closestId = "";
+  foreach ($tops as $top) {
+    if ($top['title'] == $name) {
+      $topId = $top['id'];
+      break;
+    }
+
+    $lev = levenshtein($top['title'], $name);
+    if ($lev < $distance) {
+      $closestId = $top['id'];
+      $distance = $lev;
+    }
+  }
+
+  if ($topId == "" && $distance <= $maxDistance) {
+    $topId = $closestId;
+  }
+
+  return $topId;
+}
+
+function getTopTitle($id, array $tops): string
+{
+  $topTitle = "";
+  foreach ($tops as $top) {
+    if ($top['id'] == $id) {
+      $topTitle = $top['title'];
+      break;
+    }
+  }
+
+  return $topTitle;
 }
 
 function getCloudPath($serverPath, $date)
@@ -575,4 +636,3 @@ function generateQuestion()
   }
   return $question;
 }
-
