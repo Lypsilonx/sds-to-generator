@@ -72,7 +72,8 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
     if (button.parentElement.id == "headerbuttons") {
       var form = document.querySelector(".addto");
 
-      // if so, toggle the .addto .hidden class
+      form.querySelector("h2").innerText = "TO bearbeiten";
+
       form.classList.toggle("hidden");
       // set the edit field of the form to true
       form.querySelector("#editfield").value = "true";
@@ -88,7 +89,8 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
     } else if (button.classList.contains("event")) {
       var form = document.querySelector(".addevent");
 
-      // if so, toggle the .addevent .hidden class
+      form.querySelector("h2").innerText = "Event bearbeiten";
+
       form.classList.toggle("hidden");
       // set the edit field of the form to the value of the .editbuttons topid field
       form.querySelector("#editfield").value = button.getAttribute("eventid");
@@ -106,7 +108,9 @@ document.querySelectorAll(".editbutton").forEach(function (button) {
       form.querySelector(".deletebutton").classList.remove("hidden");
     } else {
       var form = document.querySelector(".addtop");
-      // if not, toggle the .addtop .hidden class
+
+      form.querySelector("h2").innerText = "TOP bearbeiten";
+
       form.classList.toggle("hidden");
       // set the edit field of the form to the value of the .editbuttons topid field
       form.querySelector("#editfield").value = button.getAttribute("topid");

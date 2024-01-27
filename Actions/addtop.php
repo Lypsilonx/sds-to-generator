@@ -19,7 +19,7 @@ $_POST['dir'] = htmlspecialchars($_POST['dir']);
 $serverPath = $_POST['dir'];
 $file;
 $folder = explode('/', $serverPath)[0];
-if ($_POST['permanent'] == "on") {
+if ($_POST['permanent'] == "true") {
     $file = "../TOs/" . $folder . "/permanent.json";
 } else {
     $file = "../TOs/" . $serverPath . '_to.json';

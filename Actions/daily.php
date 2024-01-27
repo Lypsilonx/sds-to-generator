@@ -4,13 +4,12 @@
 // load the ../Bot/chats.json
 $chats = json_decode(file_get_contents('../Bot/chats.json'), true);
 
-// for every group check if it is the day after the groups weekday (monday, tuesday, wednesday, thursday, friday, saturday, sunday)
+// for every group check if the last plenum has already ha
 foreach ($chats["groups"] as $chat) {
-    if (date('Y-m-d', strtotime('yesterday')) == date('Y-m-d', strtotime('last ' . $chat['weekday']))) {
-        // reset the group
-        // load ../TOs/group/Plenum_to.json
-        $plenum = json_decode(file_get_contents('../TOs/' . $chat['name'] . '/Plenum_to.json'), true);
+    // load ../TOs/group/Plenum_to.json
+    $plenum = json_decode(file_get_contents('../TOs/' . $chat['name'] . '/Plenum_to.json'), true);
 
+    if (strtotime($plenum['date']) < strtotime('today')) {
         // save file to ../TOs/group/Plenum-<date>_to.json
         $date = $plenum['date'];
         file_put_contents('../TOs/' . $chat['name'] . '/Plenum-' . $date . '_to.json', json_encode($plenum, JSON_PRETTY_PRINT));

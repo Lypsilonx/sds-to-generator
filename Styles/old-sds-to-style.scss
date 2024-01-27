@@ -44,19 +44,22 @@
   div {
     padding: 10px;
     cursor: pointer;
-    background-color: #fff; 
-    border-bottom: 1px solid #d4d4d4; 
+    background-color: var(--main-bg-color);
+    border-bottom: 1px solid var(--sds-color-font);
 
-    &:hover {
-      /*when hovering an item:*/
-      background-color: #e9e9e9; 
+    &:not(.autocomplete-active) :hover {
+      * {
+        /*when hovering an item:*/
+        background-color: var(--sds-color-2);
+        color: var(--main-bg-color) !important;
+      }
     }
   }
 }
 .autocomplete-active {
   /*when navigating through the items using the arrow keys:*/
   background-color: var(--sds-accent-1) !important; 
-  color: #ffffff; 
+  color: var(--sds-color-font);
 }
 #searchfieldautocomplete-list{
   overflow: scroll;
@@ -68,15 +71,15 @@
 /* #region Fonts */
 @font-face {
   font-family: Bitter;
-  src: url(../fonts/Bitter-Bold.ttf);
+  src: url(../../fonts/Bitter-Bold.ttf);
 }
 @font-face {
   font-family: Open-Sans;
-  src: url(../fonts/OpenSans-Regular.ttf);
+  src: url(../../fonts/OpenSans-Regular.ttf);
 }
 @font-face {
   font-family: Open-Sans-Bold;
-  src: url(../fonts/OpenSans-Bold.ttf);
+  src: url(../../fonts/OpenSans-Bold.ttf);
 }
 
 .material-symbols-outlined {
@@ -390,7 +393,6 @@ body.hidemenu{
 
   &:not(.hovermenu) #main {
     width: 90%;
-    margin-left: calc(-1 * max(20%, 200px));
   }
 }
 
