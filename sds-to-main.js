@@ -368,7 +368,6 @@ xhr.open("GET", url, true);
 xhr.responseType = "json";
 xhr.onload = function () {
   var status = xhr.status;
-  console.log(xhr.response);
   if (status === 200) {
     tos = xhr.response;
     autocomplete(document.querySelector("#searchfield"), tos);

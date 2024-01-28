@@ -4,7 +4,6 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-background: #161616;
-    --color-accent-1: #b1003a;
     --color-shadow: #000;
     --color-font: white;
   }
@@ -12,12 +11,16 @@
 @media (prefers-color-scheme: light) {
   :root {
     --color-background: white;
-    --color-accent-1: #b1003a;
     --color-shadow: #000;
     --color-font: #161616;
   }
 }
 :root {
+  --color-accent: #b1003a;
+  --color-accent-1: #b1003a;
+  --color-accent-2: #c6d53a;
+  --color-accent-3: #00bba4;
+  --color-accent-4: #cf44a6;
   --border-thickness: 0.15em;
   --border-radius: 0.5em;
   --border-radius-2: calc(var(--border-radius) - var(--border-thickness));
@@ -25,8 +28,8 @@
   --color-selected: var(--color-font);
   --color-background-selected: var(--color-background);
   --color-unselected: var(--color-background);
-  --color-background-unselected: var(--color-accent-1);
-  --color-border: var(--color-accent-1);
+  --color-background-unselected: var(--color-accent);
+  --color-border: var(--color-accent);
 }
 
 /* #endregion */
@@ -114,7 +117,6 @@ body {
   justify-content: center;
   text-align: center;
   height: 100vh;
-  height: 100svh;
   background-color: var(--color-border);
   margin: 0;
   padding: 0;
@@ -143,11 +145,11 @@ li a,
 p a {
   display: inline-block;
   padding: 0.1em 0.4em;
+  transform: translateY(0.6em);
   max-width: calc(100% - 0.8em);
   overflow: hidden;
   text-overflow: ellipsis;
   margin-top: 0 !important;
-  transform: translateY(0.6em);
   border: var(--border-thickness) solid var(--color-border);
 }
 
@@ -191,6 +193,7 @@ hr {
   margin-bottom: 0.5em;
   margin-top: 0.5em;
   border-color: var(--color-border);
+  border: calc(var(--border-thickness) / 2) solid var(--color-border);
 }
 
 .hidden {
@@ -242,17 +245,30 @@ header {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 98%;
+  width: calc(100% - 3em);
   height: 5em;
   background-color: var(--color-background);
   z-index: 10;
-  padding-left: 1%;
-  padding-right: 1%;
+  padding-left: 1.5em;
+  padding-right: 1.5em;
   font-family: "Bitter";
+}
+header .logo {
+  position: relative;
+  padding-left: 0.5em;
+}
+header .logo::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 0;
+  width: 100%;
+  height: 75%;
+  border-left: var(--border-thickness) solid var(--color-border);
 }
 
 #rbody {
-  height: calc(100% - 5em);
+  height: calc(100vh - 5em);
   flex-direction: row;
   width: 100%;
 }
@@ -265,6 +281,7 @@ header {
 }
 
 #sidebar {
+  overflow: visible;
   position: relative;
   width: 20%;
   background-color: var(--color-background);
@@ -274,7 +291,8 @@ header {
   padding: 1em;
   min-width: 200px;
   z-index: 2;
-  transition: left 0.5s ease-in-out;
+  height: calc(100vh - 7em);
+  transition: margin-left 0.5s ease-in-out;
 }
 #sidebar h2 {
   top: 0;
@@ -295,17 +313,24 @@ header {
   height: 96%;
   width: calc(100% + 4em);
   overflow-y: scroll;
-  overflow-x: hidden;
+  overflow-x: visible;
   margin-left: -4em;
-}
-#sidebar ul hr {
-  margin-top: 1em;
-  margin-bottom: 0.3em;
 }
 #sidebar ul li {
   width: unset;
+  overflow-x: visible;
+}
+#sidebar ul li:has(a:hover)::after {
+  content: "";
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 4em;
+  height: 2.36em;
 }
 #sidebar ul li a {
+  transform: unset;
+  position: relative;
   justify-content: left;
   padding: 0.5em;
   padding-left: 4.5em;
@@ -322,31 +347,63 @@ header {
   border: 0;
 }
 #sidebar ul li a:hover {
+  box-shadow: 0 0 1em var(--color-shadow);
+  position: absolute;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: 40vw;
+  min-width: calc(100% - 3em);
   background-color: var(--color-background-unselected);
   color: var(--color-unselected);
   font-weight: bold;
+}
+#sidebar ul li a:hover::before {
+  content: attr(topnumber);
 }
 #sidebar #actionbuttons {
   position: fixed;
   bottom: 1em;
   left: 1em;
-  box-shadow: 0 0 1em var(--color-shadow);
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb) {
+  height: 2.5em;
+  position: relative;
+  transition: gap 0.5s ease-in-out;
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover {
+  gap: calc(2 * var(--border-thickness));
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover .material-symbols-outlined {
+  color: var(--color-font);
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover a {
+  border: var(--border-thickness) solid var(--color-accent);
+  margin: calc(-1 * var(--border-thickness));
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover a:not(:last-child) {
+  background-color: var(--color-background);
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover a:not(:last-child):hover {
+  border-color: var(--color-font);
+}
+#sidebar #actionbuttons div:has(.colorb, .styleb):hover > :last-child {
+  visibility: hidden;
 }
 #sidebar #menubutton {
   display: flex;
   position: absolute;
   top: 0;
   left: 100%;
-  width: 1.5em;
-  padding: 0.1em;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
-  height: 2.3em;
+  width: calc(1.5em - var(--border-thickness));
+  height: calc(1.5em - var(--border-thickness));
+  padding: 0.5em;
+  padding-top: calc(0.5em + var(--border-thickness));
+  padding-left: calc(0.5em + var(--border-thickness));
   align-items: center;
   justify-content: center;
   border-radius: 0 0 var(--border-radius) 0;
-  border-right: var(--border-thickness) solid var(--color-accent-1);
-  border-bottom: var(--border-thickness) solid var(--color-accent-1);
+  border-right: var(--border-thickness) solid var(--color-accent);
+  border-bottom: var(--border-thickness) solid var(--color-accent);
 }
 #sidebar #menubutton.hover {
   color: var(--color-font);
@@ -358,29 +415,12 @@ header {
   content: "menu";
 }
 
-body.hidemenu #sidebar {
-  position: absolute;
-  height: 100%;
-  left: calc(-1 * max(20%, 200px) - 2em);
-}
-body.hidemenu #sidebar #menubutton.hover .material-symbols-outlined::before {
-  content: "arrow_forward";
-}
-body.hidemenu:not(.hovermenu) #main {
-  width: calc(100% - var(--frame-thickness));
-}
-
-@media screen and (min-width: 800px) {
-  #sidebar {
-    left: 0;
-  }
-}
 /* #endregion */
 #main {
+  width: 100%;
   position: relative;
-  width: min(80% - var(--frame-thickness), 100% - var(--frame-thickness) - 200px);
   margin: var(--frame-thickness);
-  padding: 5%;
+  padding: 4em;
   margin-bottom: 0;
   box-shadow: 0 0 2px var(--color-shadow);
   background-color: var(--color-background);
@@ -413,7 +453,7 @@ body.hidemenu:not(.hovermenu) #main {
   padding: 0;
 }
 #main a > h3:hover {
-  background-color: var(--color-accent-1);
+  background-color: var(--color-accent);
 }
 #main h3 {
   display: table;
@@ -444,26 +484,31 @@ body.hidemenu:not(.hovermenu) #main {
   z-index: 1;
   justify-content: space-between;
   text-align: center;
-  border: var(--border-thickness) solid var(--color-accent-1);
+  border: var(--border-thickness) solid var(--color-accent);
 }
-#main .eventdate {
+#main .eventdate, #main .topnumber {
   display: table;
 }
-#main .eventdate > a {
+#main .eventdate > a, #main .topnumber > a {
   display: table;
-  background-color: var(--color-accent-1);
   border-radius: 0;
+  border: var(--border-thickness) solid var(--color-accent);
+}
+#main .topnumber {
+  cursor: default;
+  pointer-events: none;
 }
 #main #titleholder {
   display: table;
 }
 #main #titleholder h3 {
-  background-color: var(--color-accent-1);
-  color: var(--color-font);
+  background-color: var(--color-background-unselected);
+  color: var(--color-unselected);
+  border: var(--border-thickness) solid var(--color-accent);
 }
 #main #titleholder h3:hover {
-  background-color: var(--color-accent-1);
-  color: var(--color-background);
+  background-color: var(--color-background-selected);
+  color: var(--color-selected);
 }
 #main .catrow {
   display: table;
@@ -475,7 +520,7 @@ body.hidemenu:not(.hovermenu) #main {
   box-shadow: 0 0 1em var(--color-shadow);
   border-radius: var(--border-radius);
   padding: 1em;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
   width: calc(100% - 2em);
   position: relative;
@@ -485,21 +530,37 @@ body.hidemenu:not(.hovermenu) #main {
   position: absolute;
   top: 0;
   right: 0;
-  flex-direction: column;
 }
 #main .toprow:not(:has(.editbuttons)) .top {
   width: 100%;
 }
+#main .toprow h4 {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
 #main .toprow .top {
+  position: relative;
   width: calc(100% - 4em + 2 * var(--border-thickness));
   /* space between p's */
 }
-#main .toprow .top > *:not(h4, h5, a:has(h5, h4), .eventdate) {
+#main .toprow .top::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 0;
+  margin: 0;
+  margin-top: 0.8em;
+  width: var(--border-thickness);
+  height: calc(100% - 0.8em);
+  border-left: var(--border-thickness) solid var(--color-accent);
+}
+#main .toprow .top > * {
   margin-left: 1em;
   margin-right: 1em;
   display: inline;
 }
-#main .toprow .top *:not(:first-child, h4, h5, a:has(h5, h4), .eventdate) {
+#main .toprow .top * {
   margin-top: 0.8em;
 }
 #main .toprow .top p:last-child:empty {
@@ -530,21 +591,7 @@ body.hidemenu:not(.hovermenu) #main {
   margin-top: 0.8em;
 }
 
-body.hovermenu #main {
-  width: auto;
-}
-body.hovermenu #main .button {
-  width: 1.5em;
-}
-body.hovermenu #main .button::after {
-  content: "";
-}
-
 @media screen and (min-width: 800px) {
-  #main {
-    width: min(80% - var(--frame-thickness), 100% - var(--frame-thickness) - 200px);
-    margin-left: var(--frame-thickness);
-  }
   #main .button {
     padding-right: 1em;
   }
@@ -557,6 +604,18 @@ body.hovermenu #main .button::after {
     transform: translateY(-0.05em);
   }
 }
+.hovermenu #sidebar {
+  position: absolute;
+  border-right: var(--border-thickness) solid var(--color-border);
+}
+
+.hidemenu #sidebar {
+  margin-left: calc(-1 * max(20%, 200px + 2em));
+}
+.hidemenu #sidebar #menubutton.hover .material-symbols-outlined::before {
+  content: "arrow_forward";
+}
+
 /* #endregion */
 /* -------------------------- Menus -------------------------- */
 /* #region Menus */
@@ -626,7 +685,7 @@ body.hovermenu #main .button::after {
   justify-content: space-around;
   align-items: center;
   font-size: 0.8em;
-  background-color: var(--color-accent-1);
+  background-color: var(--color-accent);
   padding-left: 0.25em;
   padding-right: 0.25em;
   width: 14em;
@@ -657,7 +716,7 @@ body.hovermenu #main .button::after {
   align-items: center;
   text-align: center;
   justify-content: center;
-  border: var(--border-thickness) solid var(--color-accent-1) !important;
+  border: var(--border-thickness) solid var(--color-accent) !important;
 }
 
 @media (max-width: 1200px) {
@@ -666,6 +725,11 @@ body.hovermenu #main .button::after {
   }
 }
 .buttondrawer {
+  box-shadow: 0 0 1em var(--color-shadow);
+  height: -moz-min-content;
+  height: min-content;
+  width: -moz-min-content;
+  width: min-content;
   margin: 0;
   display: flex;
   flex-direction: row;
@@ -681,10 +745,8 @@ body.hovermenu #main .button::after {
 }
 .buttondrawer .button, .buttondrawer a {
   width: 1.5em;
-  height: 2.3em;
-  padding: 0.1em;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
+  height: 1.5em;
+  padding: 0.5em;
 }
 .buttondrawer .button:hover, .buttondrawer a:hover {
   background-color: var(--color-background-selected);
@@ -705,6 +767,50 @@ body.hovermenu #main .button::after {
   width: calc(100% - 1em);
   min-width: 5em;
   border: 0;
+}
+.buttondrawer.expandable_down {
+  box-shadow: none;
+  flex-direction: column-reverse;
+}
+.buttondrawer.expandable_down .button, .buttondrawer.expandable_down a {
+  margin-top: calc(-100% - var(--border-thickness));
+  transition: margin-top 0.5s ease-in-out;
+}
+.buttondrawer.expandable_down :last-child, .buttondrawer.expandable_down:hover a, .buttondrawer.expandable_down:hover .button {
+  margin-top: 0;
+}
+.buttondrawer.expandable_up {
+  box-shadow: none;
+  flex-direction: column;
+}
+.buttondrawer.expandable_up .button, .buttondrawer.expandable_up a {
+  margin-bottom: calc(-100% - var(--border-thickness));
+  transition: margin-bottom 0.5s ease-in-out;
+}
+.buttondrawer.expandable_up :last-child, .buttondrawer.expandable_up:hover a, .buttondrawer.expandable_up:hover .button {
+  margin-bottom: 0;
+}
+.buttondrawer.expandable_right {
+  box-shadow: none;
+  flex-direction: row-reverse;
+}
+.buttondrawer.expandable_right .button, .buttondrawer.expandable_right a {
+  margin-left: calc(-100% - var(--border-thickness));
+  transition: margin-left 0.5s ease-in-out;
+}
+.buttondrawer.expandable_right :last-child, .buttondrawer.expandable_right:hover a, .buttondrawer.expandable_right:hover .button {
+  margin-left: 0;
+}
+.buttondrawer.expandable_left {
+  box-shadow: none;
+  flex-direction: row;
+}
+.buttondrawer.expandable_left .button, .buttondrawer.expandable_left a {
+  margin-right: calc(-100% - var(--border-thickness));
+  transition: margin-right 0.5s ease-in-out;
+}
+.buttondrawer.expandable_left :last-child, .buttondrawer.expandable_left:hover a, .buttondrawer.expandable_left:hover .button {
+  margin-right: 0;
 }
 
 #headerbuttons {

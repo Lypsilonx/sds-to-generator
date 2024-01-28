@@ -127,6 +127,10 @@
                         echo '<a class="botb button" href="https://t.me/sds_to_bot">';
                         echo '<span class="material-symbols-outlined">smart_toy</span>';
                         echo '</a>';
+
+                        echo '<a class="styleb button" href="?dir=' . $serverPath . '&view=default">';
+                        echo '<span class="material-symbols-outlined">tv_gen</span>';
+                        echo '</a>';
                     }
                     ?>
                 </div>

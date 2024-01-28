@@ -243,20 +243,20 @@ function format_date($date)
 function generateButtons($event, $signedin, $top, $permanent = false)
 {
     if ($signedin) {
-        echo '<div class="buttondrawer editbuttons">';
+        echo '<div class="expandable_down buttondrawer editbuttons">';
         if ($top) {
-            echo '<a class="editbutton" topid="' . $event['id'] . '" topcontent="' . $event['content'] . '" toptitle="' . $event['title'] . '" toppermanent="' . ($permanent ? 'true' : 'false') . '">';
-            echo '<span class="material-symbols-outlined">edit</span>';
-            echo '</a>';
             echo '<a href="Actions/deletetop.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '&permanent=' . ($permanent ? 'true' : 'false') . '">';
             echo '<span class="material-symbols-outlined">delete</span>';
             echo '</a>';
-        } else {
-            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+            echo '<a class="editbutton" topid="' . $event['id'] . '" topcontent="' . $event['content'] . '" toptitle="' . $event['title'] . '" toppermanent="' . ($permanent ? 'true' : 'false') . '">';
             echo '<span class="material-symbols-outlined">edit</span>';
             echo '</a>';
+        } else {
             echo '<a href="Actions/deleteevent.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '">';
             echo '<span class="material-symbols-outlined">delete</span>';
+            echo '</a>';
+            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+            echo '<span class="material-symbols-outlined">edit</span>';
             echo '</a>';
         }
         echo '</div>';

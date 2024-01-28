@@ -9,6 +9,34 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         rel="stylesheet" />
     <link rel="stylesheet" href="Styles/sds-to-style.css">
+    <?php
+    // prevent script injection
+    $num_colors = 4;
+
+    if (isset($_GET['color'])) {
+        $color = preg_replace('/[^0-9]/', '', $_GET['color']);
+    } else {
+        if (isset($_SESSION['color'])) {
+            $color = $_SESSION['color'];
+        } else {
+            $color = 1;
+        }
+    }
+
+    // if color is not set or invalid
+    if ($color == null || $color > $num_colors || $color < 1) {
+        $color = 1;
+    } else {
+        $_SESSION['color'] = $color;
+    }
+
+    // set color
+    echo '<style>';
+    echo ':root{';
+    echo '--color-accent: var(--color-accent-' . $color . ');';
+    echo '}';
+    echo '</style>';
+    ?>
 </head>
 
 <body>
@@ -84,7 +112,7 @@
                         // prevent script injection
                         $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
                         // tab before title
-                        echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
+                        echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
                         $i++;
                     }
 
@@ -96,7 +124,7 @@
                     foreach ($topsP as $top) {
                         // prevent script injection
                         $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
-                        echo '<li><a href="#' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</a></li>';
+                        echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
                         $i++;
                     }
                 } else {
@@ -130,6 +158,33 @@
                         echo '<a class="botb button" href="https://t.me/sds_to_bot">';
                         echo '<span class="material-symbols-outlined">smart_toy</span>';
                         echo '</a>';
+
+                        echo '<div class="buttondrawer expandable_down">';
+
+                        for ($i = 0; $i < $num_colors; $i++) {
+                            // on click set parameter in url
+                            echo '<a class="button" style="font-variation-settings: \'FILL\' 100;" href="?dir=' . $serverPath . '&color=' . ($i + 1) . '">';
+                            echo '<span class="material-symbols-outlined" style="color: var(--color-accent-' . ($i + 1) . ');">circle</span>';
+                            echo '</a>';
+                        }
+                        echo '<a class="colorb button">';
+                        echo '<span class="material-symbols-outlined">color_lens</span>';
+                        echo '</a>';
+                        echo '</div>';
+
+                        echo '<div class="buttondrawer expandable_down">';
+                        // classic view
+                        echo '<a class="button" href="?dir=' . $serverPath . '&view=classic">';
+                        echo '<span class="material-symbols-outlined">radio</span>';
+                        echo '</a>';
+                        // modern (default) view
+                        echo '<a class="button" href="?dir=' . $serverPath . '&view=default">';
+                        echo '<span class="material-symbols-outlined">tv_gen</span>';
+                        echo '</a>';
+                        echo '<a class="styleb button">';
+                        echo '<span class="material-symbols-outlined">view_quilt</span>';
+                        echo '</a>';
+                        echo '</div>';
                     }
                     ?>
                 </div>
@@ -163,17 +218,17 @@
                     // if event was within the last 7 days of $date
                     if (strtotime($event['date']) >= strtotime('-7 days', strtotime($date)) && strtotime($event['date']) < strtotime($date)) {
                         echo '<div class="toprow">';
-                        echo '<div class="top">';
-                        // prevent script injection
-                        $event['title'] = str_replace('"', '&quot;', $event['title']);
-                        $event['content'] = str_replace('"', '&quot;', $event['content']);
-                        $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';
                         echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
                         echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
+                        echo '<div class="top">';
+                        // prevent script injection
+                        $event['title'] = str_replace('"', '&quot;', $event['title']);
+                        $event['content'] = str_replace('"', '&quot;', $event['content']);
+                        $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo formatMD(preg_match('/^\(?s(\.|iehe) TOP\)?$/i', $event['content']) == 1 ? "" : $event['content']);
                         echo '</div>';
                         generateButtons($event, $signedin, false);
@@ -190,17 +245,17 @@
                     // if event is within the next 7 days of $date
                     if (strtotime($event['date']) >= strtotime($date) && strtotime($event['date']) < strtotime('+7 days', strtotime($date))) {
                         echo '<div class="toprow">';
-                        echo '<div class="top">';
-                        // prevent script injection
-                        $event['title'] = str_replace('"', '&quot;', $event['title']);
-                        $event['content'] = str_replace('"', '&quot;', $event['content']);
-                        $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo '<h4>' . $event['title'] . '</h4>';
                         echo '<div class="eventdate">';
                         echo '<a href="Actions/ics.php?date=' . $event['date'] . '&time=&title=' . $event['title'] . '">';
                         echo '<h5>' . format_date($event['date']) . '</h5>';
                         echo '</a>';
                         echo '</div>';
+                        echo '<div class="top">';
+                        // prevent script injection
+                        $event['title'] = str_replace('"', '&quot;', $event['title']);
+                        $event['content'] = str_replace('"', '&quot;', $event['content']);
+                        $event['date'] = str_replace('"', '&quot;', $event['date']);
                         echo formatMD(linkEventContent($event, $tops));
                         echo '</div>';
                         generateButtons($event, $signedin, false);
@@ -222,16 +277,27 @@
                 $i = 1;
                 foreach ($tops as $top) {
                     echo '<div class="toprow">';
+                    echo '<h4 id="' . $top['id'] . '">' . $top['title'] . '</h4>';
+                    echo '<div class="topnumber">';
+                    echo '<a>';
+                    echo '<h5>TOP ' . $i . '</h5>';
+                    echo '</a>';
+                    echo '</div>';
                     echo '<div class="top">';
                     // prevent script injection
                     $top['title'] = str_replace('"', '&quot;', $top['title']);
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
-                    echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
                     echo formatMD($top['content']);
                     echo '</div>';
                     generateButtons($top, $signedin, true);
                     echo '</div>';
+                }
+
+                if ($signedin) {
+                    echo '<a class="addtopb button">';
+                    echo '<span class="material-symbols-outlined">add</span>';
+                    echo '</a>';
                 }
 
                 if ($topsP != null) {
@@ -243,11 +309,16 @@
 
                 foreach ($topsP as $top) {
                     echo '<div class="toprow">';
+                    echo '<h4 id="' . $top['id'] . '">' . $top['title'] . '</h4>';
+                    echo '<div class="topnumber">';
+                    echo '<a>';
+                    echo '<h5>TOP ' . $i . '</h5>';
+                    echo '</a>';
+                    echo '</div>';
                     echo '<div class="top">';
                     // prevent script injection
                     $top['title'] = str_replace('"', '&quot;', $top['title']);
                     $top['content'] = str_replace('"', '&quot;', $top['content']);
-                    echo '<h4 id="' . $top['id'] . '">TOP ' . $i . ': ' . $top['title'] . '</h4>';
                     $i++;
                     echo formatMD($top['content']);
                     echo '</div>';
