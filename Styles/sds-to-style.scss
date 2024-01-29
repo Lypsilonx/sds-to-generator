@@ -320,64 +320,70 @@ header {
     margin-block-start: 0;
     margin-block-end: 0;
     text-align: left;
+    z-index: 3;
   }
 
-  ul {
+  #scrollcontainer {
+    --overflow: 40vw;
+    overflow-y: scroll;
     height: 96%;
     width: calc(100% + 4em);
-    overflow-y: scroll;
-    overflow-x: visible;
-
     margin-left: -4em;
 
-    li {
-      width: unset;
-      overflow-x: visible;
-      
-      // create dummy for when a is made absolute
-      &:has(a:hover)::after {
-        content: "";
-        position: relative;
-        top: 0;
-        left: 0;
-        width: 4em;
-        height: 2.36em;
+    &:has(a:hover) {
+      width: calc(100% + 4em + var(--overflow));
+
+      ul {
+        width: calc(100% - var(--overflow));
       }
+    }
+
+    &::-webkit-scrollbar {
+      width: 0px;
+      background: transparent; /* make scrollbar transparent */
+    }
+
+    ul {
+      overflow: visible;
+      li {
+        overflow: visible;
+    
+        a {
+          transform: unset;
+          position: relative;
+          justify-content: left;
+          padding: 0.5em;
+          padding-left: 4.5em;
+          display: inline-block;
+          text-align: left;
+          align-items: flex-start;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+          margin: 0;
+          border-radius: 0 var(--border-radius) var(--border-radius) 0;
+          background-color: var(--color-background);
+          color: var(--color-font);
+          border: 0;
   
-      a {
-        transform: unset;
-        position: relative;
-        justify-content: left;
-        padding: 0.5em;
-        padding-left: 4.5em;
-        display: inline-block;
-        text-align: left;
-        align-items: flex-start;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-        margin: 0;
-        border-radius: 0 var(--border-radius) var(--border-radius) 0;
-        background-color: var(--color-background);
-        color: var(--color-font);
-        border: 0;
-
-        &:hover {
-          &::before {
-            content: attr(topnumber);
+          &:hover {
+            &::before {
+              content: attr(topnumber);
+            }
+  
+            box-shadow: 0 0 1em var(--color-shadow);
+            z-index: 2;
+            width: min-content;
+            max-width: calc(100% - 6em + var(--overflow));
+            min-width: calc(100% - 5em);
+            background-color: var(--color-background-unselected);
+            color: var(--color-unselected);
+            font-weight: bold;
           }
-
-          box-shadow: 0 0 1em var(--color-shadow);
-          position: absolute;
-          width: max-content;
-          max-width: 40vw;
-          min-width: calc(100% - 3em);
-          background-color: var(--color-background-unselected);
-          color: var(--color-unselected);
-          font-weight: bold;
         }
       }
     }
+
   }
 
   #actionbuttons {

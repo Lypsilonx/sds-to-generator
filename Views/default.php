@@ -96,99 +96,101 @@
                 }
                 ?>
             </h2>
-            <ul>
-                <div class="placeholder"></div>
-                <?php
-                if ($serverPath != "fallback" && $addto == false) {
-                    echo '<li><a href="#wrb">Wochenrückblick</a></li>';
-                    echo '<li><a href="#wfs">Wochenvorschau</a></li>';
-
-                    if ($tops != null) {
-                        echo '<hr>';
-                    }
-
-                    $i = 1;
-                    foreach ($tops as $top) {
-                        // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
-                        // tab before title
-                        echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
-                        $i++;
-                    }
-
-                    if ($topsP != null) {
-                        echo '<hr>';
-                        echo '<li><a href="#permanent">Laufende Arbeitsaufträge</a></li>';
-                    }
-
-                    foreach ($topsP as $top) {
-                        // prevent script injection
-                        $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
-                        echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
-                        $i++;
-                    }
-                } else {
-                    // list all groups
-                    $groups = scandir('TOs');
-                    foreach ($groups as $group) {
-                        if ($group != '.' && $group != '..' && $group != 'fallback_to.json') {
-                            echo '<li><a href="?dir=' . $group . '/Plenum">' . $group . '</a></li>';
-                        }
-                    }
-                }
-                ?>
-                <div class="placeholder"></div>
-                <div id="actionbuttons" class="buttondrawer">
+            <div id="scrollcontainer">
+                <ul>
+                    <div class="placeholder"></div>
                     <?php
                     if ($serverPath != "fallback" && $addto == false) {
-                        echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $serverPath . '">';
-                        echo '<span class="material-symbols-outlined">file_download</span>';
-                        echo '</a>';
+                        echo '<li><a href="#wrb">Wochenrückblick</a></li>';
+                        echo '<li><a href="#wfs">Wochenvorschau</a></li>';
 
-                        if ($signedin) {
-                            echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $serverPath . '">';
-                            echo '<span class="material-symbols-outlined">cloud_upload</span>';
-                            echo '</a>';
+                        if ($tops != null) {
+                            echo '<hr>';
                         }
 
-                        echo '<a class="shareb button">';
-                        echo '<span class="material-symbols-outlined">share</span>';
-                        echo '</a>';
-
-                        echo '<a class="botb button" href="https://t.me/sds_to_bot">';
-                        echo '<span class="material-symbols-outlined">smart_toy</span>';
-                        echo '</a>';
-
-                        echo '<div class="buttondrawer expandable_down">';
-
-                        for ($i = 0; $i < $num_colors; $i++) {
-                            // on click set parameter in url
-                            echo '<a class="button" style="font-variation-settings: \'FILL\' 100;" href="?dir=' . $serverPath . '&color=' . ($i + 1) . '">';
-                            echo '<span class="material-symbols-outlined" style="color: var(--color-accent-' . ($i + 1) . ');">circle</span>';
-                            echo '</a>';
+                        $i = 1;
+                        foreach ($tops as $top) {
+                            // prevent script injection
+                            $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
+                            // tab before title
+                            echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
+                            $i++;
                         }
-                        echo '<a class="colorb button">';
-                        echo '<span class="material-symbols-outlined">color_lens</span>';
-                        echo '</a>';
-                        echo '</div>';
 
-                        echo '<div class="buttondrawer expandable_down">';
-                        // classic view
-                        echo '<a class="button" href="?dir=' . $serverPath . '&view=classic">';
-                        echo '<span class="material-symbols-outlined">radio</span>';
-                        echo '</a>';
-                        // modern (default) view
-                        echo '<a class="button" href="?dir=' . $serverPath . '&view=default">';
-                        echo '<span class="material-symbols-outlined">tv_gen</span>';
-                        echo '</a>';
-                        echo '<a class="styleb button">';
-                        echo '<span class="material-symbols-outlined">view_quilt</span>';
-                        echo '</a>';
-                        echo '</div>';
+                        if ($topsP != null) {
+                            echo '<hr>';
+                            echo '<li><a href="#permanent">Laufende Arbeitsaufträge</a></li>';
+                        }
+
+                        foreach ($topsP as $top) {
+                            // prevent script injection
+                            $top['title'] = preg_replace('/[^a-zA-Z0-9äüöß!?.\- ]/', '', $top['title']);
+                            echo '<li><a href="#' . $top['id'] . '" topnumber="TOP ' . $i . ': ">' . $top['title'] . '</a></li>';
+                            $i++;
+                        }
+                    } else {
+                        // list all groups
+                        $groups = scandir('TOs');
+                        foreach ($groups as $group) {
+                            if ($group != '.' && $group != '..' && $group != 'fallback_to.json') {
+                                echo '<li><a href="?dir=' . $group . '/Plenum">' . $group . '</a></li>';
+                            }
+                        }
                     }
                     ?>
-                </div>
-            </ul>
+                    <div class="placeholder"></div>
+                    <div id="actionbuttons" class="buttondrawer">
+                        <?php
+                        if ($serverPath != "fallback" && $addto == false) {
+                            echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $serverPath . '">';
+                            echo '<span class="material-symbols-outlined">file_download</span>';
+                            echo '</a>';
+
+                            if ($signedin) {
+                                echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $serverPath . '">';
+                                echo '<span class="material-symbols-outlined">cloud_upload</span>';
+                                echo '</a>';
+                            }
+
+                            echo '<a class="shareb button">';
+                            echo '<span class="material-symbols-outlined">share</span>';
+                            echo '</a>';
+
+                            echo '<a class="botb button" href="https://t.me/sds_to_bot">';
+                            echo '<span class="material-symbols-outlined">smart_toy</span>';
+                            echo '</a>';
+
+                            echo '<div class="buttondrawer expandable_down">';
+
+                            for ($i = 0; $i < $num_colors; $i++) {
+                                // on click set parameter in url
+                                echo '<a class="button" style="font-variation-settings: \'FILL\' 100;" href="?dir=' . $serverPath . '&color=' . ($i + 1) . '">';
+                                echo '<span class="material-symbols-outlined" style="color: var(--color-accent-' . ($i + 1) . ');">circle</span>';
+                                echo '</a>';
+                            }
+                            echo '<a class="colorb button">';
+                            echo '<span class="material-symbols-outlined">color_lens</span>';
+                            echo '</a>';
+                            echo '</div>';
+
+                            echo '<div class="buttondrawer expandable_down">';
+                            // classic view
+                            echo '<a class="button" href="?dir=' . $serverPath . '&view=classic">';
+                            echo '<span class="material-symbols-outlined">radio</span>';
+                            echo '</a>';
+                            // modern (default) view
+                            echo '<a class="button" href="?dir=' . $serverPath . '&view=default">';
+                            echo '<span class="material-symbols-outlined">tv_gen</span>';
+                            echo '</a>';
+                            echo '<a class="styleb button">';
+                            echo '<span class="material-symbols-outlined">view_quilt</span>';
+                            echo '</a>';
+                            echo '</div>';
+                        }
+                        ?>
+                    </div>
+                </ul>
+            </div>
         </div>
         <div id="main">
             <div id="titleholder">

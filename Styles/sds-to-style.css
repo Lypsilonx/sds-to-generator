@@ -308,27 +308,32 @@ header .logo::before {
   margin-block-start: 0;
   margin-block-end: 0;
   text-align: left;
+  z-index: 3;
 }
-#sidebar ul {
+#sidebar #scrollcontainer {
+  --overflow: 40vw;
+  overflow-y: scroll;
   height: 96%;
   width: calc(100% + 4em);
-  overflow-y: scroll;
-  overflow-x: visible;
   margin-left: -4em;
 }
-#sidebar ul li {
-  width: unset;
-  overflow-x: visible;
+#sidebar #scrollcontainer:has(a:hover) {
+  width: calc(100% + 4em + var(--overflow));
 }
-#sidebar ul li:has(a:hover)::after {
-  content: "";
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 4em;
-  height: 2.36em;
+#sidebar #scrollcontainer:has(a:hover) ul {
+  width: calc(100% - var(--overflow));
 }
-#sidebar ul li a {
+#sidebar #scrollcontainer::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+#sidebar #scrollcontainer ul {
+  overflow: visible;
+}
+#sidebar #scrollcontainer ul li {
+  overflow: visible;
+}
+#sidebar #scrollcontainer ul li a {
   transform: unset;
   position: relative;
   justify-content: left;
@@ -346,18 +351,18 @@ header .logo::before {
   color: var(--color-font);
   border: 0;
 }
-#sidebar ul li a:hover {
+#sidebar #scrollcontainer ul li a:hover {
   box-shadow: 0 0 1em var(--color-shadow);
-  position: absolute;
-  width: -moz-max-content;
-  width: max-content;
-  max-width: 40vw;
-  min-width: calc(100% - 3em);
+  z-index: 2;
+  width: -moz-min-content;
+  width: min-content;
+  max-width: calc(100% - 6em + var(--overflow));
+  min-width: calc(100% - 5em);
   background-color: var(--color-background-unselected);
   color: var(--color-unselected);
   font-weight: bold;
 }
-#sidebar ul li a:hover::before {
+#sidebar #scrollcontainer ul li a:hover::before {
   content: attr(topnumber);
 }
 #sidebar #actionbuttons {
