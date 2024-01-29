@@ -17,7 +17,7 @@ $_GET['id'] = htmlspecialchars($_GET['id']);
 $serverPath = $_GET['dir'];
 $file;
 $folder = explode('/', $serverPath)[0];
-if ($_GET['permanent'] == "true") {
+if ($_GET['permanent'] == "on") {
     $file = "../TOs/" . $folder . "/permanent.json";
 } else {
     $file = "../TOs/" . $serverPath . '_to.json';

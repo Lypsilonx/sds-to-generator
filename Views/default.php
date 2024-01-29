@@ -11,10 +11,10 @@
     <link rel="stylesheet" href="Styles/sds-to-style.css">
     <?php
     // prevent script injection
-    $num_colors = 4;
+    $num_colors = 8;
 
     if (isset($_GET['color'])) {
-        $color = preg_replace('/[^0-9]/', '', $_GET['color']);
+        $color = preg_replace('/[^0-9a-fA-F]/', '', $_GET['color']);
     } else {
         if (isset($_SESSION['color'])) {
             $color = $_SESSION['color'];
@@ -23,8 +23,10 @@
         }
     }
 
+    $isHex = preg_match('/^[0-9a-fA-F]{6}$/', $color);
+
     // if color is not set or invalid
-    if ($color == null || $color > $num_colors || $color < 1) {
+    if ($color == null || (!$isHex && ($color > $num_colors || $color < 1))) {
         $color = 1;
     } else {
         $_SESSION['color'] = $color;
@@ -33,7 +35,11 @@
     // set color
     echo '<style>';
     echo ':root{';
-    echo '--color-accent: var(--color-accent-' . $color . ');';
+    if ($isHex) {
+        echo '--color-accent: #' . $color . ';';
+    } else {
+        echo '--color-accent: var(--color-accent-' . $color . ');';
+    }
     echo '}';
     echo '</style>';
     ?>
@@ -162,12 +168,19 @@
 
                             echo '<div class="buttondrawer expandable_down">';
 
+                            // color picker
+                            echo '<a class="button">';
+                            echo '<input type="color" id="colorpicker" onchange="window.location.href=\'?dir=' . $serverPath . '&color=\' + this.value.substring(1);" value="' . ($isHex ? '#' . $color : '#666666') . '">';
+                            echo '<span class="material-symbols-outlined">colorize</span>';
+                            echo '</a>';
+
                             for ($i = 0; $i < $num_colors; $i++) {
                                 // on click set parameter in url
                                 echo '<a class="button" style="font-variation-settings: \'FILL\' 100;" href="?dir=' . $serverPath . '&color=' . ($i + 1) . '">';
                                 echo '<span class="material-symbols-outlined" style="color: var(--color-accent-' . ($i + 1) . ');">circle</span>';
                                 echo '</a>';
                             }
+
                             echo '<a class="colorb button">';
                             echo '<span class="material-symbols-outlined">color_lens</span>';
                             echo '</a>';
@@ -334,9 +347,6 @@
                     echo '</a>';
                 }
             }
-
-            echo '<div class="placeholder"></div>';
-
             echo '</div>';
             ?>
 

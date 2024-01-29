@@ -8,6 +8,31 @@ function resize() {
 
 resize();
 
+// go back to scroll position when page is reloaded
+window.addEventListener("beforeunload", function (event) {
+  // get #main's scroll position and save it to sessionStorage
+  sessionStorage.setItem("scroll", document.querySelector("#main").scrollTop);
+
+  // get dir from url and save it to sessionStorage
+  var args = window.location.href.split("?")[1];
+  var dir = args.match(/dir=([^&#]*)/)[1];
+
+  sessionStorage.setItem("scrollDir", dir);
+});
+
+window.addEventListener("DOMContentLoaded", function () {
+  // set the scroll position to the stored value in sessionStorage if the dir is the same
+  var args = window.location.href.split("?")[1];
+  var dir = args.match(/dir=([^&#]*)/)[1];
+  var scrollDir = sessionStorage.getItem("scrollDir");
+  if (dir == scrollDir) {
+    var scrollPosition = sessionStorage.getItem("scroll");
+    if (scrollPosition) {
+      document.querySelector("#main").scrollTop = scrollPosition;
+    }
+  }
+});
+
 // when the window is thin enough, hide the menu
 window.addEventListener("resize", function () {
   resize();

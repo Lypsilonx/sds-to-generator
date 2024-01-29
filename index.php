@@ -245,7 +245,7 @@ function generateButtons($event, $signedin, $top, $permanent = false)
     if ($signedin) {
         echo '<div class="expandable_down buttondrawer editbuttons">';
         if ($top) {
-            echo '<a href="Actions/deletetop.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '&permanent=' . ($permanent ? 'true' : 'false') . '">';
+            echo '<a href="Actions/deletetop.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '&permanent=' . ($permanent ? 'on' : 'off') . '">';
             echo '<span class="material-symbols-outlined">delete</span>';
             echo '</a>';
             echo '<a class="editbutton" topid="' . $event['id'] . '" topcontent="' . $event['content'] . '" toptitle="' . $event['title'] . '" toppermanent="' . ($permanent ? 'true' : 'false') . '">';

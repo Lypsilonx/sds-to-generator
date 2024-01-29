@@ -19,9 +19,13 @@
 :root {
   --color-accent: #b1003a;
   --color-accent-1: #b1003a;
-  --color-accent-2: #c6d53a;
-  --color-accent-3: #00bba4;
-  --color-accent-4: #cf44a6;
+  --color-accent-2: #d45a33;
+  --color-accent-3: #f7b32b;
+  --color-accent-4: #7cb768;
+  --color-accent-5: #00bba4;
+  --color-accent-6: #455f9b;
+  --color-accent-7: #8a0391;
+  --color-accent-8: #9e0266;
 
   --border-thickness: 0.15em;
   --border-radius: 0.5em;
@@ -262,6 +266,12 @@ header {
     position: relative;
     padding-left: 0.5em;
 
+    * {
+      text-overflow: clip;
+      text-align: left;
+      white-space: nowrap;
+    }
+
     &::before {
       content: "";
       position: absolute;
@@ -371,14 +381,13 @@ header {
               content: attr(topnumber);
             }
   
-            box-shadow: 0 0 1em var(--color-shadow);
+            box-shadow: 0 0 0.25em var(--color-shadow);
             z-index: 2;
             width: min-content;
             max-width: calc(100% - 6em + var(--overflow));
             min-width: calc(100% - 5em);
             background-color: var(--color-background-unselected);
             color: var(--color-unselected);
-            font-weight: bold;
           }
         }
       }
@@ -390,29 +399,125 @@ header {
     position: fixed;
     bottom: 1em;
     left: 1em;
+    z-index: 100;
 
-    div:has(.colorb, .styleb) {
-      height: 2.5em;
-      position: relative;
-
-      transition: gap 0.5s ease-in-out;
-
-      &:hover {
-        .material-symbols-outlined {
-          color: var(--color-font);
-        }
-
-        gap: calc(2 * var(--border-thickness));
-        a {
-          &:not(:last-child){
-            background-color: var(--color-background);
-
-            &:hover {
-              border-color: var(--color-font);
+    div:has(.colorb) {
+      a {
+        &:not(:last-child) {
+          .material-symbols-outlined{
+            position: relative;
+            &::after {
+              content: "circle";
+              font-variation-settings: "FILL" 0;
+              color: var(--color-unselected);
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              bottom: 0;
+              left: 0;
+              align-items: center;
+              justify-content: center;
             }
           }
-          border: var(--border-thickness) solid var(--color-accent);
+
+          // custom color input
+          input[type="color"] {
+            appearance: none;
+            border: none;
+            width: 2.5em;
+            height: calc(2.5em - 2 * var(--border-thickness));
+            padding: 0;
+            margin: 0;
+            background: none;
+            cursor: pointer;
+
+            + .material-symbols-outlined {
+              opacity: 0;
+              position: absolute;
+              top: 0;
+              right: 0;
+              transition: opacity 0.5s ease-in-out;
+
+              &::after {
+                visibility: hidden;
+              }
+            }
+
+            &::-webkit-color-swatch-wrapper {
+              padding: 0;
+            }
+
+            &::-webkit-color-swatch {
+              margin: .2em;
+              border: none;
+              border-radius: 50%;
+              border: .2em solid var(--color-unselected);
+            }
+
+            &:hover {
+              &::-webkit-color-swatch {
+                border: .2em solid var(--color-selected);
+              }
+
+              + .material-symbols-outlined {
+                opacity: 1;
+              }
+            }
+          }
+        }
+
+        &:hover {
+          .material-symbols-outlined {
+            &::after {
+              color: var(--color-selected);
+            }
+          }
+        }
+      }
+    }
+
+    div:has(.colorb, .styleb) {
+      position: relative;
+      height: calc(2.5em);
+      width: calc(2.5em);
+      margin: calc(-1 * var(--border-thickness));
+      position: relative;
+      border: 0;
+
+      a {
+        margin-left: calc(-1 * var(--border-thickness));
+        margin-right: calc(-1 * var(--border-thickness));
+        border: var(--border-thickness) solid var(--color-accent);
+        border-bottom-width: 0;
+        border-top-width: 0;
+        position: relative;
+        &:not(:last-child) {
+          &:not(:nth-last-child(2))::after {
+            content: "";
+            position: absolute;
+            bottom: calc(100% - 1em);
+            left: calc(-1 * var(--border-thickness));
+            width: 100%;
+            height: 0;
+            background-color: var(--color-background-unselected);
+            border: var(--border-thickness) solid var(--color-accent);
+            z-index: -1;
+            transition: height 0.5s ease-in-out;
+          }
+        }
+      }
+
+      &:hover {
+        a {
           margin: calc(-1 * var(--border-thickness));
+          border: var(--border-thickness) solid var(--color-accent);
+
+          &:not(:last-child) {
+            // second to last child
+            &:not(:nth-last-child(2))::after {
+              height: 2em;
+            }
+          }
         }
 
         > :last-child {
@@ -459,10 +564,9 @@ header {
   margin: var(--frame-thickness);
   padding: 4em;
   margin-bottom: 0;
-  box-shadow: 0 0 2px var(--color-shadow);
   background-color: var(--color-background);
   overflow: scroll;
-  gap: 2em;
+  gap: 0;
 
   * {
     justify-content: left;
@@ -571,7 +675,6 @@ header {
   }
 
   .toprow {
-    box-shadow: 0 0 1em var(--color-shadow);
     border-radius: var(--border-radius);
     padding: 1em;
 
@@ -822,7 +925,6 @@ header {
 }
 
 .buttondrawer {
-  box-shadow: 0 0 1em var(--color-shadow);
   height: min-content;
   width: min-content;
   margin: 0;
@@ -855,8 +957,7 @@ header {
   
   input[type="text"],
   input[type="password"] {
-    margin-top: 0.1em;
-    margin-bottom: 0.1em;
+    height: calc(1.5em - var(--border-thickness) / 2);
     padding: 0.35em;
     font-size: 1em;
     background-color: var(--color-font);
