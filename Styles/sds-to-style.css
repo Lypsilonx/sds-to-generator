@@ -715,16 +715,20 @@ header .logo::before {
 .atmbuttons * {
   width: 30%;
   gap: 1em;
-  height: 100%;
+  margin: 0;
   font-size: 1em;
   padding: 0;
   align-items: center;
   text-align: center;
   justify-content: center;
   border: var(--border-thickness) solid var(--color-accent) !important;
+  height: calc(100% - 2 * var(--border-thickness));
+}
+.atmbuttons *:is(input[type=submit]) {
+  height: 100%;
 }
 
-@media (max-width: 1200px) {
+@media (min-width: 800px) {
   .atmbuttons {
     width: 80%;
   }
