@@ -26,7 +26,7 @@
   --color-accent-7: #8a0391;
   --color-accent-8: #9e0266;
   --border-thickness: 0.15em;
-  --border-radius: 0.5em;
+  --border-radius: 0;
   --border-radius-2: calc(var(--border-radius) - var(--border-thickness));
   --frame-thickness: var(--border-thickness);
   --color-selected: var(--color-font);
@@ -65,6 +65,13 @@
 .autocomplete-items div * {
   cursor: pointer;
 }
+.autocomplete-items div:hover {
+  background-color: var(--color-background-unselected);
+  color: var(--color-unselected);
+}
+.autocomplete-items div:hover * {
+  color: var(--color-unselected);
+}
 
 .autocomplete-active {
   /*when navigating through the items using the arrow keys:*/
@@ -78,6 +85,7 @@
 #searchfieldautocomplete-list {
   overflow: scroll;
   max-height: 80vh;
+  height: 100vh;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -597,6 +605,7 @@ header .logo::before {
   flex-direction: column;
   align-items: left;
   padding: 0;
+  margin-top: 2em;
 }
 #main .toprow {
   border-radius: var(--border-radius);
@@ -826,6 +835,7 @@ header .logo::before {
 }
 .buttondrawer * {
   border-radius: var(--border-radius-2);
+  height: 100%;
 }
 .buttondrawer .button, .buttondrawer a {
   width: 1.5em;
@@ -840,14 +850,15 @@ header .logo::before {
 }
 .buttondrawer input[type=text],
 .buttondrawer input[type=password] {
-  height: calc(1.5em - var(--border-thickness) / 2);
+  height: calc(100% - 0.75em);
+  margin-top: 0.025em;
   padding: 0.35em;
   font-size: 1em;
   background-color: var(--color-font);
   color: var(--color-background);
   font-family: "Bitter";
   font-size: 1.2em;
-  width: calc(100% - 1em);
+  width: calc(100% - 0.75em);
   min-width: 5em;
   border: 0;
 }
