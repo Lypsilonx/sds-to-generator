@@ -27,8 +27,11 @@ class TelegramBotApi implements BotApi
 
         // Check if callback is set
         if (isset($update['callback_query'])) {
-            $this->chat_id = $update['callback_query']['from']['id'];
             $callback_message = $update['callback_query']['data'];
+
+            // extract chat_id from callback_message (<chat_id>|<callback_message>)
+            $this->chat_id = explode("|", $callback_message)[0];
+            $callback_message = explode("|", $callback_message)[1];
 
             // delete callback message
             $callback_message_id = $update['callback_query']['message']['message_id'];
@@ -79,6 +82,13 @@ class TelegramBotApi implements BotApi
 
     public function send_message(BotMessage $response, string $chat_id = null)
     {
+        // add the chat_id to all the buttons
+        foreach ($response->buttons as $key => $button) {
+            foreach ($button as $key2 => $value) {
+                $response->buttons[$key][$key2]['callback_data'] = $this->chat_id . "|" . $value['callback_data'];
+            }
+        }
+
         $message = $this->send_bot_api_request(
             "sendMessage",
             array(
