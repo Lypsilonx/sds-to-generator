@@ -341,7 +341,7 @@
                     echo '</div>';
                 }
 
-                if ($signedin) {
+                if ($signedin && $topsP != null) {
                     echo '<a class="addtopb button">';
                     echo '<span class="material-symbols-outlined">add</span>';
                     echo '</a>';

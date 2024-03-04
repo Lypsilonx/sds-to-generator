@@ -105,7 +105,8 @@ class Bot
                 }
 
                 // enter chat id and name into chats.json
-                array_push($chats['groups'], array("name" => $name, "dir" => "Ortsgruppe" . $name . "/", "password" => hash("sha256", $password), "weekday" => $weekday, "members" => array($this->api->get_uid())));
+                $salt = file_get_contents("../salt.txt");
+                array_push($chats['groups'], array("name" => $name, "dir" => "Ortsgruppe" . $name . "/", "password" => hash("sha256", $password . $salt), "weekday" => $weekday, "members" => array($this->api->get_uid())));
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                 // create folder for Ortsgruppe
@@ -147,7 +148,8 @@ class Bot
                         }
 
                         // check if password is correct
-                        if (hash("sha256", $password) != $g['password']) {
+                        $salt = file_get_contents("../salt.txt");
+                        if (hash("sha256", $password . $salt) != $g['password']) {
                             $this->api->send_message(getMessage("wrong password"));
                             return;
                         }
@@ -285,9 +287,10 @@ class Bot
                     return;
                 }
                 // set new password
+                $salt = file_get_contents("../salt.txt");
                 foreach ($chats['groups'] as &$g) {
                     if ($g['name'] == $group) {
-                        $g['password'] = hash("sha256", $password);
+                        $g['password'] = hash("sha256", $password . $salt);
                         break;
                     }
                 }

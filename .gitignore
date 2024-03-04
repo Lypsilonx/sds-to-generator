@@ -2,7 +2,8 @@
 ._*
 .DS_Store
 TOs/*
-webdavuser.config
+webdavuser*.config
+salt.txt
 Bot/token.txt
 Bot/chats.json
 Bot/tokens.json

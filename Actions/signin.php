@@ -27,7 +27,8 @@ for ($i = 0; $i < count($chats["groups"]); $i++) {
         break;
     }
 }
-if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256", $_POST['password'])) {
+$salt = file_get_contents("../salt.txt");
+if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256", $_POST['password'] . $salt)) {
     // set session variable
     $_SESSION['signedin'] = $folder;
     // redirect to index.php
