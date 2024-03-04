@@ -500,7 +500,7 @@ function upload($markdown, $filename, $serverPath, bool $bot = false, bool $forc
     $filename = $filename . "-Tagesordnung.md";
   }
 
-  $sdsCloud = new WebdavApi("https://cloud.linke-sds.org/", "../webdavuser.config");
+  $sdsCloud = new WebdavApi("../webdavuser.config");
 
   if ($bot && !$force) {
     if ($sdsCloud->fileExists($filename, $cloudPath)) {

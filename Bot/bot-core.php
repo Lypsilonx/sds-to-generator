@@ -261,14 +261,15 @@ class Bot
                 $filename = str_replace("-", "_", $date->format("Y_m_d")) . ".md";
                 $cloudPath = getCloudPath($group . "/Plenum", $date->getTimestamp());
 
-                $sdsCloud = new WebdavApi("https://cloud.linke-sds.org/", "../webdavuser.config");
+                $sdsCloud = new WebdavApi("../webdavuser.config");
 
                 if ($sdsCloud->fileExists($filename, $cloudPath)) {
                     $cloudLink = $sdsCloud->getFileLink($filename, $cloudPath);
                 }
 
                 $mtoken = createToken($group);
-                $args = ["https://www.politischdekoriert.de/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken];
+                $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]";
+                $args = [$actual_link . "/sds-to-generator/index.php?dir=" . $group . "/Plenum&token=" . $mtoken];
                 if (isset($cloudLink)) {
                     array_push($args, $cloudLink);
                 }

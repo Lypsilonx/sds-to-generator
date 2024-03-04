@@ -5,15 +5,13 @@ class WebdavApi
     private $password;
     private $url;
 
-    function __construct($url, $filename)
+    function __construct($filename)
     {
-        // load webdavuser.config from the same directory as this script
         $webdavuser = json_decode(file_get_contents($filename), true);
 
+        $this->url = $webdavuser["url"];
         $this->user = $webdavuser["user"];
         $this->password = $webdavuser["password"];
-
-        $this->url = $url;
     }
 
     public function uploadFile($filename, $content, $cloudPath = "", $contentType = "text/markdown")
