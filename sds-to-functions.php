@@ -554,9 +554,9 @@ function generateQuestion()
         "Wissenschaftler*in",
       ];
       $question =
-        "Was ist dein(e)" . rand(0, 1) == 0
-        ? " lieblings"
-        : " hass" .
+        "Was ist dein(e)" . ((rand(0, 1) == 0)
+          ? " lieblings"
+          : " hass") .
         " " .
         $things[rand(0, count($things) - 1)] .
         "?";
