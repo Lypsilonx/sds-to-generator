@@ -241,7 +241,7 @@ function renderMarkDown($serverPath)
   // hash the date
   $hdate = hash("sha256", $data["date"]);
   // convert the hash to an integer
-  $seed = intval($hdate, 16);
+  $seed = hexdec(substr($hdate, 0, 8));
   srand($seed);
 
   // replace %awarenessfrage% and %zusatzfrage% with a random question
