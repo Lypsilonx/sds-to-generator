@@ -95,7 +95,6 @@ class TelegramBotApi implements BotApi
                 "chat_id" => $chat_id ?? $this->chat_id,
                 "text" => $response->text,
                 "disable_notification" => true,
-                "parse_mode" => "Markdown",
                 "reply_markup" => json_encode(
                     [
                         'inline_keyboard' => $response->buttons
