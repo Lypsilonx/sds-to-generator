@@ -208,7 +208,7 @@ class TelegramBotApi implements BotApi
         );
     }
 
-    public function react($message_id, $reaction)
+    public function react($reaction, $message_id = null)
     {
         // react to message with $reaction
     }

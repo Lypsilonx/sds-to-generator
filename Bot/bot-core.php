@@ -19,7 +19,7 @@ interface BotApi
     public function send_file($path);
     public function delete_message($message_id);
     public function debug_log($message);
-    public function react($message_id, $reaction);
+    public function react($reaction, $message_id = null);
     public function leave_group();
     public function in_group(string $chat_id = null): bool;
     public function get_uid(): string;
@@ -371,7 +371,7 @@ class Bot
                     saveTOP($group, $title, $content);
 
                     // send response
-                    $this->api->send_message($message_id = getMessage("top saved", [$title]));
+                    $this->api->send_message(getMessage("top saved", [$title]));
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
@@ -386,12 +386,12 @@ class Bot
                     saveTOP($group, $title, $content);
 
                     // send response
-                    $this->api->send_message($message_id = getMessage("top saved", [$title]));
+                    $this->api->send_message(getMessage("top saved", [$title]));
                     $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . "(Siehe TOP)"]));
                 }
 
                 // react to message with tick
-                $this->api->react($message_id, "✅");
+                $this->api->react("✅");
             }
             // /termin or #termin (not regarding capitalization)
             else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
@@ -434,10 +434,10 @@ class Bot
                 saveEvent($group, $title, $content, $date);
 
                 // send response
-                $this->api->send_message($message_id = getMessage("event saved", [$title]));
+                $this->api->send_message(getMessage("event saved", [$title]));
 
                 // react to message with tick
-                $this->api->react($message_id, "✅");
+                $this->api->react("✅");
             }
             // /del or #del (not regarding capitalization)
             else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
