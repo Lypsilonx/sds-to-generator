@@ -10,35 +10,15 @@
         rel="stylesheet" />
     <link rel="stylesheet" href="Styles/sds-to-style.css">
     <?php
-    // prevent script injection
-    $num_colors = 8;
-
-    if (isset($_GET['color'])) {
-        $color = preg_replace('/[^0-9a-fA-F]/', '', $_GET['color']);
-    } else {
-        if (isset($_SESSION['color'])) {
-            $color = $_SESSION['color'];
-        } else {
-            $color = 1;
-        }
-    }
-
     $isHex = preg_match('/^[0-9a-fA-F]{6}$/', $color);
-
-    // if color is not set or invalid
-    if ($color == null || (!$isHex && ($color > $num_colors || $color < 1))) {
-        $color = 1;
-    } else {
-        $_SESSION['color'] = $color;
-    }
 
     // set color
     echo '<style>';
-    echo ':root{';
+    echo ':root{' . PHP_EOL;
     if ($isHex) {
-        echo '--color-accent: #' . $color . ';';
+        echo '--color-accent: #' . $color . ';' . PHP_EOL;
     } else {
-        echo '--color-accent: var(--color-accent-' . $color . ');';
+        echo '--color-accent: var(--color-accent-' . $color . ');' . PHP_EOL;
     }
     echo '}';
     echo '</style>';

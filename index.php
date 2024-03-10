@@ -6,17 +6,26 @@ require_once 'sds-to-functions.php';
 $addto = false;
 $serverPath;
 
-if (!isset($_GET['dir'])) {
-    $serverPath = 'fallback';
-} else {
+$serverPath = getVar('dir', 'fallback', function ($input) {
     // sanitize input
-    $serverPath = preg_replace('/[^a-zA-Z0-9äüöß\/_-]/', '', $_GET['dir']);
+    $input = preg_replace('/[^a-zA-Z0-9äüöß\/_-]/', '', $input);
 
     // check if directory is valid (exactly one folder deep) and at least one character long (before and after /)
-    if (preg_match('/^[a-zA-Z0-9äüöß_-]{1,}\/[a-zA-Z0-9äüöß_-]{1,}$/', $serverPath) == 0) {
-        $serverPath = 'fallback';
-    }
-}
+    return !preg_match('/^[a-zA-Z0-9äüöß_-]{1,}\/[a-zA-Z0-9äüöß_-]{1,}$/', $input) == 0;
+}, false);
+
+$view = getVar('view', "default", function ($input) {
+    // sanitize input
+    $input = preg_replace('/[^a-zA-Z0-9äüöß_-]/', '', $input);
+
+    return file_exists('Views/' . $input . '.php');
+}, false, -1);
+
+$num_colors = 8;
+
+$color = getVar('color', 1, function ($color) use ($num_colors) {
+    return preg_match('/^[0-9a-fA-F]{6}$/', $color) || ($color <= $num_colors && $color >= 1);
+}, false, -1);
 
 $json;
 // try getting json file
@@ -121,24 +130,9 @@ if ($serverPath != "fallback") {
     $tops = $json_data['tops'];
 }
 
-// get "view" from session (if not set, set to "default")
-$view = "default";
-if (isset($_SESSION['view']) && $_SESSION['view'] != "" && file_exists('Views/' . $_SESSION['view'] . '.php')) {
-    $view = $_SESSION['view'];
-} else {
-    $_SESSION['view'] = "default";
-}
+// load the .php file for the view
+require_once 'Views/' . $view . '.php';
 
-// get "view" from url (if set)
-if (isset($_GET['view'])) {
-    // sanitize input
-    $view = preg_replace('/[^a-zA-Z0-9äüöß_-]/', '', $_GET['view']);
-    // check if view is valid
-    if (file_exists('Views/' . $view . '.php')) {
-        $_SESSION['view'] = $view;
-    } else {
-        $view = "default";
-    }
 }
 
 function linkEventContent($event, array $tops)
@@ -262,6 +256,44 @@ function generateButtons($event, $signedin, $top, $permanent = false)
         echo '</div>';
     }
 }
+function sanitize($input)
+{
+    $input = trim($input);
+    $input = stripslashes($input);
+    $input = htmlspecialchars($input);
+    return $input;
+}
 
-// load the .php file for the view
-require_once 'Views/' . $view . '.php';
+function getVar($name, $default = "", $filter = null, $saveInSession = true, $saveAsCookie = 0)
+{
+    if (isset($_GET[$name])) {
+        $_GET[$name] = sanitize($_GET[$name]);
+    }
+
+    $out = $default;
+
+    if (isset($_GET[$name]) && ($filter == null || $filter($_GET[$name]))) {
+        $out = $_GET[$name];
+        if ($saveInSession) {
+            $_SESSION[$name] = $out;
+        }
+        if ($saveAsCookie != 0) {
+            // if negative, set cookie for as long as possible
+            if ($saveAsCookie < 0) {
+                setcookie($name, $out, time() + 60 * 60 * 24 * 365 * 100);
+            } else {
+                setcookie($name, $out, time() + $saveAsCookie);
+            }
+        }
+    } else if ($saveInSession) {
+        if (isset($_SESSION[$name])) {
+            $out = $_SESSION[$name];
+        }
+    } else if ($saveAsCookie != 0) {
+        if (isset($_COOKIE[$name])) {
+            $out = $_COOKIE[$name];
+        }
+    }
+
+    return $out;
+}
