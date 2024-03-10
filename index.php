@@ -237,17 +237,17 @@ function generateButtons($event, $signedin, $top, $permanent = false)
     if ($signedin) {
         echo '<div class="expandable_down buttondrawer editbuttons">';
         if ($top) {
-            echo '<a href="Actions/deletetop.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '&permanent=' . ($permanent ? 'on' : 'off') . '">';
+            echo '<a href="Actions/deletetop.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '&permanent=' . ($permanent ? 'on' : 'off') . '" title="TOP löschen">';
             echo '<span class="material-symbols-outlined">delete</span>';
             echo '</a>';
-            echo '<a class="editbutton" topid="' . $event['id'] . '" topcontent="' . $event['content'] . '" toptitle="' . $event['title'] . '" toppermanent="' . ($permanent ? 'true' : 'false') . '">';
+            echo '<a class="editbutton" topid="' . $event['id'] . '" topcontent="' . $event['content'] . '" toptitle="' . $event['title'] . '" toppermanent="' . ($permanent ? 'true' : 'false') . '" title="TOP bearbeiten">';
             echo '<span class="material-symbols-outlined">edit</span>';
             echo '</a>';
         } else {
-            echo '<a href="Actions/deleteevent.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '">';
+            echo '<a href="Actions/deleteevent.php?id=' . $event['id'] . '&dir=' . $_GET['dir'] . '" title="Event löschen">';
             echo '<span class="material-symbols-outlined">delete</span>';
             echo '</a>';
-            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '">';
+            echo '<a class="editbutton event" eventid="' . $event['id'] . '" eventtitle="' . $event['title'] . '" eventcontent="' . $event['content'] . '" eventdate="' . $event['date'] . '" title="Event bearbeiten">';
             echo '<span class="material-symbols-outlined">edit</span>';
             echo '</a>';
         }

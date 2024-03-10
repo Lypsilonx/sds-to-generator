@@ -37,12 +37,12 @@
                 echo '<form action="Actions/signin.php" method="post">';
                 echo '<input type="password" name="password" placeholder="Passwort" id="passwordfield" title="Das Passwort, dass deine Gruppe festgelegt hat." required>';
                 echo '<input type="hidden" name="dir" value="' . $serverPath . '">';
-                echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
+                echo '<a type="submit" class="unlockbutton" onclick="this.parentNode.submit();" title="Anmelden"><span class="material-symbols-outlined"></span></a>';
                 echo '</form>';
             }
             if ($signedin_somewhere) {
                 echo '<form action="Actions/signout.php" method="post">';
-                echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();"><span class="material-symbols-outlined"></span></a>';
+                echo '<a type="submit" class="lockbutton" onclick="this.parentNode.submit();" title="Abmelden"><span class="material-symbols-outlined"></span></a>';
                 echo '<input type="hidden" name="dir" value="' . $serverPath . '">';
                 echo '</form>';
             }
@@ -53,12 +53,12 @@
                     echo $serverPath;
                 } ?>" id="searchfield">
             </div>
-            <a class="searchbutton">
+            <a class="searchbutton" title="Suchen">
                 <span class="material-symbols-outlined">search</span>
             </a>
             <?php
             if ($signedin) {
-                echo '<a class="editbutton" toptitle="' . $json_data['title'] . '" topdate="' . $json_data['date'] . '">';
+                echo '<a class="editbutton" toptitle="' . $json_data['title'] . '" topdate="' . $json_data['date'] . '" title="TO Bearbeiten">';
                 echo '<span class="material-symbols-outlined">edit</span>';
                 echo '</a>';
             }
@@ -128,21 +128,21 @@
                     <div id="actionbuttons" class="buttondrawer">
                         <?php
                         if ($serverPath != "fallback" && $addto == false) {
-                            echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $serverPath . '">';
+                            echo '<a class="downloadb button" href="Actions/downloadto.php?dir=' . $serverPath . '" title="TO Heunterladen">';
                             echo '<span class="material-symbols-outlined">file_download</span>';
                             echo '</a>';
 
                             if ($signedin) {
-                                echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $serverPath . '">';
+                                echo '<a class="uploadb button" href="Actions/uploadto.php?dir=' . $serverPath . '" title="TO in die Cloud hochladen">';
                                 echo '<span class="material-symbols-outlined">cloud_upload</span>';
                                 echo '</a>';
                             }
 
-                            echo '<a class="shareb button">';
+                            echo '<a class="shareb button" title="TO Teilen">';
                             echo '<span class="material-symbols-outlined">share</span>';
                             echo '</a>';
 
-                            echo '<a class="botb button" href="https://t.me/sds_to_bot">';
+                            echo '<a class="botb button" href="https://t.me/sds_to_bot" title="TO Bot">';
                             echo '<span class="material-symbols-outlined">smart_toy</span>';
                             echo '</a>';
 
@@ -168,11 +168,11 @@
 
                             echo '<div class="buttondrawer expandable_down">';
                             // classic view
-                            echo '<a class="button" href="?dir=' . $serverPath . '&view=classic">';
+                            echo '<a class="button" href="?dir=' . $serverPath . '&view=classic" title="Klassische Ansicht">';
                             echo '<span class="material-symbols-outlined">radio</span>';
                             echo '</a>';
                             // modern (default) view
-                            echo '<a class="button" href="?dir=' . $serverPath . '&view=default">';
+                            echo '<a class="button" href="?dir=' . $serverPath . '&view=default" title="Moderne Ansicht">';
                             echo '<span class="material-symbols-outlined">tv_gen</span>';
                             echo '</a>';
                             echo '<a class="styleb button">';
