@@ -133,8 +133,6 @@ if ($serverPath != "fallback") {
 // load the .php file for the view
 require_once 'Views/' . $view . '.php';
 
-}
-
 function linkEventContent($event, array $tops)
 {
     // check if "content" is "(Siehe TOP)" or "siehe TOP" or "s. TOP" ("(" opional, has to contain "s" and "TOP")
