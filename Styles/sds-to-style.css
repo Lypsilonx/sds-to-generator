@@ -566,7 +566,8 @@ header .logo::before {
 }
 #main .button {
   position: relative;
-  width: 8em;
+  width: -moz-min-content;
+  width: min-content;
   height: 1.9em;
   padding: 0.3em;
   left: 50%;
@@ -692,6 +693,9 @@ header .logo::before {
   #main .addeventb::after {
     content: "Neues Event";
     transform: translateY(-0.05em);
+  }
+  #main .addtopb, #main .addeventb {
+    width: 8em;
   }
 }
 .hovermenu #sidebar {

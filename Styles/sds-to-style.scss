@@ -635,7 +635,7 @@ header {
 
   .button {
     position: relative;
-    width: 8em;
+    width: min-content;
     height: 1.9em;
     padding: 0.3em;
     left: 50%;
@@ -789,6 +789,10 @@ header {
     .addeventb::after {
       content: "Neues Event";
       transform: translateY(-.05em);
+    }
+
+    .addtopb, .addeventb {
+      width: 8em;
     }
   }
 }
