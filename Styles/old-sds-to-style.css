@@ -150,7 +150,7 @@ ul {
 }
 
 a,
-input[type=submit] {
+input[type="submit"] {
   text-decoration: none;
   background-color: var(--sds-accent-1);
   color: var(--sds-color-font);
@@ -164,14 +164,14 @@ input[type=submit] {
 }
 
 a:hover,
-input[type=submit]:hover,
-button[type=submit]:hover {
+input[type="submit"]:hover,
+button[type="submit"]:hover {
   background-color: var(--sds-color-2);
   color: var(--main-bg-color);
 }
 a:hover *,
-input[type=submit]:hover *,
-button[type=submit]:hover * {
+input[type="submit"]:hover *,
+button[type="submit"]:hover * {
   color: var(--main-bg-color);
 }
 
@@ -217,8 +217,8 @@ button * {
   pointer-events: none;
 }
 
-input[type=text],
-input[type=password] {
+input[type="text"],
+input[type="password"] {
   cursor: text;
 }
 
@@ -272,7 +272,12 @@ header {
   position: absolute;
   width: calc(100% - 2em);
   padding: 1em;
-  background-image: linear-gradient(180deg, var(--main-bg-color) 0%, var(--main-bg-color) 50%, rgba(255, 255, 255, 0) 100%);
+  background-image: linear-gradient(
+    180deg,
+    var(--main-bg-color) 0%,
+    var(--main-bg-color) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   pointer-events: none;
   height: 2em;
   font-size: 1.5em;
@@ -648,8 +653,8 @@ body.hovermenu #main .button::after {
     width: 80%;
   }
 }
-.menu form input[type=text],
-.menu form input[type=date] {
+.menu form input[type="text"],
+.menu form input[type="date"] {
   height: 2em;
   width: 100%;
   padding: 0.5em;
@@ -675,8 +680,8 @@ body.hovermenu #main .button::after {
 #headerbuttons .autocomplete {
   width: calc(100% - 2.5em);
 }
-#headerbuttons input[type=text],
-#headerbuttons input[type=password] {
+#headerbuttons input[type="text"],
+#headerbuttons input[type="password"] {
   height: calc(100% - 1.2em);
   padding: 0.5em;
   font-size: 1em;
@@ -707,4 +712,4 @@ body.hovermenu #main .button::after {
   content: "lock_open";
 }
 
-/* #endregion *//*# sourceMappingURL=old-sds-to-style.css.map */
+/* #endregion */ /*# sourceMappingURL=old-sds-to-style.css.map */

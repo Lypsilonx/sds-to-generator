@@ -133,6 +133,15 @@ if ($serverPath != "fallback") {
 // load the .php file for the view
 require_once 'Views/' . $view . '.php';
 
+
+// add announcement to bottom of page
+if ($folder != "Aachen") {
+    echo '<div class="announcement" style="position: fixed; bottom: 0; right: 0; padding: 0.4em; text-align: right; display: flex; flex-direction: row; align-items: flex-end; gap: 1em; background-color: var(--color-accent); border-top-left-radius: var(--border-radius); z-index: 100; align-items: center;">';
+    echo '<span class="material-symbols-outlined" style="color: var(--color-background); font-size: 1.5em;">info</span>';
+    echo '<p style="color: var(--color-background);">Aus sicherheitsgründen müssen alle Passwörter per /changepw neu gesetzt werden.</p>';
+    echo '</div>';
+}
+
 function linkEventContent($event, array $tops)
 {
     // check if "content" is "(Siehe TOP)" or "siehe TOP" or "s. TOP" ("(" opional, has to contain "s" and "TOP")
