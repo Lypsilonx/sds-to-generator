@@ -209,7 +209,21 @@ class TelegramBotApi implements BotApi
 
     public function react($reaction, $message_id = null)
     {
-        // react to message with $reaction
+        $this->send_bot_api_request(
+            "setMessageReaction",
+            array(
+                "chat_id" => $this->chat_id,
+                "message_id" => $message_id ?? $this->message_id,
+                "reaction" => json_encode(
+                    [
+                        [
+                            'type' => 'emoji',
+                            'emoji' => $reaction
+                        ]
+                    ]
+                )
+            )
+        );
     }
 
     public function leave_group()

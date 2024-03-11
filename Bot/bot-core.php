@@ -371,6 +371,7 @@ class Bot
                     saveTOP($group, $title, $content);
 
                     // send response
+                    $this->api->react('👍');
                     $this->api->send_message(getMessage("top saved", [$title]));
                 } else {
                     // bring date to format yyyy-mm-dd
@@ -386,12 +387,10 @@ class Bot
                     saveTOP($group, $title, $content);
 
                     // send response
+                    $this->api->react('👍');
                     $this->api->send_message(getMessage("top saved", [$title]));
                     $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . "(Siehe TOP)"]));
                 }
-
-                // react to message with tick
-                $this->api->react("✅");
             }
             // /termin or #termin (not regarding capitalization)
             else if (strpos(strtolower($text), "#termin") === 0 || strpos(strtolower($text), "/termin") === 0) {
@@ -434,10 +433,8 @@ class Bot
                 saveEvent($group, $title, $content, $date);
 
                 // send response
+                $this->api->react('👍');
                 $this->api->send_message(getMessage("event saved", [$title]));
-
-                // react to message with tick
-                $this->api->react("✅");
             }
             // /del or #del (not regarding capitalization)
             else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
@@ -471,7 +468,6 @@ class Bot
 
                     array_push($buttons, array(["text" => "Abbrechen", "callback_data" => "none"]));
 
-                    // react to message with tick
                     $this->api->send_message(getMessage("find top or event", [$title, $buttons]));
                 }
             }
