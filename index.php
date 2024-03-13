@@ -174,7 +174,7 @@ function formatMD($text)
     }
 
     // recognize dates (M.D. or M.D.Y) and link .ics files (do not break the line)
-    $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß\- ]*&quot; )|([a-zA-Z0-9äüöß\-]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '[$2$3$4$5$6$7$8$9](Actions/ics.php?date=$5&time=$9&title=$2$3)', $out);
+    $out = preg_replace('/((&quot;[a-zA-Z0-9äüöß\- ]*&quot; )|([a-zA-Z0-9äüöß\-]* ))?(am )?(\d{1,2}\.\d{1,2}\.(\d{2,4})?)( )?(um )?(\d{1,2}(:\d{1,2}|( )?Uhr))?/', '$2$3[$4$5$7$8$9](Actions/ics.php?date=$5&time=$9&title=$2$3)', $out);
 
 
     // change p back to .

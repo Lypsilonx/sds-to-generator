@@ -20,7 +20,7 @@ class WebdavApi
             $this->createFolder($cloudPath);
         }
 
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -40,13 +40,14 @@ class WebdavApi
 
     private function getFileID($filename, $cloudPath = "")
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
                 'http' => array(
                     'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password),
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
+                        'Content-Type: text/xml',
                     'content' => '<?xml version="1.0" encoding="UTF-8"?>
                                 <d:propfind xmlns:d="DAV:">
                                     <d:prop xmlns:oc="http://owncloud.org/ns">
@@ -66,7 +67,7 @@ class WebdavApi
 
     public function fileExists($filename, $cloudPath = "")
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -93,13 +94,14 @@ class WebdavApi
 
     private function folderExists($cloudPath)
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath;
+        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(
                 'http' => array(
                     'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password),
+                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
+                        'Content-Type: text/xml',
                     'content' => '<?xml version="1.0"?>
                                 <propfind xmlns="DAV:">
                                     <prop>
@@ -119,7 +121,7 @@ class WebdavApi
 
     private function createFolder($cloudPath)
     {
-        $url = $this->url . "/remote.php/dav/files/" . $this->user . "/" . $cloudPath;
+        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(

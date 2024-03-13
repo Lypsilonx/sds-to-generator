@@ -106,7 +106,16 @@ class Bot
 
                 // enter chat id and name into chats.json
                 $salt = file_get_contents("../salt.txt");
-                array_push($chats['groups'], array("name" => $name, "dir" => "Ortsgruppe" . $name . "/", "password" => hash("sha256", $password . $salt), "weekday" => $weekday, "members" => array($this->api->get_uid())));
+                array_push(
+                    $chats['groups'],
+                    array(
+                        "name" => $name,
+                        "dir" => "Ortsgruppe " . $name . "/",
+                        "password" => hash("sha256", $password . $salt),
+                        "weekday" => $weekday,
+                        "members" => array($this->api->get_uid())
+                    )
+                );
                 file_put_contents("chats.json", json_encode($chats, JSON_PRETTY_PRINT));
 
                 // create folder for Ortsgruppe

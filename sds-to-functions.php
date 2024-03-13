@@ -193,7 +193,7 @@ function renderMarkDown($serverPath)
             $eventFormat = str_replace("%content%", "", $eventFormat);
           } else if (preg_match('/^\(?s(\.|iehe) TOP\)?$/i', $wvs[$key2]["content"])) {
             $content = $wvs[$key2]["content"];
-            $topId = getTopId($wvs[$key2]["top"], $data["tops"]);
+            $topId = getTopId($wvs[$key2]["title"], $data["tops"]);
             if ($topId != "") {
               $topTitle = getTopTitle($topId, $data["tops"]);
 
@@ -206,8 +206,17 @@ function renderMarkDown($serverPath)
                 }
               }
 
-              // uncomment when nextcloud is on version 25
-              //$content = "Siehe [" . $topTitle . "](#" . ($topNumber + 5) . ".-" . str_replace(" ", "-", $topTitle) . ")";
+              $link = strtolower($topTitle);
+              $link = str_replace(" ", "-", $link);
+              $link = preg_replace('/-+/', '-', $link);
+              $link = str_replace("ü", "u", $link);
+              $link = str_replace("ö", "o", $link);
+              $link = str_replace("ä", "a", $link);
+              $link = preg_replace('/[^a-zA-Z0-9-]/', '', $link);
+
+              $content = "Siehe [" . $topTitle . "](#h-" . ($topNumber + 5) . "-"
+                . $link
+                . ")";
             }
 
             $eventFormat = str_replace("%content%", "\r\n      * " . $content, $eventFormat);
@@ -293,10 +302,10 @@ function download($content, $filename)
   header("Content-Disposition: attachment; filename=" . $filename);
   echo $content;
 }
-function getTopId($name, array $tops, $maxDistance = 100)
+function getTopId($name, array $tops, $minSimilarity = 50)
 {
   $topId = "";
-  $distance = 100000;
+  $similarity = 0;
   $closestId = "";
   foreach ($tops as $top) {
     if ($top['title'] == $name) {
@@ -304,14 +313,14 @@ function getTopId($name, array $tops, $maxDistance = 100)
       break;
     }
 
-    $lev = levenshtein($top['title'], $name);
-    if ($lev < $distance) {
+    similar_text($top['title'], $name, $percent);
+    if ($percent > $similarity) {
       $closestId = $top['id'];
-      $distance = $lev;
+      $similarity = $percent;
     }
   }
 
-  if ($topId == "" && $distance <= $maxDistance) {
+  if ($topId == "" && $similarity >= $minSimilarity) {
     $topId = $closestId;
   }
 
@@ -345,6 +354,9 @@ function getCloudPath($serverPath, $date)
       break;
     }
   }
+
+  // encode to get rid of spaces
+  $cloudPath = str_replace(" ", "%20", $cloudPath);
 
   return $cloudPath;
 }

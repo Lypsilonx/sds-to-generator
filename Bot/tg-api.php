@@ -1,5 +1,4 @@
 <?php
-// https://api.telegram.org/botXXXX/setWebhook?url=www.politischdekoriert.de/sds-to-generator/Bot/index.php&drop_pending_updates=true
 require_once 'bot-core.php';
 class TelegramBotApi implements BotApi
 {
@@ -221,7 +220,8 @@ class TelegramBotApi implements BotApi
                             'emoji' => $reaction
                         ]
                     ]
-                )
+                ),
+                "big" => false
             )
         );
     }
