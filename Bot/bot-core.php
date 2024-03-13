@@ -570,6 +570,11 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "Beispiel: /init Berlin Mittwoch 1234"
                 . PHP_EOL . "(Das Passwort kannst du dir aussuchen und später ändern.)"
                 . PHP_EOL
+                . PHP_EOL . "Danach kannst du /folder <Dateipfad> eingeben, um den Speicherort der TO in der Cloud festzulegen."
+                . PHP_EOL . "Beispiel: /folder Ortsgruppe Berlin/2023 SoSe/"
+                . PHP_EOL
+                . PHP_EOL . "Danach musst du dem SDS TO Bot noch Zugriff auf den entsprechenden Ordner in der Cloud geben."
+                . PHP_EOL
                 . PHP_EOL . "Falls ihr einen Fehler findet, meldet ihn bitte an"
                 . PHP_EOL . "support@politischdekoriert.de"
                 . PHP_EOL
@@ -581,6 +586,12 @@ function getMessage($id, $args = [])
                 . PHP_EOL
                 . PHP_EOL . "Starte am besten indem du in deiner Ortsgruppe /init <Ort> <Plenumstag> <Passwort> eingibst."
                 . PHP_EOL . "Beispiel: /init Berlin Mittwoch 1234"
+                . PHP_EOL . "(Das Passwort kannst du dir aussuchen und später ändern.)"
+                . PHP_EOL
+                . PHP_EOL . "Danach kannst du /folder <Dateipfad> eingeben, um den Speicherort der TO in der Cloud festzulegen."
+                . PHP_EOL . "Beispiel: /folder Ortsgruppe Berlin/2023 SoSe/"
+                . PHP_EOL
+                . PHP_EOL . "Danach musst du dem SDS TO Bot noch Zugriff auf den entsprechenden Ordner in der Cloud geben."
                 . PHP_EOL
                 . PHP_EOL . "Du kannst Befehle auch aus deimem Privatchat mit mir eingeben. Dazu musst du dort einfach /init <Ort> <Passwort> eingeben."
                 . PHP_EOL
@@ -610,6 +621,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL
                 . PHP_EOL . "/upto"
                 . PHP_EOL . "Lädt die TO auf den SDS Server hoch"
+                . PHP_EOL . "(Benötigt Zugriff auf den in /folder festgelegten Ordner in der Cloud)"
                 . PHP_EOL
                 . PHP_EOL . "/seeto"
                 . PHP_EOL . "Liefert einen Link zum Ansehen der TO"
@@ -723,7 +735,9 @@ function getMessage($id, $args = [])
             }
             break;
         case "init":
-            $response->text = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt.";
+            $response->text = "Ortsgruppe " . $args[0] . " wurde erfolgreich hinzugefügt."
+                . PHP_EOL
+                . PHP_EOL . "Damit ihr TOs hochladen (/upto) und ansehen (/seeto) könnt, müsst ihr dem SDS TO Bot noch Zugriff auf eure Cloud Ordner geben.";
             break;
         case "plenum changed":
             $response->text = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
