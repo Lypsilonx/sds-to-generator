@@ -163,8 +163,7 @@ class TelegramBotApi implements BotApi
                     "sendDocument",
                     array(
                         "chat_id" => $this->chat_id,
-                        "caption" => $caption,
-                        "parse_mode" => "Markdown"
+                        "caption" => $caption
                     )
                 ),
                 CURLOPT_RETURNTRANSFER => true,
@@ -200,8 +199,7 @@ class TelegramBotApi implements BotApi
             array(
                 "chat_id" => $this->chat_id,
                 "text" => $message,
-                "disable_notification" => true,
-                "parse_mode" => "Markdown"
+                "disable_notification" => true
             )
         );
     }

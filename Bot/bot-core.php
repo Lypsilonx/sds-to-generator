@@ -381,7 +381,6 @@ class Bot
 
                     // send response
                     $this->api->react('👍');
-                    $this->api->send_message(getMessage("top saved", [$title]));
                 } else {
                     // bring date to format yyyy-mm-dd
                     $date = $matches[0];
@@ -397,7 +396,6 @@ class Bot
 
                     // send response
                     $this->api->react('👍');
-                    $this->api->send_message(getMessage("top saved", [$title]));
                     $this->api->send_message(getMessage("event recognized", [$date->format("d.m."), $title . PHP_EOL . "(Siehe TOP)"]));
                 }
             }
@@ -443,7 +441,6 @@ class Bot
 
                 // send response
                 $this->api->react('👍');
-                $this->api->send_message(getMessage("event saved", [$title]));
             }
             // /del or #del (not regarding capitalization)
             else if (strpos(strtolower($text), "#del") === 0 || strpos(strtolower($text), "/del") === 0) {
@@ -621,7 +618,7 @@ function getMessage($id, $args = [])
                 . PHP_EOL
                 . PHP_EOL . "/upto"
                 . PHP_EOL . "Lädt die TO auf den SDS Server hoch"
-                . PHP_EOL . "(Benötigt Zugriff auf den in /folder festgelegten Ordner in der Cloud)"
+                . PHP_EOL . "(Benötigt Zugriff auf den in /folder festgelegten Ordner in der Cloud. Gehe hier hin https://login.linksjugend-solid.de/orgunit/, wähle deine Ortsgruppe und füge den SDS TO Bot mit Moderationsrechten hinzu.)"
                 . PHP_EOL
                 . PHP_EOL . "/seeto"
                 . PHP_EOL . "Liefert einen Link zum Ansehen der TO"
@@ -694,14 +691,6 @@ function getMessage($id, $args = [])
                 array_push($buttons, array(["text" => "In Cloud öffnen", "url" => $args[1]]));
             }
             $response->buttons = $buttons;
-            break;
-        case "top saved":
-            $response->deleteCommand = false;
-            $response->text = "TOP \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
-            break;
-        case "event saved":
-            $response->deleteCommand = false;
-            $response->text = "Termin \"" . $args[0] . "\" wurde erfolgreich hinzugefügt.";
             break;
         case "event recognized":
             $response->deleteCommand = false;
