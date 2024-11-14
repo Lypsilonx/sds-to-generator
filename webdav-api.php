@@ -86,7 +86,7 @@ class WebdavApi
         );
 
         $result = file_get_contents($url, false, $context);
-        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
+        if ($result[0] == "") {
             return false;
         }
         return true;
@@ -113,7 +113,7 @@ class WebdavApi
         );
 
         $result = file_get_contents($url, false, $context);
-        if ($http_response_header[0] == "HTTP/1.1 404 Not Found") {
+        if ($result[0] == "") {
             return false;
         }
         return true;

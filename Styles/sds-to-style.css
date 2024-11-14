@@ -174,7 +174,7 @@ ul {
 }
 
 a,
-input[type=submit] {
+input[type="submit"] {
   text-decoration: none;
   border-radius: var(--border-radius);
   padding: 0.1em;
@@ -187,19 +187,19 @@ input[type=submit] {
   background-color: var(--color-background-unselected);
 }
 a *,
-input[type=submit] * {
+input[type="submit"] * {
   color: var(--color-unselected);
 }
 
 a:hover,
-input[type=submit]:hover,
-button[type=submit]:hover {
+input[type="submit"]:hover,
+button[type="submit"]:hover {
   background-color: var(--color-background-selected);
   color: var(--color-selected);
 }
 a:hover *,
-input[type=submit]:hover *,
-button[type=submit]:hover * {
+input[type="submit"]:hover *,
+button[type="submit"]:hover * {
   color: var(--color-selected);
 }
 
@@ -247,8 +247,8 @@ button * {
   pointer-events: none;
 }
 
-input[type=text],
-input[type=password] {
+input[type="text"],
+input[type="password"] {
   cursor: text;
 }
 
@@ -319,7 +319,12 @@ header .logo::before {
   position: absolute;
   width: calc(100% - 2em);
   padding: 1em;
-  background-image: linear-gradient(180deg, var(--color-background) 0%, var(--color-background) 50%, rgba(255, 255, 255, 0) 100%);
+  background-image: linear-gradient(
+    180deg,
+    var(--color-background) 0%,
+    var(--color-background) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   pointer-events: none;
   height: 2em;
   font-size: 1.5em;
@@ -389,10 +394,18 @@ header .logo::before {
   left: 1em;
   z-index: 100;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) .material-symbols-outlined {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  .material-symbols-outlined {
   position: relative;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) .material-symbols-outlined::after {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  .material-symbols-outlined::after {
   content: "circle";
   font-variation-settings: "FILL" 0;
   color: var(--color-unselected);
@@ -404,10 +417,14 @@ header .logo::before {
   align-items: center;
   justify-content: center;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color] {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"] {
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: none;
   width: 2.5em;
   height: calc(2.5em - 2 * var(--border-thickness));
@@ -416,32 +433,63 @@ header .logo::before {
   background: none;
   cursor: pointer;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color] + .material-symbols-outlined {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]
+  + .material-symbols-outlined {
   opacity: 0;
   position: absolute;
   top: 0;
   right: 0;
   transition: opacity 0.5s ease-in-out;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color] + .material-symbols-outlined::after {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]
+  + .material-symbols-outlined::after {
   visibility: hidden;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color]::-webkit-color-swatch-wrapper {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color]::-webkit-color-swatch {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]::-webkit-color-swatch {
   margin: 0.2em;
   border: none;
   border-radius: 50%;
   border: 0.2em solid var(--color-unselected);
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color]:hover::-webkit-color-swatch {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]:hover::-webkit-color-swatch {
   border: 0.2em solid var(--color-selected);
 }
-#sidebar #actionbuttons div:has(.colorb) a:not(:last-child) input[type=color]:hover + .material-symbols-outlined {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:not(:last-child)
+  input[type="color"]:hover
+  + .material-symbols-outlined {
   opacity: 1;
 }
-#sidebar #actionbuttons div:has(.colorb) a:hover .material-symbols-outlined::after {
+#sidebar
+  #actionbuttons
+  div:has(.colorb)
+  a:hover
+  .material-symbols-outlined::after {
   color: var(--color-selected);
 }
 #sidebar #actionbuttons div:has(.colorb, .styleb) {
@@ -460,7 +508,10 @@ header .logo::before {
   border-top-width: 0;
   position: relative;
 }
-#sidebar #actionbuttons div:has(.colorb, .styleb) a:not(:last-child):not(:nth-last-child(2))::after {
+#sidebar
+  #actionbuttons
+  div:has(.colorb, .styleb)
+  a:not(:last-child):not(:nth-last-child(2))::after {
   content: "";
   position: absolute;
   bottom: calc(100% - 1em);
@@ -476,7 +527,10 @@ header .logo::before {
   margin: calc(-1 * var(--border-thickness));
   border: var(--border-thickness) solid var(--color-accent);
 }
-#sidebar #actionbuttons div:has(.colorb, .styleb):hover a:not(:last-child):not(:nth-last-child(2))::after {
+#sidebar
+  #actionbuttons
+  div:has(.colorb, .styleb):hover
+  a:not(:last-child):not(:nth-last-child(2))::after {
   height: 2em;
 }
 #sidebar #actionbuttons div:has(.colorb, .styleb):hover > :last-child {
@@ -579,10 +633,12 @@ header .logo::before {
   text-align: center;
   border: var(--border-thickness) solid var(--color-accent);
 }
-#main .eventdate, #main .topnumber {
+#main .eventdate,
+#main .topnumber {
   display: table;
 }
-#main .eventdate > a, #main .topnumber > a {
+#main .eventdate > a,
+#main .topnumber > a {
   display: table;
   border-radius: 0;
   border: var(--border-thickness) solid var(--color-accent);
@@ -696,7 +752,8 @@ header .logo::before {
     content: "Neues Event";
     transform: translateY(-0.05em);
   }
-  #main .addtopb, #main .addeventb {
+  #main .addtopb,
+  #main .addeventb {
     width: 8em;
   }
 }
@@ -750,8 +807,8 @@ header .logo::before {
   overflow: scroll;
   border-radius: 0 0 var(--border-radius) var(--border-radius);
 }
-.menu form input[type=text],
-.menu form input[type=date] {
+.menu form input[type="text"],
+.menu form input[type="date"] {
   height: 2em;
   width: calc(100% - 1em);
   padding: 0.5em;
@@ -761,7 +818,7 @@ header .logo::before {
   font-family: "Bitter";
   font-size: 1.2em;
 }
-.menu form input[type=text] {
+.menu form input[type="text"] {
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 .menu h2 {
@@ -815,7 +872,7 @@ header .logo::before {
   border: var(--border-thickness) solid var(--color-accent) !important;
   height: calc(100% - 2 * var(--border-thickness));
 }
-.atmbuttons *:is(input[type=submit]) {
+.atmbuttons *:is(input[type="submit"]) {
   height: 100%;
 }
 
@@ -843,19 +900,22 @@ header .logo::before {
   border-radius: var(--border-radius-2);
   height: 100%;
 }
-.buttondrawer .button, .buttondrawer a {
+.buttondrawer .button,
+.buttondrawer a {
   width: 1.5em;
   height: 1.5em;
   padding: 0.5em;
 }
-.buttondrawer .button:hover, .buttondrawer a:hover {
+.buttondrawer .button:hover,
+.buttondrawer a:hover {
   background-color: var(--color-background-selected);
 }
-.buttondrawer .button:hover .material-symbols-outlined::before, .buttondrawer a:hover .material-symbols-outlined::before {
+.buttondrawer .button:hover .material-symbols-outlined::before,
+.buttondrawer a:hover .material-symbols-outlined::before {
   color: var(--color-selected);
 }
-.buttondrawer input[type=text],
-.buttondrawer input[type=password] {
+.buttondrawer input[type="text"],
+.buttondrawer input[type="password"] {
   height: calc(100% - 0.75em);
   margin-top: 0.025em;
   padding: 0.35em;
@@ -872,44 +932,56 @@ header .logo::before {
   box-shadow: none;
   flex-direction: column-reverse;
 }
-.buttondrawer.expandable_down .button, .buttondrawer.expandable_down a {
+.buttondrawer.expandable_down .button,
+.buttondrawer.expandable_down a {
   margin-top: calc(-100% - var(--border-thickness));
   transition: margin-top 0.5s ease-in-out;
 }
-.buttondrawer.expandable_down :last-child, .buttondrawer.expandable_down:hover a, .buttondrawer.expandable_down:hover .button {
+.buttondrawer.expandable_down :last-child,
+.buttondrawer.expandable_down:hover a,
+.buttondrawer.expandable_down:hover .button {
   margin-top: 0;
 }
 .buttondrawer.expandable_up {
   box-shadow: none;
   flex-direction: column;
 }
-.buttondrawer.expandable_up .button, .buttondrawer.expandable_up a {
+.buttondrawer.expandable_up .button,
+.buttondrawer.expandable_up a {
   margin-bottom: calc(-100% - var(--border-thickness));
   transition: margin-bottom 0.5s ease-in-out;
 }
-.buttondrawer.expandable_up :last-child, .buttondrawer.expandable_up:hover a, .buttondrawer.expandable_up:hover .button {
+.buttondrawer.expandable_up :last-child,
+.buttondrawer.expandable_up:hover a,
+.buttondrawer.expandable_up:hover .button {
   margin-bottom: 0;
 }
 .buttondrawer.expandable_right {
   box-shadow: none;
   flex-direction: row-reverse;
 }
-.buttondrawer.expandable_right .button, .buttondrawer.expandable_right a {
+.buttondrawer.expandable_right .button,
+.buttondrawer.expandable_right a {
   margin-left: calc(-100% - var(--border-thickness));
   transition: margin-left 0.5s ease-in-out;
 }
-.buttondrawer.expandable_right :last-child, .buttondrawer.expandable_right:hover a, .buttondrawer.expandable_right:hover .button {
+.buttondrawer.expandable_right :last-child,
+.buttondrawer.expandable_right:hover a,
+.buttondrawer.expandable_right:hover .button {
   margin-left: 0;
 }
 .buttondrawer.expandable_left {
   box-shadow: none;
   flex-direction: row;
 }
-.buttondrawer.expandable_left .button, .buttondrawer.expandable_left a {
+.buttondrawer.expandable_left .button,
+.buttondrawer.expandable_left a {
   margin-right: calc(-100% - var(--border-thickness));
   transition: margin-right 0.5s ease-in-out;
 }
-.buttondrawer.expandable_left :last-child, .buttondrawer.expandable_left:hover a, .buttondrawer.expandable_left:hover .button {
+.buttondrawer.expandable_left :last-child,
+.buttondrawer.expandable_left:hover a,
+.buttondrawer.expandable_left:hover .button {
   margin-right: 0;
 }
 
@@ -939,4 +1011,4 @@ header .logo::before {
   content: "lock_open";
 }
 
-/* #endregion *//*# sourceMappingURL=sds-to-style.css.map */
+/* #endregion */ /*# sourceMappingURL=sds-to-style.css.map */
