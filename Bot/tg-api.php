@@ -4,6 +4,7 @@ class TelegramBotApi implements BotApi
 {
     private $token;
     private $chat_id;
+    private $thread_id;
     private $message_id;
 
     public function __construct($token)
@@ -30,7 +31,8 @@ class TelegramBotApi implements BotApi
 
             // extract chat_id from callback_message (<chat_id>|<callback_message>)
             $this->chat_id = explode("|", $callback_message)[0];
-            $callback_message = explode("|", $callback_message)[1];
+            $this->thread_id = explode("|", $callback_message)[1];
+            $callback_message = explode("|", $callback_message)[2];
 
             // delete callback message
             $callback_message_id = $update['callback_query']['message']['message_id'];
@@ -68,6 +70,7 @@ class TelegramBotApi implements BotApi
             $output->text = $message['text'];
             $this->chat_id = $message['chat']['id'];
             $this->message_id = $message['message_id'];
+            $this->thread_id = $message['message_thread_id'];
             $output->username = $message['from']['username'];
 
             if (!isset($username)) {
@@ -79,12 +82,12 @@ class TelegramBotApi implements BotApi
         return $output;
     }
 
-    public function send_message(BotMessage $response, string $chat_id = null)
+    public function send_message(BotMessage $response, string $chat_id = null, string $thread_id = null): string
     {
         // add the chat_id to all the buttons
         foreach ($response->buttons as $key => $button) {
             foreach ($button as $key2 => $value) {
-                $response->buttons[$key][$key2]['callback_data'] = $this->chat_id . "|" . $value['callback_data'];
+                $response->buttons[$key][$key2]['callback_data'] = $this->chat_id . "|" . $this->thread_id . "|" . $value['callback_data'];
             }
         }
 
@@ -92,6 +95,7 @@ class TelegramBotApi implements BotApi
             "sendMessage",
             array(
                 "chat_id" => $chat_id ?? $this->chat_id,
+                "reply_to_message_id" => $thread_id ?? $this->thread_id,
                 "text" => $response->text,
                 "disable_notification" => true,
                 "reply_markup" => json_encode(
@@ -163,6 +167,7 @@ class TelegramBotApi implements BotApi
                     "sendDocument",
                     array(
                         "chat_id" => $this->chat_id,
+                        "reply_to_message_id" => $this->thread_id,
                         "caption" => $caption
                     )
                 ),
@@ -198,6 +203,7 @@ class TelegramBotApi implements BotApi
             "sendMessage",
             array(
                 "chat_id" => $this->chat_id,
+                "reply_to_message_id" => $this->thread_id,
                 "text" => $message,
                 "disable_notification" => true
             )

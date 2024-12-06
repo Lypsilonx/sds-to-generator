@@ -178,6 +178,10 @@ class Bot
         // Help
         else if (strpos(strtolower($text), "/help") === 0) {
             $this->api->send_message(getMessage("help"));
+        }
+        // Get Chat ID
+        else if (strpos(strtolower($text), "/getid") === 0) {
+            $this->api->debug_log($this->api->get_uid());
         } else {
             // load chats.json
             $chats = json_decode(file_get_contents("chats.json"), true);
