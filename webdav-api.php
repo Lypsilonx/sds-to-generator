@@ -4,6 +4,7 @@ class WebdavApi
     private $user;
     private $password;
     private $url;
+    private $path = "remote.php/dav/files/";
 
     function __construct($filename)
     {
@@ -20,7 +21,7 @@ class WebdavApi
             $this->createFolder($cloudPath);
         }
 
-        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -40,7 +41,7 @@ class WebdavApi
 
     private function getFileID($filename, $cloudPath = "")
     {
-        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -67,7 +68,7 @@ class WebdavApi
 
     public function fileExists($filename, $cloudPath = "")
     {
-        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath . $filename;
+        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
 
         $context = stream_context_create(
             array(
@@ -94,7 +95,7 @@ class WebdavApi
 
     private function folderExists($cloudPath)
     {
-        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath;
+        $url = $this->url . $this->path . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(
@@ -121,7 +122,7 @@ class WebdavApi
 
     private function createFolder($cloudPath)
     {
-        $url = $this->url . "remote.php/dav/files/" . $this->user . "/" . $cloudPath;
+        $url = $this->url . $this->path . $this->user . "/" . $cloudPath;
 
         $context = stream_context_create(
             array(

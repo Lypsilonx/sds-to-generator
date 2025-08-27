@@ -342,6 +342,16 @@ class Bot
                     }
                 }
             }
+            // Current Directory
+            else if (strpos(strtolower($text), "/currentfolder") === 0) {
+                // set new directory
+                foreach ($chats['groups'] as &$g) {
+                    if ($g['name'] == $group) {
+                        $this->api->send_message(getMessage("current folder", [$group, $g['dir']]));
+                        break;
+                    }
+                }
+            }
             // Change Directory
             else if (strpos(strtolower($text), "/folder") === 0) {
                 // get rest of message
@@ -647,6 +657,9 @@ function getMessage($id, $args = [])
                 . PHP_EOL . "/plenum <Tag>"
                 . PHP_EOL . "Ändert den Tag des Plenums"
                 . PHP_EOL
+                . PHP_EOL . "/currentfolder"
+                . PHP_EOL . "Zeigt den aktuellen Speicherort der TO an"
+                . PHP_EOL
                 . PHP_EOL . "/folder <Dateipfad>"
                 . PHP_EOL . "Ändert den Speicherort der TO (Bsp. \"/folder Ortsgruppe Berlin/2023 SoSe/\")"
                 . PHP_EOL
@@ -734,6 +747,10 @@ function getMessage($id, $args = [])
             break;
         case "plenum changed":
             $response->text = "Plenumstag für " . $args[0] . " wurde auf " . $args[1] . " geändert.";
+            break;
+        case "current folder":
+            $response->deleteAnswer = DeleteAnswerOptions::AT_MIDNIGHT;
+            $response->text = "Aktueller Speicherort für " . $args[0] . " ist \"" . $args[1] . "\".";
             break;
         case "folder changed":
             $response->text = "Speicherort für " . $args[0] . " wurde auf \"" . $args[1] . "\" geändert.";
