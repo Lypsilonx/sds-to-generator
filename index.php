@@ -133,15 +133,6 @@ if ($serverPath != "fallback") {
 // load the .php file for the view
 require_once 'Views/' . $view . '.php';
 
-
-// add announcement to bottom of page
-if ($folder != "Aachen") {
-    echo '<div class="announcement" style="position: fixed; bottom: 0; right: 0; padding: 0.4em; text-align: right; display: flex; flex-direction: row; align-items: flex-end; gap: 1em; background-color: var(--color-accent); border-top-left-radius: var(--border-radius); z-index: 100; align-items: center;">';
-    echo '<span class="material-symbols-outlined" style="color: var(--color-background); font-size: 1.5em;">info</span>';
-    echo '<p style="color: var(--color-background);">Aus sicherheitsgründen müssen alle Passwörter per /changepw neu gesetzt werden.</p>';
-    echo '</div>';
-}
-
 function linkEventContent($event, array $tops)
 {
     // check if "content" is "(Siehe TOP)" or "siehe TOP" or "s. TOP" ("(" opional, has to contain "s" and "TOP")
@@ -201,10 +192,10 @@ function formatMD($text)
     $out = str_replace('&lt;=', '⇐', $out);
 
     // replace [book-list:single:<type>|<title>] with book list iframe
-    $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/single-view.php?type=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
+    $out = preg_replace('/\[book-list:single:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\|([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.lypsilonx.de/book-list/actions/single-view.php?type=$1&title=$2" width="120px" height="120px" frameborder="0" scrolling="no" allowtransparency="true"></iframe>', $out);
 
     // replace [book-list:...] with book list iframe
-    $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.politischdekoriert.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
+    $out = preg_replace('/\[book-list:([a-zA-Z0-9äüöß\-\'\’\´: ]*)\]/', '<iframe src="https://www.lypsilonx.de/book-list/actions/to-view.php?dir=$1" width="100%x" height="120px" frameborder="0" scrolling="horizontal" allowtransparency="true"></iframe>', $out);
 
     return $out;
 }

@@ -1,6 +1,6 @@
 <?php
 // print errors
-require_once "../sds-to-functions.php";
+require_once __DIR__ . "/../sds-to-functions.php";
 
 // prevent script injection
 if (!isset($_GET['dir'])) {

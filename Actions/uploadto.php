@@ -1,7 +1,7 @@
 <?php
 // start session
 session_start();
-require_once "../sds-to-functions.php";
+require_once __DIR__ . "/../sds-to-functions.php";
 
 // check if user is signed in
 if (!isset($_GET['dir'])) {
@@ -26,7 +26,7 @@ if ($token != "") {
     if (isset($_GET['token'])) {
         // check if token is valid
         // load Bot/tokens.json
-        $json = file_get_contents("../Bot/tokens.json");
+        $json = file_get_contents(__DIR__ . "/../Bot/tokens.json");
         $tokens = json_decode($json, true);
         // check if dir is in tokens.json as "group"
         for ($i = 0; $i < count($tokens); $i++) {

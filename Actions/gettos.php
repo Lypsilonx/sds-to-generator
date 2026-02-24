@@ -3,7 +3,7 @@
 function getTos($dir)
 {
     $files = array();
-    $dir = "../" . $dir;
+    $dir = __DIR__ . "/../" . $dir;
     $dir = realpath($dir);
     $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
     foreach ($iterator as $file) {
@@ -47,7 +47,7 @@ function getTos($dir)
             $a = strtotime($a[1]);
             $b = strtotime($b[1]);
 
-            return $a < $b;
+            return $a < $b ? 1 : -1;
         } else {
             // sort by name
             return strcmp($a[0] . $a[1], $b[0] . $b[1]);

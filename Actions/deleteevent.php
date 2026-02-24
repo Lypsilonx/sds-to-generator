@@ -20,7 +20,7 @@ if (!isset($_SESSION['signedin']) || $_SESSION['signedin'] != $folder) {
     exit();
 }
 
-$file = "../TOs/" . $folder . "/events.json";
+$file = __DIR__ . "/../TOs/" . $folder . "/events.json";
 $json = file_get_contents($file);
 
 // decode json to array

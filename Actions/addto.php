@@ -34,7 +34,7 @@ if ($_POST["edit"] == "") {
     // if the delete button was pressed
     if ($_POST["delete"] == "true") {
         // delete to file
-        unlink("../TOs/" . $serverPath . '_to.json');
+        unlink(__DIR__ . "/../TOs/" . $serverPath . '_to.json');
     } else {
         // edit to file
         $json_data['title'] = $_POST['title'];
@@ -43,7 +43,7 @@ if ($_POST["edit"] == "") {
 }
 
 // encode array to json and save to file
-file_put_contents("../TOs/" . $serverPath . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
+file_put_contents(__DIR__ . "/../TOs/" . $serverPath . '_to.json', json_encode($json_data, JSON_PRETTY_PRINT));
 
 // redirect to index.php
 header('Location: ../index.php?dir=' . $serverPath);

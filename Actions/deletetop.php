@@ -18,9 +18,9 @@ $serverPath = $_GET['dir'];
 $file;
 $folder = explode('/', $serverPath)[0];
 if ($_GET['permanent'] == "on") {
-    $file = "../TOs/" . $folder . "/permanent.json";
+    $file = __DIR__ . "/../TOs/" . $folder . "/permanent.json";
 } else {
-    $file = "../TOs/" . $serverPath . '_to.json';
+    $file = __DIR__ . "/../TOs/" . $serverPath . '_to.json';
 }
 $json = file_get_contents($file);
 

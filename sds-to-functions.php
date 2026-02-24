@@ -3,29 +3,29 @@ require_once 'webdav-api.php';
 function renderMarkDown($serverPath)
 {
   // get the JSON from the directory and render it as markdown
-  $data = json_decode(file_get_contents("../TOs/" . $serverPath . "_to.json"), true);
+  $data = json_decode(file_get_contents(__DIR__ . "/TOs/" . $serverPath . "_to.json"), true);
   $group = explode("/", $serverPath)[0];
   // get the perms from the directory
-  $permanent = json_decode(file_get_contents("../TOs/" . $group . "/permanent.json"), true);
+  $permanent = json_decode(file_get_contents(__DIR__ . "/TOs/" . $group . "/permanent.json"), true);
   // get the events from the directory
-  $events = json_decode(file_get_contents("../TOs/" . $group . "/events.json"), true);
+  $events = json_decode(file_get_contents(__DIR__ . "/TOs/" . $group . "/events.json"), true);
   // load Markdown/top-format.md
-  $topFormat = file_get_contents("../Markdown/top-format.md");
+  $topFormat = file_get_contents(__DIR__ . "/Markdown/top-format.md");
   $topFormatOriginal = $topFormat;
   // load Markdown/day-format.md
-  $dayFormat = file_get_contents("../Markdown/day-format.md");
+  $dayFormat = file_get_contents(__DIR__ . "/Markdown/day-format.md");
   $dayFormatOriginal = $dayFormat;
   // load Markdown/event-format.md
-  $eventFormat = file_get_contents("../Markdown/event-format.md");
+  $eventFormat = file_get_contents(__DIR__ . "/Markdown/event-format.md");
   $eventFormatOriginal = $eventFormat;
   // load Markdown/perm-format.md
-  $permFormat = file_get_contents("../Markdown/perm-format.md");
+  $permFormat = file_get_contents(__DIR__ . "/Markdown/perm-format.md");
   $permFormatOriginal = $permFormat;
   // Format the date as DD.MM.YYYY
   $fdate = new DateTime($data["date"]);
   $fdate = $fdate->format("d.m.Y");
   // load Markdown/mask.md
-  $mask = file_get_contents("../Markdown/mask.md");
+  $mask = file_get_contents(__DIR__ . "/Markdown/mask.md");
 
   $j = 1;
   // for each item in the JSON, replace the %key% in mask.md with the value of the key
@@ -345,7 +345,7 @@ function getCloudPath($serverPath, $date)
   $group = explode("/", $serverPath)[0];
 
   // load Bot/chats.json
-  $chats = json_decode(file_get_contents("../Bot/chats.json"), true);
+  $chats = json_decode(file_get_contents(__DIR__ . "/Bot/chats.json"), true);
 
   //find chat where name is dir
   for ($i = 0; $i < count($chats["groups"]); $i++) {
@@ -512,7 +512,7 @@ function upload($markdown, $filename, $serverPath, bool $bot = false, bool $forc
     $filename = $filename . "-Tagesordnung.md";
   }
 
-  $sdsCloud = new WebdavApi("../webdavuser.config");
+  $sdsCloud = new WebdavApi(__DIR__ . "/webdavuser.config");
 
   if ($bot && !$force) {
     if ($sdsCloud->fileExists($filename, $cloudPath)) {

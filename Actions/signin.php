@@ -15,7 +15,7 @@ $serverPath = $_POST['dir'];
 $folder = explode('/', $serverPath)[0];
 
 // load chats.json from ../Bot
-$json = file_get_contents("../Bot/chats.json");
+$json = file_get_contents(__DIR__ . "/../Bot/chats.json");
 // decode json to array
 $chats = json_decode($json, true);
 
@@ -27,7 +27,7 @@ for ($i = 0; $i < count($chats["groups"]); $i++) {
         break;
     }
 }
-$salt = file_get_contents("../salt.txt");
+$salt = file_get_contents(__DIR__ . "/../salt.txt");
 if ($folderid != -1 && $chats["groups"][$folderid]["password"] == hash("sha256", $_POST['password'] . $salt)) {
     // set session variable
     $_SESSION['signedin'] = $folder;

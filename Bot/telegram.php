@@ -1,5 +1,5 @@
 <?php
-require_once '../sds-to-functions.php';
+require_once __DIR__ . "/../sds-to-functions.php";
 require_once "tg-api.php";
 
 // load token from token.txt
