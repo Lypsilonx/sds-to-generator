@@ -15,24 +15,36 @@ class WebdavApi
         $this->password = $webdavuser["password"];
     }
 
-    public function uploadFile($filename, $content, $cloudPath = "", $contentType = "text/markdown")
-    {
+    public function uploadFile(
+        $filename,
+        $content,
+        $cloudPath = "",
+        $contentType = "text/markdown",
+    ) {
         if (!$this->folderExists($cloudPath)) {
             $this->createFolder($cloudPath);
         }
 
-        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
+        $url =
+            $this->url .
+            $this->path .
+            $this->user .
+            "/" .
+            $cloudPath .
+            $filename;
 
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'PUT',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
-                        'Content-Type: ' . $contentType,
-                    'content' => $content
-                )
-            )
-        );
+        $context = stream_context_create([
+            "http" => [
+                "method" => "PUT",
+                "header" =>
+                    "Authorization: Basic " .
+                    base64_encode($this->user . ":" . $this->password) .
+                    "\r\n" .
+                    "Content-Type: " .
+                    $contentType,
+                "content" => $content,
+            ],
+        ]);
 
         $result = file_get_contents($url, false, $context);
 
@@ -41,50 +53,70 @@ class WebdavApi
 
     private function getFileID($filename, $cloudPath = "")
     {
-        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
+        $url =
+            $this->url .
+            $this->path .
+            $this->user .
+            "/" .
+            $cloudPath .
+            $filename;
 
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
-                        'Content-Type: text/xml',
-                    'content' => '<?xml version="1.0" encoding="UTF-8"?>
+        $context = stream_context_create([
+            "http" => [
+                "method" => "PROPFIND",
+                "header" =>
+                    "Authorization: Basic " .
+                    base64_encode($this->user . ":" . $this->password) .
+                    "\r\n" .
+                    "Content-Type: text/xml",
+                "content" => '<?xml version="1.0" encoding="UTF-8"?>
                                 <d:propfind xmlns:d="DAV:">
                                     <d:prop xmlns:oc="http://owncloud.org/ns">
                                         <oc:fileid/>
                                     </d:prop>
-                                </d:propfind>'
-                )
-            )
-        );
+                                </d:propfind>',
+            ],
+        ]);
 
         $result = file_get_contents($url, false, $context);
 
-        $fileid = substr($result, strpos($result, '<oc:fileid>') + 11, strpos($result, '</oc:fileid>') - strpos($result, '<oc:fileid>') - 11);
+        $fileid = substr(
+            $result,
+            strpos($result, "<oc:fileid>") + 11,
+            strpos($result, "</oc:fileid>") -
+                strpos($result, "<oc:fileid>") -
+                11,
+        );
 
         return $fileid;
     }
 
     public function fileExists($filename, $cloudPath = "")
     {
-        $url = $this->url . $this->path . $this->user . "/" . $cloudPath . $filename;
+        $url =
+            $this->url .
+            $this->path .
+            $this->user .
+            "/" .
+            $cloudPath .
+            $filename;
 
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
-                        'Content-Type: text/xml',
-                    'content' => '<?xml version="1.0"?>
+        $context = stream_context_create([
+            "http" => [
+                "method" => "PROPFIND",
+                "header" =>
+                    "Authorization: Basic " .
+                    base64_encode($this->user . ":" . $this->password) .
+                    "\r\n" .
+                    "Content-Type: text/xml",
+                "content" => '<?xml version="1.0"?>
                                 <propfind xmlns="DAV:">
                                     <prop>
                                         <resourcetype />
                                     </prop>
-                                </propfind>'
-                )
-            )
-        );
+                                </propfind>',
+            ],
+        ]);
 
         $result = file_get_contents($url, false, $context);
         if ($result[0] == "") {
@@ -97,21 +129,22 @@ class WebdavApi
     {
         $url = $this->url . $this->path . $this->user . "/" . $cloudPath;
 
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'PROPFIND',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password) . "\r\n" .
-                        'Content-Type: text/xml',
-                    'content' => '<?xml version="1.0"?>
+        $context = stream_context_create([
+            "http" => [
+                "method" => "PROPFIND",
+                "header" =>
+                    "Authorization: Basic " .
+                    base64_encode($this->user . ":" . $this->password) .
+                    "\r\n" .
+                    "Content-Type: text/xml",
+                "content" => '<?xml version="1.0"?>
                                 <propfind xmlns="DAV:">
                                     <prop>
                                         <resourcetype />
                                     </prop>
-                                </propfind>'
-                )
-            )
-        );
+                                </propfind>',
+            ],
+        ]);
 
         $result = file_get_contents($url, false, $context);
         if ($result[0] == "") {
@@ -124,14 +157,14 @@ class WebdavApi
     {
         $url = $this->url . $this->path . $this->user . "/" . $cloudPath;
 
-        $context = stream_context_create(
-            array(
-                'http' => array(
-                    'method' => 'MKCOL',
-                    'header' => 'Authorization: Basic ' . base64_encode($this->user . ':' . $this->password)
-                )
-            )
-        );
+        $context = stream_context_create([
+            "http" => [
+                "method" => "MKCOL",
+                "header" =>
+                    "Authorization: Basic " .
+                    base64_encode($this->user . ":" . $this->password),
+            ],
+        ]);
 
         $result = file_get_contents($url, false, $context);
     }
@@ -140,6 +173,11 @@ class WebdavApi
     {
         $fileid = $this->getFileID($filename, $cloudPath);
 
-        return $this->url . "/index.php/f/" . $fileid;
+        return $this->url .
+            "apps/files/files/" .
+            $fileid .
+            "?dir=/" .
+            $cloudPath .
+            "&editing=false&openfile=true";
     }
 }
